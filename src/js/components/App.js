@@ -8,7 +8,31 @@ import {
     Stage,
 } from 'react-pixi-fiber';
 import turtleBodySrc from '../../img/turtle-body.png';
-
+const foo = app => {
+    const texture = PIXI.Texture.fromImage(turtleBodySrc);
+    console.log(texture.width, texture.width)
+    console.log('foo');
+    app.stage.position.set(app.screen.width / 2, app.screen.height / 2);
+    console.log(typeof turtleBodySrc)
+    return (
+        <Container
+            // pivot="0.5"
+        >
+            <Sprite texture={texture} pivot={[43, 60]}/>
+        </Container>
+    );
+};
+const overlay = props => {
+    console.log(props.app);
+    return (
+        <Container
+            name="overlay"
+            hitArea={new PIXI.Rectangle(0, 0, props.app.stage.width, props.app.stage.height)}
+            width={props.width}
+            height={props.height}
+        ></Container>
+    );
+};
 const mapStateToProps = state => ({ ...state });
 const App = props => (
     <Stage
@@ -18,15 +42,12 @@ const App = props => (
             {
                 backgroundColor: 0x00ff3b,
                 autoResize: true,
+                resolution: props.resolution,
             }
         }
         style={{
-            // position: 'absolute',
-            // top: 0,
-            // bottom: 0,
-            // left: 0,
-            // right: 0,
-            width: '100%'
+            width: '100%',
+            height: '100%',
         }}
         position='absolute'
         hitArea={new PIXI.Rectangle(0, 0, props.width, props.height)}
@@ -37,11 +58,10 @@ const App = props => (
         pointerdown={e => console.log(e)}
     >
         <AppContext.Consumer>
-            {app => (
-                <Container>
-                    <Sprite texture={PIXI.Texture.fromImage(turtleBodySrc)} />
-                </Container>
-            )}
+            {app => overlay({ ...props, app })}
+        </AppContext.Consumer>
+        <AppContext.Consumer>
+            {app => foo(app)}
         </AppContext.Consumer>
     </Stage>
 );

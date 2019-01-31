@@ -23,7 +23,11 @@ const resize = ({
 const initialState = {
     width: appContainer.offsetWidth,
     height: appContainer.offsetHeight,
+    resolution: window.devicePixelRation,
     lastResize: Date.now(),
+    images: {
+        default: 'turtle-body.png',
+    },
 };
 
 const store = createStore(
@@ -47,8 +51,8 @@ render(
             className="app"
             style={
                 {
-                    // flex: 1,
-                    // paddingBottom: '80%',
+                    flex: 1,
+                    overflow: 'hidden',
                 }
             }
         >
