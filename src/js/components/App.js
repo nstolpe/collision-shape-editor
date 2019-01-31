@@ -1,3 +1,5 @@
+// components/App.js
+
 import React from 'react';
 import * as PIXI from 'pixi.js';
 import { connect } from "react-redux";
@@ -7,33 +9,44 @@ import {
     Sprite,
     Stage,
 } from 'react-pixi-fiber';
+import Edges from 'App/components/Edges';
+import Vertices from 'App/components/Vertices';
+import {
+    resize,
+    addVertex,
+} from 'App/actions/action';
+import store from 'App/store/store';
 import turtleBodySrc from '../../img/turtle-body.png';
-const foo = app => {
+
+window.store = store;
+
+const image = props => {
+    const { app } = props;
     const texture = PIXI.Texture.fromImage(turtleBodySrc);
-    console.log(texture.width, texture.width)
-    console.log('foo');
-    app.stage.position.set(app.screen.width / 2, app.screen.height / 2);
-    console.log(typeof turtleBodySrc)
+    // all should come through loader
+    const pivot = [43, 60];
     return (
         <Container
-            // pivot="0.5"
+            name="image-container"
+            position={[app.screen.width / 2, app.screen.height / 2]}
         >
-            <Sprite texture={texture} pivot={[43, 60]}/>
+            <Sprite name="image" texture={texture} pivot={pivot}/>
         </Container>
     );
 };
-const overlay = props => {
-    console.log(props.app);
-    return (
-        <Container
-            name="overlay"
-            hitArea={new PIXI.Rectangle(0, 0, props.app.stage.width, props.app.stage.height)}
-            width={props.width}
-            height={props.height}
-        ></Container>
-    );
-};
+
+const edges = props => (
+    <Container
+        name="edges-container"
+    >
+      <Edges {...props} />
+      <Vertices {...props} />
+    </Container>
+);
+
 const mapStateToProps = state => ({ ...state });
+const mapDispatchToProps = dispatch => ({ addVertex: ({ x, y }) => dispatch(addVertex({ x, y })) });
+
 const App = props => (
     <Stage
         width={props.width}
@@ -55,15 +68,31 @@ const App = props => (
         height={props.height}
         interactive
         buttonMode
-        pointerdown={e => console.log(e)}
+        pointerdown={e => props.addVertex(e.data.global)}
     >
         <AppContext.Consumer>
-            {app => overlay({ ...props, app })}
+            {app => image({ ...props, app })}
         </AppContext.Consumer>
         <AppContext.Consumer>
-            {app => foo(app)}
+            {app => edges({ ...props, app })}
         </AppContext.Consumer>
     </Stage>
 );
 
-export default connect(mapStateToProps)(App);
+window.addEventListener('resize', e => {
+    const now = Date.now();
+    const last = store.getState().lastResize;
+    const appContainer = document.getElementById('app-container');
+
+    if (!last  || now - last > 250) {
+        store.dispatch(resize({
+            width: appContainer.offsetWidth,
+            height: appContainer.offsetHeight,
+            lastResize: now,
+        }));
+    }
+});
+
+window.dispatchEvent(new Event('resize'));
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
