@@ -9,8 +9,10 @@ import {
     Sprite,
     Stage,
 } from 'react-pixi-fiber';
+import { Provider } from "react-redux";
 import Edges from 'App/components/Edges';
 import Vertices from 'App/components/Vertices';
+import Viewport from 'App/components/Viewport';
 import {
     resize,
     addVertex,
@@ -68,13 +70,27 @@ const App = props => (
         height={props.height}
         interactive
         buttonMode
-        pointerdown={e => props.addVertex(e.data.global)}
     >
         <AppContext.Consumer>
-            {app => image({ ...props, app })}
-        </AppContext.Consumer>
-        <AppContext.Consumer>
-            {app => edges({ ...props, app })}
+            {app => (
+                <Viewport
+                    screenWidth={props.width}
+                    screenHeight={props.height}
+                    worldWidth={props.width}
+                    worldHeight={props.height}
+                    interaction={app.renderer.interaction}
+                    pointerdown={function(e) {
+                        console.log('stage');
+                        console.log(e.data.global);
+                        const vertex = e.data.getLocalPosition(this);
+                        props.addVertex(vertex);
+                    }}
+                    // zoomedEnd={e => console.log('wheel', e)}
+                >
+                    {image({ ...props, app })}
+                    {edges({ ...props, app })}
+                </Viewport>
+            )}
         </AppContext.Consumer>
     </Stage>
 );

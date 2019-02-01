@@ -1,6 +1,7 @@
 // components/Vertices.js
 
 import React from 'react';
+import * as PIXI from 'pixi.js';
 import {
     Container,
     Sprite,
@@ -19,6 +20,12 @@ const Vertices = props => (
                 tint="0xdf33c1"
                 pivot={[5.5, 5.5]}
                 interactive
+                pointerdown={e => {
+                    e.stopPropagation();
+                    console.log(`vertex_${idx}`);
+                    console.log(e);
+                }}
+                hitArea={new PIXI.Circle(5.5, 5.5, 5.5)}
             />)
         ], []) }
     </Container>
