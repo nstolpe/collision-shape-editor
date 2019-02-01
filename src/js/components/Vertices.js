@@ -1,6 +1,7 @@
 // components/Vertices.js
 
 import React from 'react';
+import { connect } from "react-redux";
 import * as PIXI from 'pixi.js';
 import {
     Container,
@@ -8,6 +9,8 @@ import {
 } from 'react-pixi-fiber';
 
 import vertexSrc from '../../img/vertex.png';
+
+const mapStateToProps = state => ({ ...state });
 
 const Vertices = props => (
     <Container>
@@ -31,4 +34,5 @@ const Vertices = props => (
     </Container>
 );
 
-export default Vertices;
+// export default Vertices;
+export default connect(mapStateToProps)(Vertices);

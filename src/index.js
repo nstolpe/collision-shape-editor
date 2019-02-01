@@ -1,14 +1,14 @@
 import React from 'react';
 import { render } from 'react-dom';
+import { AppContext } from 'react-pixi-fiber';
 import { Provider } from "react-redux";
-
 import store from 'App/store/store';
 import App from 'App/components/App';
 
 const appContainer = document.getElementById('app-container');
-
+const ControlContext = React.createContext();
 render(
-    <Provider store={store}>
+    <div>
         <div
             className="app"
             style={
@@ -23,11 +23,13 @@ render(
                 height={appContainer.offsetHeight}
             />
         </div>
-        <div className="controls">
-            <form>
-                <label>foo</label>
-            </form>
-        </div>
-    </Provider>,
+        <ControlContext.Provider store={store}>
+            <div className="controls">
+                <form>
+                    <label>foo</label>
+                </form>
+            </div>
+        </ControlContext.Provider>
+    </div>,
     appContainer
 );

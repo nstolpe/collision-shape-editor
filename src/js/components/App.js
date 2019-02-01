@@ -2,14 +2,16 @@
 
 import React from 'react';
 import * as PIXI from 'pixi.js';
-import { connect } from "react-redux";
+import {
+    connect,
+    Provider,
+} from "react-redux";
 import {
     AppContext,
     Container,
     Sprite,
     Stage,
 } from 'react-pixi-fiber';
-import { Provider } from "react-redux";
 import Edges from 'App/components/Edges';
 import Vertices from 'App/components/Vertices';
 import Viewport from 'App/components/Viewport';
@@ -73,23 +75,25 @@ const App = props => (
     >
         <AppContext.Consumer>
             {app => (
-                <Viewport
-                    screenWidth={props.width}
-                    screenHeight={props.height}
-                    worldWidth={props.width}
-                    worldHeight={props.height}
-                    interaction={app.renderer.interaction}
-                    pointerdown={function(e) {
-                        console.log('stage');
-                        console.log(e.data.global);
-                        const vertex = e.data.getLocalPosition(this);
-                        props.addVertex(vertex);
-                    }}
-                    // zoomedEnd={e => console.log('wheel', e)}
-                >
-                    {image({ ...props, app })}
-                    {edges({ ...props, app })}
-                </Viewport>
+                <Provider store={store}>
+                    <Viewport
+                        screenWidth={props.width}
+                        screenHeight={props.height}
+                        worldWidth={props.width}
+                        worldHeight={props.height}
+                        interaction={app.renderer.interaction}
+                        pointerdown={function(e) {
+                            console.log('stage');
+                            console.log(e.data.global);
+                            const vertex = e.data.getLocalPosition(this);
+                            props.addVertex(vertex);
+                        }}
+                        // zoomedEnd={e => console.log('wheel', e)}
+                    >
+                        {image({ ...props, app })}
+                        {edges({ ...props, app })}
+                    </Viewport>
+                </Provider>
             )}
         </AppContext.Consumer>
     </Stage>
@@ -111,4 +115,5 @@ window.addEventListener('resize', e => {
 
 window.dispatchEvent(new Event('resize'));
 
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+// export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default App;
