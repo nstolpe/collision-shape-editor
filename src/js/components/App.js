@@ -39,15 +39,6 @@ const image = props => {
     );
 };
 
-const edges = props => (
-    <Container
-        name="edges-container"
-    >
-      <Edges {...props} />
-      <Vertices {...props} />
-    </Container>
-);
-
 const mapStateToProps = state => ({ ...state });
 const mapDispatchToProps = dispatch => ({ addVertex: ({ x, y }) => dispatch(addVertex({ x, y })) });
 
@@ -84,13 +75,18 @@ const App = props => (
                         interaction={app.renderer.plugins.interaction}
                         pointertap={function(e) {
                             console.log('stage');
-                            console.log(e.data.global);
+                            console.log(e);
                             const vertex = e.data.getLocalPosition(e.currentTarget);
                             store.dispatch(addVertex(vertex));
                         }}
                     >
                         {image({ ...props, app })}
-                        {edges({ ...props, app })}
+                        <Container
+                            name="edges-container"
+                        >
+                          <Edges {...props} />
+                          <Vertices {...props} />
+                        </Container>
                     </Viewport>
                 </Provider>
             )}

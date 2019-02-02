@@ -4,6 +4,8 @@ import { connect } from "react-redux";
 import * as PIXI from "pixi.js";
 import Viewport from 'pixi-viewport';
 
+import { scaleUI } from 'App/actions/action';
+
 const TYPE = "Viewport";
 
 // props:
@@ -12,17 +14,16 @@ const TYPE = "Viewport";
 // worldWidth
 // worldHeight
 // interaction = app.renderer.interaction
-const mapStateToProps = state => ({ ...state });
+const mapDispatchToProps = dispatch => ({
+    scaleUI: ({ x, y }) => dispatch(scaleUI({ x, y })),
+});
 
 const behavior = {
     customDisplayObject: function(props) {
         return new Viewport({ ...props });
     },
     customDidAttach: (instance, oldProps, newProps) => {
-        instance.on('zoomed', e => console.log('zoomed', e, e.viewport.scale.x))
-        // instance.on('zoomed-end', e => console.log('zoomed-end', e))
-        // instance.on('wheel', e => console.log('wheel', e))
-        // instance.on('wheel-scroll', e => console.log('wheel-scroll', e))
+        instance.on('zoomed', e => instance.scaleUI(e.viewport.scale));
         instance
             .drag()
             .pinch()
@@ -32,5 +33,4 @@ const behavior = {
     },
 };
 
-// export default CustomPIXIComponent(behavior, TYPE);
-export default connect()(CustomPIXIComponent(behavior, TYPE));
+export default connect(null, mapDispatchToProps)(CustomPIXIComponent(behavior, TYPE));
