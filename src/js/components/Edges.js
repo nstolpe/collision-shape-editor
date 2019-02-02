@@ -25,6 +25,17 @@ export const behavior = {
     instance.clear();
     instance.alpha = alpha;
     instance.lineStyle(weight / UIScale.x, stroke);
+    instance.hitArea = new PIXI.Polygon(vertices.reduce((points, vertex) => [ ...points, vertex.x, vertex.y ], []));
+    instance.interactive = true;
+
+    if (typeof newProps.pointerdown === 'function' && typeof oldProps.pointerdown === 'function' && newProps.pointerdown !== oldProps.pointerdown) {
+        instance.off('pointerdown', oldProps.pointerdown);
+        instance.on('pointerdown', newProps.pointerdown);
+    } else if (typeof newProps.pointerdown === 'function' && typeof oldProps.pointerdown !== 'function') {
+        instance.on('pointerdown', newProps.pointerdown);
+    } else if (typeof oldProps.pointerdown === 'function' && typeof newProps.pointerdown !== 'function') {
+        instance.off('pointerdown', oldProps.pointerdown);
+    }
 
     if (vertices && vertices.length) {
         for (let i = 0, l = vertices.length; i <= l; i++) {
