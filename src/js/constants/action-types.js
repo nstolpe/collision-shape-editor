@@ -1,6 +1,7 @@
 // src/js/constants/action-types.js
 
 export const ADD_VERTEX = 'ADD_VERTEX';
+export const DELETE_VERTEX = 'DELETE_VERTEX';
 export const MOVE_VERTEX = 'MOVE_VERTEX';
 export const RESIZE = 'RESIZE';
 export const SCALE_UI = 'SCALE_UI';

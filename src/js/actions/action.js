@@ -2,6 +2,7 @@
 
 import {
     ADD_VERTEX,
+    DELETE_VERTEX,
     MOVE_VERTEX,
     RESIZE,
     SCALE_UI,
@@ -17,6 +18,11 @@ export const resize = ({ width, height }) => ({
 export const addVertex = ({ x, y }) => ({
     type: ADD_VERTEX,
     data: { x, y },
+});
+
+export const deleteVertex = id => ({
+    type: DELETE_VERTEX,
+    data: { id },
 });
 
 export const moveVertex = ({ x, y, id }) => ({

@@ -3,6 +3,7 @@
 import {v4 as uuid} from 'uuid';
 import {
     ADD_VERTEX,
+    DELETE_VERTEX,
     MOVE_VERTEX,
     RESIZE,
     SCALE_UI,
@@ -31,13 +32,16 @@ const rootReducer = (state = initialState, action) => {
                 ...state,
                 vertices: [ ...state.vertices, { ...data, id: uuid() } ],
             };
+        case DELETE_VERTEX:
+            return {
+                ...state,
+                vertices: state.vertices.filter(vertex => vertex.id !== data.id),
+            };
         case MOVE_VERTEX:
             const vertex = state.vertices.find(vertex => vertex.id === data.id);
             return {
                 ...state,
-                vertices: state.vertices.map(
-                    vertex => vertex.id === data.id && state.movingVertices.find(vertex => vertex.id === data.id) ? data : vertex
-                ),
+                vertices: state.vertices.map(vertex => vertex.id === data.id ? data : vertex),
             };
         case RESIZE:
             return {
@@ -60,6 +64,7 @@ const rootReducer = (state = initialState, action) => {
                 movingVertices: state.movingVertices.filter(vertex => vertex.id !== data.id),
             };
         default:
+            console.log(`undefined action: ${action.type}`, action);
             return state;
     }
 };

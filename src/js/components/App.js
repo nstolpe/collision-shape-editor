@@ -74,10 +74,14 @@ const App = props => (
                         worldHeight={props.height}
                         interaction={app.renderer.plugins.interaction}
                         pointertap={function(e) {
-                            console.log('stage');
-                            console.log(e);
-                            const vertex = e.data.getLocalPosition(e.currentTarget);
-                            store.dispatch(addVertex(vertex));
+                            switch (true) {
+                                case e.data.originalEvent.ctrlKey && !e.data.originalEvent.altKey:
+                                    const coordinates = e.data.getLocalPosition(e.currentTarget);
+                                    store.dispatch(addVertex(coordinates));
+                                    break;
+                                default:
+                                    break;
+                            }
                         }}
                     >
                         {image({ ...props, app })}
