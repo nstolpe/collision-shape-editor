@@ -46,6 +46,7 @@ const Vertices = props => (
                     alpha={props.alpha || 0.8}
                     pivot={[5.5, 5.5]}
                     interactive
+                    cursor={props.altPressed ? "no-drop" : "pointer"}
                     scale={scale}
                     // pointertap={e => {
                     //     e.stopPropagation();
@@ -55,12 +56,15 @@ const Vertices = props => (
                     pointerdown={e => {
                         e.stopPropagation();
                         switch (true) {
-                            case e.data.originalEvent.altKey && !e.data.originalEvent.ctrlKey:
+                            case props.altPressed && !props.ctrlPressed:
                                 props.deleteVertex(vertex.id);
                                 break;
+                            case !props.altPressed && !props.ctrlPressed:
+                                props.startVertexMove(vertex);
+                                break;
+                            default:
+                                break;
                         }
-                        props.startVertexMove(vertex);
-                        // console.log('foo.data', foo.data);
                     }}
                     pointerup={e => {
                         e.stopPropagation();
