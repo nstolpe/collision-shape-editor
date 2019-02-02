@@ -57,7 +57,7 @@ const App = props => (
         height={props.height}
         options={
             {
-                backgroundColor: 0x00ff3b,
+                backgroundColor: 0x05ffd5,
                 autoResize: true,
                 resolution: props.resolution,
             }
@@ -81,14 +81,13 @@ const App = props => (
                         screenHeight={props.height}
                         worldWidth={props.width}
                         worldHeight={props.height}
-                        interaction={app.renderer.interaction}
-                        pointerdown={function(e) {
+                        interaction={app.renderer.plugins.interaction}
+                        pointertap={function(e) {
                             console.log('stage');
                             console.log(e.data.global);
-                            const vertex = e.data.getLocalPosition(this);
-                            props.addVertex(vertex);
+                            const vertex = e.data.getLocalPosition(e.currentTarget);
+                            store.dispatch(addVertex(vertex));
                         }}
-                        // zoomedEnd={e => console.log('wheel', e)}
                     >
                         {image({ ...props, app })}
                         {edges({ ...props, app })}

@@ -1,8 +1,12 @@
 // src/js/reducers/reducer.js
 
+import {v4 as uuid} from 'uuid';
 import {
-    RESIZE,
     ADD_VERTEX,
+    MOVE_VERTEX,
+    RESIZE,
+    START_VERTEX_MOVE,
+    STOP_VERTEX_MOVE,
 } from "App/constants/action-types";
 
 const initialState = {
@@ -13,25 +17,41 @@ const initialState = {
     images: {
         default: 'turtle-body.png',
     },
-    vertices: [
-        // { x: 100, y: 100 },
-        // { x: 200, y: 100 },
-        // { x: 200, y: 200 },
-        // { x: 100, y: 200 },
-    ],
+    vertices: [],
+    movingVertices: [],
 };
 
 const rootReducer = (state = initialState, action) => {
+    const data = action.data;
     switch (action.type) {
+        case ADD_VERTEX:
+            return {
+                ...state,
+                vertices: [ ...state.vertices, { ...data, id: uuid() } ],
+            };
+        case MOVE_VERTEX:
+            const vertex = state.vertices.find(vertex => vertex.id === data.id);
+            console.log(data)
+            return {
+                ...state,
+                vertices: state.vertices.map(
+                    vertex => vertex.id === data.id && state.movingVertices.find(vertex => vertex.id === data.id) ? data : vertex
+                ),
+            };
         case RESIZE:
             return {
                 ...state,
                 ...action.data,
             };
-        case ADD_VERTEX:
+        case START_VERTEX_MOVE:
             return {
                 ...state,
-                vertices: [ ...state.vertices, action.data ],
+                movingVertices: [ ...state.movingVertices, { ...data } ],
+            };
+        case STOP_VERTEX_MOVE:
+            return {
+                ...state,
+                movingVertices: state.movingVertices.filter(vertex => vertex.id !== data.id),
             };
         default:
             return state;

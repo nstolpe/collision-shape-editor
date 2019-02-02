@@ -28,9 +28,9 @@ const behavior = {
             .pinch()
             .wheel()
             .decelerate()
-            .on('clicked', e => console.log('viewport clicked', e))
             .resize();
     },
 };
 
-export default CustomPIXIComponent(behavior, TYPE);
+// export default CustomPIXIComponent(behavior, TYPE);
+export default connect()(CustomPIXIComponent(behavior, TYPE));
