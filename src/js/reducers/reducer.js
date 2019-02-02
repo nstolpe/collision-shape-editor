@@ -7,6 +7,8 @@ import {
     MOVE_VERTEX,
     RESIZE,
     SCALE_UI,
+    SET_ALT_PRESSED,
+    SET_CTRL_PRESSED,
     START_VERTEX_MOVE,
     STOP_VERTEX_MOVE,
 } from "App/constants/action-types";
@@ -22,6 +24,8 @@ const initialState = {
     vertices: [],
     movingVertices: [],
     UIScale: { x: 1, y: 1 },
+    ctrlPressed: false,
+    altPressed: false,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -52,6 +56,16 @@ const rootReducer = (state = initialState, action) => {
             return {
                 ...state,
                 UIScale: { ...data },
+            };
+        case SET_ALT_PRESSED:
+            return {
+                ...state,
+                altPressed: data.pressed,
+            };
+        case SET_CTRL_PRESSED:
+            return {
+                ...state,
+                ctrlPressed: data.pressed,
             };
         case START_VERTEX_MOVE:
             return {

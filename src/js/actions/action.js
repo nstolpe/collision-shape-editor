@@ -6,6 +6,8 @@ import {
     MOVE_VERTEX,
     RESIZE,
     SCALE_UI,
+    SET_ALT_PRESSED,
+    SET_CTRL_PRESSED,
     START_VERTEX_MOVE,
     STOP_VERTEX_MOVE,
 } from "App/constants/action-types";
@@ -33,6 +35,16 @@ export const moveVertex = ({ x, y, id }) => ({
 export const scaleUI = ({ x, y }) => ({
     type: SCALE_UI,
     data: { x, y },
+});
+
+export const setAltPressed = pressed => ({
+    type: SET_ALT_PRESSED,
+    data: { pressed },
+});
+
+export const setCtrlPressed = pressed => ({
+    type: SET_CTRL_PRESSED,
+    data: { pressed },
 });
 
 export const startVertexMove = ({ x, y, id }) => ({
