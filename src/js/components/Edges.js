@@ -14,15 +14,17 @@ export const behavior = {
         stroke,
         weight,
         alpha,
+        UIScale,
     } = Object.assign({
         stroke: 0xff3e82,
         weight: 1,
         alpha: 0.8,
+        UIScale: 1,
     }, newProps);
 
     instance.clear();
     instance.alpha = alpha;
-    instance.lineStyle(weight, stroke);
+    instance.lineStyle(weight / UIScale.x, stroke);
 
     if (vertices && vertices.length) {
         for (let i = 0, l = vertices.length; i <= l; i++) {

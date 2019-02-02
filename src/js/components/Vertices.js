@@ -16,10 +16,8 @@ import {
 
 import vertexSrc from '../../img/vertex.png';
 
-const mapStateToProps = state => {
-    console.log(state);
-    return { ...state }
-};
+const mapStateToProps = state => ({ ...state });
+
 const mapDispatchToProps = dispatch => ({
     moveVertex: ({ x, y, id }) => dispatch(moveVertex({ x, y, id })),
     startVertexMove: ({ x, y, id }) => dispatch(startVertexMove({ x, y, id })),
@@ -32,6 +30,10 @@ const Vertices = props => (
         {props.vertices.reduce((result, vertex, idx) => {
             const { x, y, id } = vertex;
             console.log('in the jsx', vertex, props);
+            const scale = {
+                x: 1 / props.UIScale.x,
+                y: 1 / props.UIScale.y,
+            };
             return [
                 ...result,
                 (<Sprite
@@ -43,6 +45,7 @@ const Vertices = props => (
                     alpha={props.alpha || 0.8}
                     pivot={[5.5, 5.5]}
                     interactive
+                    scale={scale}
                     // pointertap={e => {
                     //     e.stopPropagation();
                     //     console.log(`vertex_${id}`);
@@ -52,35 +55,21 @@ const Vertices = props => (
                         e.stopPropagation();
                         props.startVertexMove(vertex);
                         console.log('foo.data', foo.data);
-                        // foo.data = event.data;
-                        // e.currentTarget.alpha = 0.5;
-                        // foo.dragging = true;
                     }}
                     pointerup={e => {
                         e.stopPropagation();
                         e.currentTarget.alpha = 1;
                         props.stopVertexMove(vertex);
-                        // foo.dragging = false;
-                        // set the interaction data to null
-                        // foo.data = null;
                     }}
                     pointerupoutside={e => {
                         e.stopPropagation();
                         e.currentTarget.alpha = 1;
                         props.stopVertexMove(vertex);
-                        // foo.dragging = false;
-                        // set the interaction data to null
-                        // foo.data = null;
                     }}
                     pointermove={e => {
                         const coordinates = e.data.getLocalPosition(e.currentTarget.parent);
                         console.log('pointermove', { ...vertex, ...coordinates }, coordinates)
                         props.moveVertex({ ...vertex, ...coordinates });
-                        // if (foo.dragging) {
-                            // const newPosition = e.data.getLocalPosition(e.currentTarget.parent);
-                            // e.currentTarget.x = newPosition.x;
-                            // e.currentTarget.y = newPosition.y;
-                        // }
                     }}
                     hitArea={new PIXI.Circle(5.5, 5.5, 5.5)}
                 />)
@@ -89,5 +78,4 @@ const Vertices = props => (
     </Container>
 );
 
-// export default Vertices;
 export default connect(mapStateToProps, mapDispatchToProps)(Vertices);

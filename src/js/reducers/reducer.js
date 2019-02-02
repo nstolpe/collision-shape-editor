@@ -5,6 +5,7 @@ import {
     ADD_VERTEX,
     MOVE_VERTEX,
     RESIZE,
+    SCALE_UI,
     START_VERTEX_MOVE,
     STOP_VERTEX_MOVE,
 } from "App/constants/action-types";
@@ -19,6 +20,7 @@ const initialState = {
     },
     vertices: [],
     movingVertices: [],
+    UIScale: { x: 1, y: 1 },
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -31,7 +33,6 @@ const rootReducer = (state = initialState, action) => {
             };
         case MOVE_VERTEX:
             const vertex = state.vertices.find(vertex => vertex.id === data.id);
-            console.log(data)
             return {
                 ...state,
                 vertices: state.vertices.map(
@@ -42,6 +43,11 @@ const rootReducer = (state = initialState, action) => {
             return {
                 ...state,
                 ...action.data,
+            };
+        case SCALE_UI:
+            return {
+                ...state,
+                UIScale: { ...data },
             };
         case START_VERTEX_MOVE:
             return {
