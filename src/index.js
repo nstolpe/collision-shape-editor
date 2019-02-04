@@ -14,11 +14,9 @@ render(
         width: '100%',
         height: '100%',
     }}>
-
         <App
             width={appContainer.offsetWidth}
             height={appContainer.offsetHeight}
-            onKeyDown={e => console.log(e)}
         />
         <ControlContext.Provider store={store}>
             <div className="controls">

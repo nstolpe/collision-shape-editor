@@ -28,6 +28,7 @@ export const behavior = {
     instance.hitArea = new PIXI.Polygon(vertices.reduce((points, vertex) => [ ...points, vertex.x, vertex.y ], []));
     instance.interactive = true;
 
+    // resets pointerdown, which wasn't being assigned well.
     if (typeof newProps.pointerdown === 'function' && typeof oldProps.pointerdown === 'function' && newProps.pointerdown !== oldProps.pointerdown) {
         instance.off('pointerdown', oldProps.pointerdown);
         instance.on('pointerdown', newProps.pointerdown);

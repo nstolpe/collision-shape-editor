@@ -36,7 +36,8 @@ const image = props => {
     const texture = PIXI.Texture.fromImage(turtleBodySrc);
     texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
     // all should come through loader
-    const pivot = [43, 60];
+    // const pivot = [43, 60];
+    const pivot = [0,0];
     return (
         <Container
             name="image-container"
@@ -51,14 +52,18 @@ const image = props => {
 const App = (props) => {
     const focusTarget = useRef(null);
     const [buttonMode, setButtonMode] = useState(false);
+    // const [altPressed, setAltPressed] = useState(false);
+    // const [ctrlPressed, setCtrlPressed] = useState(false);
 
     const keyDown = e => {
         switch(e.key) {
             case "Alt":
-                store.dispatch(setAltPressed(true))
+                store.dispatch(setAltPressed(true));
+                // setAltPressed(true);
                 break;
             case "Control":
-                setButtonMode(true);
+                // setButtonMode(true);
+                // setCtrlPressed(true);
                 store.dispatch(setCtrlPressed(true))
                 break;
             default:
@@ -70,9 +75,11 @@ const App = (props) => {
         switch(e.key) {
             case "Alt":
                 store.dispatch(setAltPressed(false))
+                setAltPressed(false);
                 break;
             case "Control":
-                setButtonMode(false);
+                // setCtrlPressed(false);
+                // setButtonMode(false);
                 store.dispatch(setCtrlPressed(false))
                 break;
             default:
@@ -113,7 +120,9 @@ const App = (props) => {
                 width={props.width}
                 height={props.height}
                 interactive
-                buttonMode={buttonMode}
+                // buttonMode={buttonMode}
+                // cursor="grab"
+                // cursor={props.ctrlPressed ? "pointer" : "grab"}
             >
                 <AppContext.Consumer>
                     {app => (
@@ -124,16 +133,19 @@ const App = (props) => {
                                 worldWidth={props.width}
                                 worldHeight={props.height}
                                 interaction={app.renderer.plugins.interaction}
-                                pointertap={function(e) {
-                                    switch (true) {
-                                        case e.data.originalEvent.ctrlKey && !e.data.originalEvent.altKey:
-                                            const coordinates = e.data.getLocalPosition(e.currentTarget);
-                                            store.dispatch(addVertex(coordinates));
-                                            break;
-                                        default:
-                                            break;
+                                { ...props }
+                                // cursor={store.getState().ctrlPressed ? "pointer" : "grab"}
+                                pointertap={e => {
+                                        switch (true) {
+                                            case store.getState().ctrlPressed && !store.getState().altPressed:
+                                                const coordinates = e.data.getLocalPosition(e.currentTarget);
+                                                store.dispatch(addVertex(coordinates));
+                                                break;
+                                            default:
+                                                break;
+                                        }
                                     }
-                                }}
+                                }
                             >
                                 {image({ ...props, app })}
                                 <Container
@@ -167,5 +179,5 @@ window.addEventListener('resize', e => {
 
 window.dispatchEvent(new Event('resize'));
 
-// export default connect(mapStateToProps, mapDispatchToProps)(App);
+// export default connect()(App);
 export default App;

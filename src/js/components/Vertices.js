@@ -46,7 +46,7 @@ const Vertices = props => (
                     alpha={props.alpha || 0.8}
                     pivot={[5.5, 5.5]}
                     interactive
-                    cursor={props.altPressed ? "no-drop" : "pointer"}
+                    cursor={props.altPressed ? "no-drop" : "move"}
                     scale={scale}
                     // pointertap={e => {
                     //     e.stopPropagation();
@@ -68,6 +68,11 @@ const Vertices = props => (
                     }}
                     pointerup={e => {
                         e.stopPropagation();
+                        const stage = e.target.parent.parent.parent.parent;
+                        const sprite = stage.children[0].children[0].children[0];
+                        const spriteGlobalCoords = sprite.toGlobal({x:0,y:0});
+                        const pointGlobalCoords = e.target.toGlobal({x:0,y:0});
+                        console.log(`x: ${spriteGlobalCoords.x - pointGlobalCoords.x} y: ${spriteGlobalCoords.y - pointGlobalCoords.y}`);
                         props.stopVertexMove(vertex);
                     }}
                     pointerupoutside={e => {
