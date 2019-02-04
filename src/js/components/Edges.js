@@ -54,4 +54,5 @@ export const behavior = {
   }
 };
 
-export default connect(mapStateToProps)(CustomPIXIComponent(behavior, TYPE));
+// export default connect(mapStateToProps)(CustomPIXIComponent(behavior, TYPE));
+export default CustomPIXIComponent(behavior, TYPE);

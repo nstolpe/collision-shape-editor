@@ -9,6 +9,7 @@ import * as PIXI from 'pixi.js';
 import {
     connect,
     Provider,
+    ReactReduxContext,
 } from "react-redux";
 import {
     AppContext,
@@ -124,40 +125,38 @@ const App = (props) => {
                 // cursor="grab"
                 // cursor={props.ctrlPressed ? "pointer" : "grab"}
             >
-                <AppContext.Consumer>
-                    {app => (
-                        <Provider store={store}>
-                            <Viewport
-                                screenWidth={props.width}
-                                screenHeight={props.height}
-                                worldWidth={props.width}
-                                worldHeight={props.height}
-                                interaction={app.renderer.plugins.interaction}
-                                { ...props }
-                                // cursor={store.getState().ctrlPressed ? "pointer" : "grab"}
-                                pointertap={e => {
-                                        switch (true) {
-                                            case store.getState().ctrlPressed && !store.getState().altPressed:
-                                                const coordinates = e.data.getLocalPosition(e.currentTarget);
-                                                store.dispatch(addVertex(coordinates));
-                                                break;
-                                            default:
-                                                break;
+                        <AppContext.Consumer>
+                            {app => (
+                                <Viewport
+                                    screenWidth={props.width}
+                                    screenHeight={props.height}
+                                    worldWidth={props.width}
+                                    worldHeight={props.height}
+                                    interaction={app.renderer.plugins.interaction}
+                                    { ...props }
+                                    // cursor={store.getState().ctrlPressed ? "pointer" : "grab"}
+                                    pointertap={e => {
+                                            switch (true) {
+                                                case store.getState().ctrlPressed && !store.getState().altPressed:
+                                                    const coordinates = e.data.getLocalPosition(e.currentTarget);
+                                                    store.dispatch(addVertex(coordinates));
+                                                    break;
+                                                default:
+                                                    break;
+                                            }
                                         }
                                     }
-                                }
-                            >
-                                {image({ ...props, app })}
-                                <Container
-                                    name="edges-container"
                                 >
-                                  <Edges {...props} pointerdown={e=>console.log(e)}/>
-                                  <Vertices {...props} />
-                                </Container>
-                            </Viewport>
-                        </Provider>
-                    )}
-                </AppContext.Consumer>
+                                    {image({ ...props, app })}
+                                    <Container
+                                        name="edges-container"
+                                    >
+                                      <Edges {...props} pointerdown={e=>console.log(e)}/>
+                                      <Vertices {...props} />
+                                    </Container>
+                                </Viewport>
+                            )}
+                        </AppContext.Consumer>
             </Stage>
         </div>
     )
@@ -178,6 +177,8 @@ window.addEventListener('resize', e => {
 });
 
 window.dispatchEvent(new Event('resize'));
-
-// export default connect()(App);
-export default App;
+const mapStateToProps = state => {
+    return { ...state }
+};
+export default connect(mapStateToProps)(App);
+// export default App;

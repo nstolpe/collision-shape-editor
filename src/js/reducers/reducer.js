@@ -16,8 +16,8 @@ import {
 const initialState = {
     width: 0,
     height: 0,
-    resolution: window.devicePixelRation,
-    lastResize: undefined,
+    resolution: window.devicePixelRatio,
+    lastResize: Date.now(),
     images: {
         default: 'turtle-body.png',
     },

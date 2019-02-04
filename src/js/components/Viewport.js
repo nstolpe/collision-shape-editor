@@ -1,8 +1,10 @@
 // src/js/components/Viewport.js
 import { CustomPIXIComponent } from "react-pixi-fiber";
-import { connect } from "react-redux";
+import {
+    connect, ReactReduxContext } from "react-redux";
 import * as PIXI from "pixi.js";
 import Viewport from 'pixi-viewport';
+import store from 'App/store/store';
 
 import { scaleUI } from 'App/actions/action';
 
@@ -58,4 +60,5 @@ const behavior = {
     },
 };
 
-export default connect(mapDispatchToProps, mapDispatchToProps)(CustomPIXIComponent(behavior, TYPE));
+export default connect(mapDispatchToProps, mapDispatchToProps, null, { context: store })(CustomPIXIComponent(behavior, TYPE));
+// export default CustomPIXIComponent(behavior, TYPE);

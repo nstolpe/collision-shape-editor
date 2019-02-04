@@ -8,23 +8,25 @@ import App from 'App/components/App';
 const appContainer = document.getElementById('app-container');
 const ControlContext = React.createContext();
 render(
-    <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        width: '100%',
-        height: '100%',
-    }}>
-        <App
-            width={appContainer.offsetWidth}
-            height={appContainer.offsetHeight}
-        />
-        <ControlContext.Provider store={store}>
-            <div className="controls">
-                <form>
-                    <label>foo</label>
-                </form>
-            </div>
-        </ControlContext.Provider>
-    </div>,
+    <Provider store={store}>
+        <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            height: '100%',
+        }}>
+            <App
+                width={appContainer.offsetWidth}
+                height={appContainer.offsetHeight}
+            />
+            <ControlContext.Provider store={store}>
+                <div className="controls">
+                    <form>
+                        <label>foo</label>
+                    </form>
+                </div>
+            </ControlContext.Provider>
+        </div>
+    </Provider>,
     appContainer
 );
