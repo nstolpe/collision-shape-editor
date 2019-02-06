@@ -36,6 +36,8 @@ const behavior = {
         //             break;
         //     }
         // });
+        instance.on('pointertap', props.pointertap);
+
         return instance;
     },
     customDidAttach: instance => {
@@ -54,8 +56,9 @@ const behavior = {
                 instance.cursor = "grab";
                 break;
         }
-        this.applyDisplayObjectProps(oldProps,newProps)
+        // this.applyDisplayObjectProps(oldProps,newProps)
     },
 };
 
-export default connect(mapDispatchToProps, mapDispatchToProps)(CustomPIXIComponent(behavior, TYPE));
+// export default connect(mapDispatchToProps, mapDispatchToProps)(CustomPIXIComponent(behavior, TYPE));
+export default CustomPIXIComponent(behavior, TYPE);

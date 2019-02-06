@@ -11,13 +11,14 @@ import {
     SET_CTRL_PRESSED,
     START_VERTEX_MOVE,
     STOP_VERTEX_MOVE,
+    SET_TEST_CONTAINER_POSITION,
 } from "App/constants/action-types";
 
 const initialState = {
     width: 0,
     height: 0,
-    resolution: window.devicePixelRation,
-    lastResize: undefined,
+    resolution: window.devicePixelRatio,
+    lastResize: Date.now(),
     images: {
         default: 'turtle-body.png',
     },
@@ -26,6 +27,7 @@ const initialState = {
     UIScale: { x: 1, y: 1 },
     ctrlPressed: false,
     altPressed: false,
+    testContainerPosition: { x: 0, y: 0 },
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -76,6 +78,11 @@ const rootReducer = (state = initialState, action) => {
             return {
                 ...state,
                 movingVertices: state.movingVertices.filter(vertex => vertex.id !== data.id),
+            };
+        case SET_TEST_CONTAINER_POSITION:
+            return {
+                ...state,
+                testContainerPosition: { ...data },
             };
         default:
             console.log(`undefined action: ${action.type}`, action);

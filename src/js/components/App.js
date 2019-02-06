@@ -23,6 +23,7 @@ import Viewport from 'App/components/Viewport';
 import {
     addVertex,
     resize,
+    scaleUI,
     setAltPressed,
     setCtrlPressed,
 } from 'App/actions/action';
@@ -51,7 +52,7 @@ const image = props => {
 
 const App = (props) => {
     const focusTarget = useRef(null);
-    const [buttonMode, setButtonMode] = useState(false);
+    // const [buttonMode, setButtonMode] = useState(false);
     // const [altPressed, setAltPressed] = useState(false);
     // const [ctrlPressed, setCtrlPressed] = useState(false);
 
@@ -75,7 +76,7 @@ const App = (props) => {
         switch(e.key) {
             case "Alt":
                 store.dispatch(setAltPressed(false))
-                setAltPressed(false);
+                // setAltPressed(false);
                 break;
             case "Control":
                 // setCtrlPressed(false);
@@ -126,43 +127,41 @@ const App = (props) => {
             >
                 <AppContext.Consumer>
                     {app => (
-                        <Provider store={store}>
-                            <Viewport
-                                screenWidth={props.width}
-                                screenHeight={props.height}
-                                worldWidth={props.width}
-                                worldHeight={props.height}
-                                interaction={app.renderer.plugins.interaction}
-                                { ...props }
-                                // cursor={store.getState().ctrlPressed ? "pointer" : "grab"}
-                                pointertap={e => {
-                                        switch (true) {
-                                            case store.getState().ctrlPressed && !store.getState().altPressed:
-                                                const coordinates = e.data.getLocalPosition(e.currentTarget);
-                                                store.dispatch(addVertex(coordinates));
-                                                break;
-                                            default:
-                                                break;
-                                        }
+                        <Viewport
+                            screenWidth={app.stage.width}
+                            screenHeight={app.stage.height}
+                            worldWidth={props.width}
+                            worldHeight={props.height}
+                            interaction={app.renderer.plugins.interaction}
+                            // cursor={store.getState().ctrlPressed ? "pointer" : "grab"}
+                            pointertap={e => {
+                                    switch (true) {
+                                        case store.getState().ctrlPressed && !store.getState().altPressed:
+                                            const coordinates = e.data.getLocalPosition(e.currentTarget);
+                                            store.dispatch(addVertex(coordinates));
+                                            break;
+                                        default:
+                                            break;
                                     }
                                 }
+                            }
+                            scaleUI={props.scaleUI}
+                            { ...props }
+                        >
+                            {image({ ...props, app })}
+                            <Container
+                                name="edges-container"
                             >
-                                {image({ ...props, app })}
-                                <Container
-                                    name="edges-container"
-                                >
-                                  <Edges {...props} pointerdown={e=>console.log(e)}/>
-                                  <Vertices {...props} />
-                                </Container>
-                            </Viewport>
-                        </Provider>
+                                <Edges {...props} pointerdown={e=>console.log(e)}/>
+                                <Vertices context={props.context} {...props} />
+                            </Container>
+                        </Viewport>
                     )}
                 </AppContext.Consumer>
             </Stage>
         </div>
     )
 };
-
 window.addEventListener('resize', e => {
     const now = Date.now();
     const last = store.getState().lastResize;
@@ -179,5 +178,12 @@ window.addEventListener('resize', e => {
 
 window.dispatchEvent(new Event('resize'));
 
-// export default connect()(App);
-export default App;
+const mapStateToProps = state => ({ ...state });
+
+const mapDispatchToProps = dispatch => ({
+    scaleUI: ({ x, y }) => dispatch(scaleUI({ x, y })),
+    addVertex: ({x, y }) => dispatch(addVertex({ x, y })),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
+// export default App;

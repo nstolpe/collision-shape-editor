@@ -10,6 +10,7 @@ import {
     SET_CTRL_PRESSED,
     START_VERTEX_MOVE,
     STOP_VERTEX_MOVE,
+    SET_TEST_CONTAINER_POSITION,
 } from "App/constants/action-types";
 
 export const resize = ({ width, height }) => ({
@@ -56,3 +57,10 @@ export const stopVertexMove = ({ x, y, id }) => ({
     type: STOP_VERTEX_MOVE,
     data: { x, y, id },
 });
+
+export const setTestContainerPosition = ({ x, y }) => ({
+    type: SET_TEST_CONTAINER_POSITION,
+    data: { x, y },
+});
+
+window.setTestContainerPosition = setTestContainerPosition;
