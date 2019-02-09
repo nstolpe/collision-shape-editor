@@ -31,6 +31,7 @@
     "imagetracerjs": "^1.2.4",
     "pixi-viewport": "^3.15.0",
     "pixi.js": "^5.0.0-rc",
+    "prop-types": "^15.6.2",
     "react": "16.8.0-alpha.1",
     "react-dom": "^16.8.0-alpha.1",
     "react-pixi-fiber": "^0.7.0",
