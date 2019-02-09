@@ -6,6 +6,10 @@ import { connect } from "react-redux";
 
 const mapStateToProps = state => ({ ...state });
 
-const TestContainer = props => <Container name="foobar" position={props.testContainerPosition} />;
+const TestContainer = (props, state) => {
+    console.log(props);
+    return (<Container name="TestContainer" position={props.testContainerPosition} foo={props.lastResize}/>);
+};
 
+// export default TestContainer;
 export default connect(mapStateToProps, null)(TestContainer);

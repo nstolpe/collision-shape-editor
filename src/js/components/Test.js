@@ -1,4 +1,4 @@
-// components/Test.js
+// src/js/components/Test.js
 import React from 'react';
 import {
     Container,
@@ -31,12 +31,10 @@ const Test = props => {
             }}
             name="stage"
         >
-            <Provider store={store}>
-                <TestContainer />
-            </Provider>
+            <TestContainer { ...props }/>
         </Stage>
     );
 }
 
-// export default connect(mapStateToProps, null)(Test);
-export default Test;
+export default connect(mapStateToProps, null)(Test);
+// export default Test;
