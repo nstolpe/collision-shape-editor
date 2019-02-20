@@ -17,10 +17,10 @@ const TYPE = "Viewport";
 const mapStateToProps = state => {
     return { ...state }
 };
-const mapDispatchToProps = dispatch => ({
-    scaleUI: ({ x, y }) => dispatch(scaleUI({ x, y })),
-    addVertex: ({x, y }) => dispatch(addVertex({ x, y })),
-});
+// const mapDispatchToProps = dispatch => ({
+//     scaleUI: ({ x, y }) => dispatch(scaleUI({ x, y })),
+//     addVertex: ({x, y }) => dispatch(addVertex({ x, y })),
+// });
 
 const behavior = {
     customDisplayObject: function(props) {

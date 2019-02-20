@@ -2,30 +2,27 @@
 import React from 'react';
 
 import { Provider, ReactReduxContext } from "react-redux";
-import { AppContext } from 'react-pixi-fiber';
+import { AppContext, Stage } from 'react-pixi-fiber';
 
 import { ContextOne, ContextTwo } from 'App/contexts/contexts';
 import store from 'App/store/store';
-// console.log(Provider);
-// console.log(ReactReduxContext.Consumer);
-// console.log(AppContext);
+
+const addApp = (children, app) => React.Children.map(children, child => React.cloneElement(child, { app: app }));
 
 const ContextBridge = props => (
-    <ReactReduxContext.Consumer>{
-        data => (
-            <AppContext.Consumer>{
-                app => (
-                    props.barrierRender(
-                        <AppContext.Provider app={app}>
-                            <Provider store={store}>
-                                {props.children}
-                            </Provider>
-                        </AppContext.Provider>
-                    )
+    <ReactReduxContext.Consumer>{() => (
+        <Stage>
+            <AppContext.Consumer>{app => (
+                props.barrierRender(
+                    <AppContext.Provider>
+                        <Provider store={store}>
+                            {addApp(props.children, app)}
+                        </Provider>
+                    </AppContext.Provider>
                 )
-            }</AppContext.Consumer>
-        )
-    }</ReactReduxContext.Consumer>
+            )}</AppContext.Consumer>
+        </Stage>
+    )}</ReactReduxContext.Consumer>
 );
 
 export default ContextBridge;

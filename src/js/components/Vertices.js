@@ -92,5 +92,5 @@ const Vertices = props => (
     </Container>
 );
 
-// export default Vertices;
-export default connect(mapStateToProps, mapDispatchToProps)(Vertices);
+export default Vertices;
+// export default connect(mapStateToProps, mapDispatchToProps)(Vertices);

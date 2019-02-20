@@ -1,15 +1,16 @@
-// components/TestContainer.js
+// src/js/components/TestContainer.js
 
 import React from 'react';
 import { Container } from 'react-pixi-fiber';
 import { connect } from "react-redux";
 
-const mapStateToProps = state => ({ ...state });
+import ScreenContext from 'App/contexts/ScreenContext';
 
-const TestContainer = (props, state) => {
-    console.log(props);
-    return (<Container name="TestContainer" position={props.testContainerPosition} foo={props.lastResize}/>);
+const mapStateToProps = (state, ownProps) => ({ ...state });
+
+const TestContainer = props => {
+    return (<Container name="TestContainer" position={props.testContainerPosition} />);
 };
 
 // export default TestContainer;
-export default connect(mapStateToProps, null)(TestContainer);
+export default connect(mapStateToProps, null, null, { context: ScreenContext })(TestContainer);
