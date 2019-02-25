@@ -1,36 +1,70 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { render } from 'react-dom';
-import { AppContext, Stage } from 'react-pixi-fiber';
-import { Provider } from "react-redux";
-
-import { resize } from 'App/actions/action';
-import App from 'App/components/App';
-import ContextBridge from 'App/components/ContextBridge';
-import Test from 'App/components/Test';
+import { AppContext, Container, Stage, withApp } from 'react-pixi-fiber';
+import { Provider, connect, ReactReduxContext } from "react-redux";
+import * as PIXI from "pixi.js";
+console.log(PIXI);
+// import App from 'App/components/App';
+// import ContextBridge from 'App/components/ContextBridge';
+import {
+    resize,
+    setBackgroundColor,
+} from 'App/actions/actions';
+import AppWrapper from 'App/components/AppWrapper';
+import ColorPicker from 'App/components/ColorPicker';
+import Controls from 'App/components/Controls';
+import Screen from 'App/components/Screen';
+import ScreenWrapper from 'App/components/ScreenWrapper';
+import ScreenContext from 'App/contexts/ScreenContext';
 import TestContainer from 'App/components/TestContainer';
+import Viewport from 'App/components/Viewport';
 import store from 'App/store/store';
 
 const appContainer = document.getElementById('app-container');
-const ControlContext = React.createContext();
 
 store.dispatch(resize({
     width: appContainer.offsetWidth,
     height: appContainer.offsetHeight,
     lastResize: Date.now(),
 }));
-window.store = store;
-const context = React.createContext();
-render(
-    <ContextBridge
-        barrierRender={children => (
-            <Stage>{children}</Stage>
-        )}
-    >
-        <TestContainer />
 
-    </ContextBridge>,
+window.store = store;
+
+const mapDispatchToProps = dispatch => ({
+    onChange: e => {
+        const colorString = e.target.value;
+        const color = parseInt(colorString.replace('#',''), 16);
+        dispatch(setBackgroundColor(color));
+    },
+});
+const EffectViewport = props => {
+    const { renderer } = props.app;
+    const { backgroundColor } = props;
+    if (renderer.backgroundColor !== backgroundColor) {
+        renderer.backgroundColor = backgroundColor;
+    }
+    return (<Viewport>{props.children}</Viewport>);
+};
+const ConnectedViewport = connect(state => state, null, null, { context: ScreenContext })(withApp(EffectViewport));
+const ConnectedScreen = connect(state => state)(Screen);
+
+// store used in both renderers
+render(
+    <Provider store={store}>
+        <AppWrapper>
+            <ScreenWrapper>
+                <Screen context={ScreenContext}>
+                    <ConnectedViewport>
+                        <TestContainer />
+                    </ConnectedViewport>
+                </Screen>
+            </ScreenWrapper>
+            <Controls></Controls>
+        </AppWrapper>
+    </Provider>,
     appContainer
 );
+
 // render(
 //     <Provider store={store}>
 //         <div style={{
@@ -39,32 +73,12 @@ render(
 //             width: '100%',
 //             height: '100%',
 //         }}>
-//             <Test />
+//             <App />
 //             <div className="controls">
 //                 <form>
-//                     <label>{store.getState().lastResize}</label>
+//                     <label>foo</label>
 //                 </form>
 //             </div>
-//         </div>
-//     </Provider>,
-//     appContainer
-// );
-// render(
-//     <Provider context={context} store={store}>
-//         <div style={{
-//             display: 'flex',
-//             flexDirection: 'column',
-//             width: '100%',
-//             height: '100%',
-//         }}>
-//             <App context={context}/>
-//             <ControlContext.Provider store={store}>
-//                 <div className="controls">
-//                     <form>
-//                         <label>foo</label>
-//                     </form>
-//                 </div>
-//             </ControlContext.Provider>
 //         </div>
 //     </Provider>,
 //     appContainer

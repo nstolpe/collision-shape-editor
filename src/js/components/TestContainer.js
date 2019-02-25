@@ -6,7 +6,7 @@ import { connect } from "react-redux";
 
 import ScreenContext from 'App/contexts/ScreenContext';
 
-const mapStateToProps = (state, ownProps) => ({ ...state });
+const mapStateToProps = state => ({ ...state });
 
 const TestContainer = props => {
     return (<Container name="TestContainer" position={props.testContainerPosition} />);
