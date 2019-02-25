@@ -26,7 +26,7 @@ import {
     scaleUI,
     setAltPressed,
     setCtrlPressed,
-} from 'App/actions/action';
+} from 'App/actions/actions';
 import store from 'App/store/store';
 import turtleBodySrc from '../../img/turtle-body.png';
 
