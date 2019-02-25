@@ -7,6 +7,7 @@ import {
     MOVE_VERTEX,
     RESIZE,
     SCALE_UI,
+    SET_BACKGROUND_COLOR,
     SET_ALT_PRESSED,
     SET_CTRL_PRESSED,
     START_VERTEX_MOVE,
@@ -15,6 +16,7 @@ import {
 } from "App/constants/action-types";
 
 const initialState = {
+    backgroundColor: 0x05ffd5,
     width: 0,
     height: 0,
     resolution: window.devicePixelRatio,
@@ -49,6 +51,16 @@ const rootReducer = (state = initialState, action) => {
                 ...state,
                 vertices: state.vertices.map(vertex => vertex.id === data.id ? data : vertex),
             };
+        case START_VERTEX_MOVE:
+            return {
+                ...state,
+                movingVertices: [ ...state.movingVertices, { ...data } ],
+            };
+        case STOP_VERTEX_MOVE:
+            return {
+                ...state,
+                movingVertices: state.movingVertices.filter(vertex => vertex.id !== data.id),
+            };
         case RESIZE:
             return {
                 ...state,
@@ -59,6 +71,11 @@ const rootReducer = (state = initialState, action) => {
                 ...state,
                 UIScale: { ...data },
             };
+        case SET_BACKGROUND_COLOR:
+            return {
+                ...state,
+                backgroundColor: data.color,
+            };
         case SET_ALT_PRESSED:
             return {
                 ...state,
@@ -68,16 +85,6 @@ const rootReducer = (state = initialState, action) => {
             return {
                 ...state,
                 ctrlPressed: data.pressed,
-            };
-        case START_VERTEX_MOVE:
-            return {
-                ...state,
-                movingVertices: [ ...state.movingVertices, { ...data } ],
-            };
-        case STOP_VERTEX_MOVE:
-            return {
-                ...state,
-                movingVertices: state.movingVertices.filter(vertex => vertex.id !== data.id),
             };
         case SET_TEST_CONTAINER_POSITION:
             return {
