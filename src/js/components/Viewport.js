@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import * as PIXI from "pixi.js";
 import Viewport from 'pixi-viewport';
 
-import { scaleUI } from 'App/actions/action';
+import { scaleUI } from 'App/actions/actions';
 
 const TYPE = "Viewport";
 

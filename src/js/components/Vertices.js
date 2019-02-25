@@ -13,7 +13,7 @@ import {
     moveVertex,
     startVertexMove,
     stopVertexMove,
-} from 'App/actions/action';
+} from 'App/actions/actions';
 
 import vertexSrc from '../../img/vertex.png';
 
