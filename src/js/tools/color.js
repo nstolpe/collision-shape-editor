@@ -1,29 +1,16 @@
 // /src/js/tools/color.js
 
-// https://gist.github.com/vahidk/05184faf3d92a0aa1b46aeaa93b07786
-// export const rgbToHsl = ({ r, g, b }) => {
-//     r /= 255; g /= 255; b /= 255;
-//     const max = Math.max(r, g, b);
-//     const min = Math.min(r, g, b);
-//     const d = max - min;
-//     let h;
-//     if (d === 0) h = 0;
-//     else if (max === r) h = (g - b) / d % 6;
-//     else if (max === g) h = (b - r) / d + 2;
-//     else if (max === b) h = (r - g) / d + 4;
-//     let l = (min + max) / 2;
-//     let s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
-//     return { h: h * 60, s, l };
-// };
+// https://jsfiddle.net/t5nq6jjc/1
+// https://stackoverflow.com/a/9493060 (link above from comments)
 export const rgbToHsl = ({ r, g, b }) => {
     r /= 255, g /= 255, b /= 255;
-    var max = Math.max(r, g, b), min = Math.min(r, g, b);
-    var h, s, l = (max + min) / 2;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
 
     if(max == min){
-        h = s = 0; // achromatic
+        h = s = 0;
     }else{
-        var d = (max - min);
+        const d = (max - min);
         s = l >= 0.5 ? d / (2 - (max + min)) : d / (max + min);
         switch(max){
             case r: h = ((g - b) / d + (g < b ? 6 : 0))*60; break;
@@ -34,26 +21,7 @@ export const rgbToHsl = ({ r, g, b }) => {
 
     return { h, s, l };
 }
-// export const rgbToHsl = ({ r, g, b }) => {
-//     r /= 255, g /= 255, b /= 255;
-//     var max = Math.max(r, g, b), min = Math.min(r, g, b);
-//     var h, s, l = (max + min) / 2;
 
-//     if(max == min){
-//         h = s = 0; // achromatic
-//     }else{
-//         var d = max - min;
-//         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-//         switch(max){
-//             case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-//             case g: h = (b - r) / d + 2; break;
-//             case b: h = (r - g) / d + 4; break;
-//         }
-//         h /= 6;
-//     }
-
-//     return {h, s, l};
-// }
 // https://gist.github.com/vahidk/05184faf3d92a0aa1b46aeaa93b07786
 export const hslToRgb = ({ h, s, l }) => {
     const c = (1 - Math.abs(2 * l - 1)) * s;

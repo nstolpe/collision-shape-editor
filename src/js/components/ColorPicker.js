@@ -18,23 +18,27 @@ import {
     toHex,
 } from 'App/tools/color';
 
-const Trigger = styled.a`
+const Trigger = styled.a.attrs(
+    ({ triggerWidth, triggerHeight, backgroundColor }) => ({
+        style: {
+            width: triggerWidth == null ? '4em' : triggerWidth,
+            height: triggerHeight == null ?'4em' : triggerHeight,
+            backgroundColor: backgroundColor,
+        },
+    }),
+)`
     text-decoration: none;
-    width: ${({triggerWidth}) => triggerWidth == null ? '4em' : triggerWidth};
-    height: ${({triggerHeight}) => triggerHeight == null ?'4em' : triggerHeight};
     display: inline-block;
     box-sizing: border-box;
     position: relative;
-    background-color: ${({backgroundColor}) => backgroundColor};
     transition: opacity 0.2s ease;
-    &:hover {
-        box-shadow: 0 0 2px #ffffff;
-    }
     border-radius: .2em;
     vertical-align: middle;
     cursor: pointer;
+    &:hover {
+        box-shadow: 0 0 2px #ffffff;
+    }
 `;
-
 const Panel = styled.div`
     position: absolute;
     display: ${({active}) => active ? 'flex' : 'none'};
@@ -48,6 +52,9 @@ const Panel = styled.div`
 
 const CanvasWrapper = styled.div`
     display: flex;
+    display: inline-block;
+    box-sizing: border-box;
+    position: relative;
 `;
 
 const ValuesWrapper = styled.div`
