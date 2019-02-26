@@ -5,6 +5,7 @@ import styled from 'styled-components';
 
 import { setBackgroundColor } from 'App/actions/actions';
 import ColorPicker from 'App/components/ColorPicker';
+import FileLoader from 'App/components/FileLoader';
 import {
     toHex,
     rgbToHex,
@@ -13,6 +14,9 @@ import {
 const Styled = styled.div`
     background-color: #ebebeb;
     padding: 1em;
+    & > * {
+        margin-right: 1em;
+    }
 `;
 
 const mapStateToProps = (state, ownProps) => ({ ...state });
@@ -32,7 +36,7 @@ const mapDispatchToProps = dispatch => ({
 const Controls = ({ children, backgroundColor, onChange, onColorChange }) => {
     return(
         <Styled>
-            <input type="color" onChange={onChange} value={toHex(backgroundColor)}/>
+            <FileLoader />
             <ColorPicker color={backgroundColor} onColorChange={onColorChange} />
             {children}
         </Styled>

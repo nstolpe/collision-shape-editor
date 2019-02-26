@@ -21,8 +21,8 @@ import {
 const Trigger = styled.a.attrs(
     ({ triggerWidth, triggerHeight, backgroundColor }) => ({
         style: {
-            width: triggerWidth == null ? '4em' : triggerWidth,
-            height: triggerHeight == null ?'4em' : triggerHeight,
+            width: triggerWidth == null ? '5.4em' : triggerWidth,
+            height: triggerHeight == null ?'5.4em' : triggerHeight,
             backgroundColor: backgroundColor,
         },
     }),
@@ -43,7 +43,7 @@ const Panel = styled.div`
     position: absolute;
     display: ${({active}) => active ? 'flex' : 'none'};
     bottom: 100%;
-    background-color: #ebebeb;
+    background-color: #d9d9d9;
     padding: 1em;
     margin-bottom: 1em;
     border-radius: .2em .2em 0 0;
@@ -60,6 +60,7 @@ const CanvasWrapper = styled.div`
 const ValuesWrapper = styled.div`
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
 `;
 
 const PadCanvas = styled.canvas`
@@ -88,6 +89,15 @@ const SlideCanvas = styled.canvas`
     margin: ${({width}) => `0 ${width * .5}px`};
 `;
 
+const Label = styled.label`
+    font-family: sans-serif;
+    font-size: 1.4em;
+    font-weight: bold;
+`;
+
+const Input = styled.input`
+
+`;
 const mapStateToProps = (state, ownProps) => ({ ...state });
 
 const mapDispatchToProps = dispatch => ({
@@ -222,9 +232,15 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
                     }}
                 />
                 <ValuesWrapper>
-                    <label>RGB:<input type="text" value={`${rgb.r}/${rgb.g}/${rgb.b}`} readOnly /></label>
-                    <label>HSL:<input type="text" value={`${hue.h.toFixed(2)}/${hue.s.toFixed(2)}/${hue.l.toFixed(2)}`} readOnly /></label>
-                    <label>Hex:<input type="text" value={hexColorString} readOnly /></label>
+                    <Label>
+                        RGB:<Input type="text" value={`${rgb.r}/${rgb.g}/${rgb.b}`} readOnly />
+                    </Label>
+                    <Label>
+                        HSL:<Input type="text" value={`${hue.h.toFixed(2)}/${hue.s.toFixed(2)}/${hue.l.toFixed(2)}`} readOnly />
+                    </Label>
+                    <Label>
+                        Hex:<Input type="text" value={hexColorString} readOnly />
+                    </Label>
                 </ValuesWrapper>
             </Panel>
         </Trigger>
