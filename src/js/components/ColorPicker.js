@@ -74,6 +74,7 @@ const PadCanvas = styled.canvas`
             <line x1='0' y1='9' x2='19' y2='9' stroke='%23ffffff' stroke-width='1' />
             <line x1='9' y1='0' x2='9' y2='19' stroke='%23ffffff' stroke-width='1' />
         </svg>") 9 9, crosshair;
+    touch-action: none;
 `;
 
 const SlideCanvas = styled.canvas`
@@ -87,6 +88,7 @@ const SlideCanvas = styled.canvas`
             <line x1='9' y1='0' x2='9' y2='19' stroke='%23ffffff' stroke-width='1' />
         </svg>") 9 9, crosshair;
     margin: ${({width}) => `0 ${width * .5}px`};
+    touch-action: none;
 `;
 
 const Label = styled.label`
@@ -209,6 +211,24 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
                     onMouseOut={event => {
                         setPadDragging(false);
                     }}
+                    onPointerDown={event => {
+                        setPadPixelCoords({ x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY });
+                        colorChange(event, onColorChange);
+                        setPadDragging(true);
+                    }}
+                    onPointerMove={event => {
+                        event.preventDefault();
+                        if (padDragging) {
+                            setPadPixelCoords({ x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY });
+                            colorChange(event, onColorChange);
+                        }
+                    }}
+                    onPointerUp={event => {
+                        setPadDragging(false);
+                    }}
+                    onPointerLeave={event => {
+                        setPadDragging(false);
+                    }}
                 />
                 <SlideCanvas ref={slideCanvas} width={slideWidth} height={slideHeight}
                     onClick={event => {
@@ -228,6 +248,24 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
                         setPadDragging(false);
                     }}
                     onMouseOut={event => {
+                        setPadDragging(false);
+                    }}
+                    onPointerDown={event => {
+                        setPadPixelCoords({ x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY });
+                        colorChange(event, onColorChange);
+                        setPadDragging(true);
+                    }}
+                    onPointerMove={event => {
+                        event.preventDefault();
+                        if (padDragging) {
+                            setPadPixelCoords({ x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY });
+                            colorChange(event, onColorChange);
+                        }
+                    }}
+                    onPointerUp={event => {
+                        setPadDragging(false);
+                    }}
+                    onPointerLeave={event => {
                         setPadDragging(false);
                     }}
                 />
