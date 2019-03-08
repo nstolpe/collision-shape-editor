@@ -93,10 +93,10 @@ const Label = styled.label`
     font-family: sans-serif;
     font-size: 1.4em;
     font-weight: bold;
+    user-select: none;
 `;
 
 const Input = styled.input`
-
 `;
 const mapStateToProps = (state, ownProps) => ({ ...state });
 
@@ -234,7 +234,7 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
     const [padDragging, setPadDragging] = useState(false);
     const [slideDragging, setSlideDragging] = useState(false);
     // state - coordinates
-    const [padPixelCoords, setPadPixelCoordinates] = useState(false);
+    const [padPixelCoordinates, setPadPixelCoordinates] = useState(false);
     const [slidePixelCoordinates, setSlidePixelCoordinates] = useState(false);
     // state - hex color for trigger and whatever's embedding the component.
     const hexColorString = toHex(color);
@@ -252,9 +252,16 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
         const context = canvas.getContext('2d');
 
         if (width > 0 && height > 0) {
+            let coordinates;
             context.clearRect(0, 0, width, height);
             drawPadCanvas(canvas, hexBase);
-            const coordinates = padPixelCoords || findColorCoordinates(canvas, currentColor);
+
+            if (padPixelCoordinates) {
+                coordinates = padPixelCoordinates;
+            } else {
+                coordinates = findColorCoordinates(canvas, currentColor);
+                setPadPixelCoordinates(coordinates);
+            }
 
             if (coordinates) {
                 const rgb = coordinatesToColor(coordinates, canvas.getContext('2d'));
@@ -281,9 +288,17 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
         const context = canvas.getContext('2d');
 
         if (width > 0 && height > 0) {
+            let coordinates;
             context.clearRect(0, 0, width, height);
             drawSlideCanvas(canvas);
-            const coordinates = slidePixelCoordinates || findColorCoordinates(canvas, hexBase);
+            // const coordinates = slidePixelCoordinates || findColorCoordinates(canvas, hexBase);
+
+            if (slidePixelCoordinates) {
+                coordinates = slidePixelCoordinates;
+            } else {
+                coordinates = findColorCoordinates(canvas, hexBase);
+                setSlidePixelCoordinates(coordinates);
+            }
 
             if (coordinates) {
                 const rgb = coordinatesToColor(coordinates, canvas.getContext('2d'));
@@ -332,9 +347,6 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
                     onMouseUp={event => {
                         setPadDragging(false);
                     }}
-                    // onMouseOut={event => {
-                    //     setPadDragging(false);
-                    // }}
                     onPointerDown={event => {
                         const { target: canvas } = event;
                         const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
@@ -352,9 +364,6 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
                     onPointerUp={event => {
                         setPadDragging(false);
                     }}
-                    // onPointerLeave={event => {
-                    //     setPadDragging(false);
-                    // }}
                     dragging={padDragging}
                 />
                 <SlideCanvas ref={slideCanvas} width={slideWidth} height={slideHeight}
@@ -379,16 +388,22 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
                     onMouseUp={event => {
                         setSlideDragging(false);
                     }}
-                    onMouseOut={event => {
-                        setSlideDragging(false);
-                    }}
                     onPointerDown={event => {
+                        const { target: canvas } = event;
+                        const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
+                        setSlidePixelCoordinates(coordinates);
+                        setSlideDragging(true);
                     }}
                     onPointerMove={event => {
+                        event.preventDefault();
+                        if (slideDragging) {
+                            const { target: canvas } = event;
+                            const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
+                            setSlidePixelCoordinates(coordinates);
+                        }
                     }}
                     onPointerUp={event => {
-                    }}
-                    onPointerLeave={event => {
+                        setSlideDragging(false);
                     }}
                     dragging={slideDragging}
                 />
