@@ -16,7 +16,7 @@ import {
 } from "App/constants/action-types";
 
 const initialState = {
-    backgroundColor: 0x05ffd5,
+    backgroundColor: 0x44fc03,
     width: 0,
     height: 0,
     resolution: window.devicePixelRatio,

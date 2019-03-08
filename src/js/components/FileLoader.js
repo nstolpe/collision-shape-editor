@@ -1,4 +1,5 @@
 // src/js/components/FileUploader.js
+import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from "react-redux";
 import styled from 'styled-components';
@@ -17,17 +18,30 @@ const Label = styled.label`
     background-color: #c2c2c2;
     color: #ffffff;
 `;
+
 const Input = styled.input`
     display: none;
 `;
 
-const FileLoader = props => {
+const Span = styled.span`
+    mix-blend-mode: difference;
+`;
+
+const eventLog = event => console.log(event.type);
+const FileLoader = ({ text }) => {
     return(
         <Label htmlFor="file-uploader">
-            File
-            <Input onChange={e => console.log(e.target.files)} type="file" id="file-uploader" />
+            <Span>{text}</Span>
+            <Input onChange={e => console.log(e.target.files)} onInput={eventLog} onCancel={eventLog} onBlur={eventLog} type="file" id="file-uploader" />
         </Label>
     );
 }
 
+FileLoader.defaultProps = {
+    text: 'file',
+};
+
+FileLoader.propTypes = {
+    text: PropTypes.string,
+};
 export default FileLoader

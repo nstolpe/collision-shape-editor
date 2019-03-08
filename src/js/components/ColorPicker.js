@@ -63,17 +63,19 @@ const ValuesWrapper = styled.div`
     justify-content: space-between;
 `;
 
+const cursor = `url("data:image/svg+xml;utf8,
+    <svg xmlns='http://www.w3.org/2000/svg' height='19' width='19' viewBox='0 0 19 19'>
+        <line x1='0' y1='9' x2='19' y2='9' stroke='%23ffffff' stroke-width='1' />
+        <line x1='9' y1='0' x2='9' y2='19' stroke='%23ffffff' stroke-width='1' />
+    </svg>") 9 9, crosshair`;
+
 const PadCanvas = styled.canvas`
     display: inline-block;
     width: ${({width}) => `${width}px`};
     height: ${({height}) => `${height}px`};
     vertical-align: middle;
     cursor: crosshair;
-    cursor: url("data:image/svg+xml;utf8,
-        <svg xmlns='http://www.w3.org/2000/svg' height='19' width='19' viewBox='0 0 19 19'>
-            <line x1='0' y1='9' x2='19' y2='9' stroke='%23ffffff' stroke-width='1' />
-            <line x1='9' y1='0' x2='9' y2='19' stroke='%23ffffff' stroke-width='1' />
-        </svg>") 9 9, crosshair;
+    cursor: ${({dragging}) => dragging ? 'none' : cursor};
     touch-action: none;
 `;
 
@@ -82,12 +84,8 @@ const SlideCanvas = styled.canvas`
     width: ${({width}) => `${width}px`};
     height: ${({height}) => `${height}px`};
     vertical-align: middle;
-    cursor: url("data:image/svg+xml;utf8,
-        <svg xmlns='http://www.w3.org/2000/svg' height='19' width='19' viewBox='0 0 19 19'>
-            <line x1='0' y1='9' x2='19' y2='9' stroke='%23ffffff' stroke-width='1' />
-            <line x1='9' y1='0' x2='9' y2='19' stroke='%23ffffff' stroke-width='1' />
-        </svg>") 9 9, crosshair;
-    margin: ${({width}) => `0 ${width * .5}px`};
+    cursor: ${({dragging}) => dragging ? 'none' : cursor};
+    margin: ${({width}) => `0 ${width * .25}px`};
     touch-action: none;
 `;
 
@@ -111,28 +109,63 @@ const mapDispatchToProps = dispatch => ({
 });
 
 const drawPadCanvas = (canvas, colorString) => {
-    if (canvas.offsetWidth < 1 || canvas.offsetHeight < 1) {
-        return;
-    }
     const ctx = canvas.getContext('2d');
     const width = canvas.offsetWidth;
     const height = canvas.offsetHeight;
     const gradientWhite = ctx.createLinearGradient(0, 0, width, 0);
     const gradientBlack = ctx.createLinearGradient(0, 0, 0, height);
 
-    ctx.rect(0, 0, width, height);
+    gradientWhite.addColorStop(0, 'rgba(255,255,255,1)');
+    gradientWhite.addColorStop(1, 'rgba(255,255,255,0)');
+    gradientBlack.addColorStop(0, 'rgba(0,0,0,0)');
+    gradientBlack.addColorStop(1, 'rgba(0,0,0,1)');
+
+    // ctx.rect(0, 0, width, height);
+
     ctx.fillStyle = colorString;
     ctx.fillRect(0, 0, width, height);
 
-    gradientWhite.addColorStop(0, 'rgba(255,255,255,1)');
-    gradientWhite.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = gradientWhite;
     ctx.fillRect(0, 0, width, height);
 
-    gradientBlack.addColorStop(0, 'rgba(0,0,0,0)');
-    gradientBlack.addColorStop(1, 'rgba(0,0,0,1)');
     ctx.fillStyle = gradientBlack;
-    ctx.fillRect(0, 0, width, height);
+    ctx.fillRect(0, 1, width, height);
+
+    // ensure the first pixel is white, the gradients don't usually get it.
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, 1, 1);
+    // ensure the pixel at width, height is the base color.
+    ctx.fillStyle = colorString;
+    ctx.fillRect(width - 1, 0, 1, 1);
+};
+
+const drawCursor = ({ canvas, color, coordinates, mode='xy', alpha=0.5, compositeOperation='source-over' }) => {
+    const ctx = canvas.getContext('2d');
+    const width = canvas.offsetWidth;
+    const height = canvas.offsetHeight;
+
+    ctx.globalCompositeOperation = compositeOperation;
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+
+
+    if (['x', 'xy'].includes(mode)) {
+        ctx.beginPath();
+        ctx.moveTo(0, coordinates.y);
+        ctx.lineTo(width, coordinates.y);
+        ctx.stroke();
+    }
+
+    if (['y', 'xy'].includes(mode)) {
+        ctx.beginPath();
+        ctx.moveTo(coordinates.x, 0);
+        ctx.lineTo(coordinates.x, height);
+        ctx.stroke();
+    }
+
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
 };
 
 const drawSlideCanvas = (canvas) => {
@@ -142,10 +175,8 @@ const drawSlideCanvas = (canvas) => {
     const ctx = canvas.getContext('2d');
     const width = canvas.offsetWidth;
     const height = canvas.offsetHeight;
-    const gradientWhite = ctx.createLinearGradient(0, 0, width, 0);
-    const gradientBlack = ctx.createLinearGradient(0, 0, 0, height);
-
     const gradient = ctx.createLinearGradient(0, 0, 0, height);
+
     gradient.addColorStop(0, 'rgba(255, 0, 0, 1)');
     gradient.addColorStop(0.17, 'rgba(255, 255, 0, 1)');
     gradient.addColorStop(0.34, 'rgba(0, 255, 0, 1)');
@@ -157,36 +188,127 @@ const drawSlideCanvas = (canvas) => {
     ctx.fillRect(0, 0, width, height);
 };
 
-const colorChange = (event, callback) => {
-    const x = event.nativeEvent.offsetX;
-    const y = event.nativeEvent.offsetY;
-    const ctx = event.target.getContext('2d');
-    const color = ctx.getImageData(x, y, 1, 1).data;
-    callback({ r: color[0], g: color[1], b: color[2] });
+const coordinatesToColor = ({ x, y }, ctx) => {
+    let color;
+    try {
+        color = ctx.getImageData(x, y, 1, 1).data;
+    } catch (e) {
+        debugger;
+    }
+
+    return { r: color[0], g: color[1], b: color[2] };
 };
 
+const findColorCoordinates = (canvas, targetHex) => {
+    const ctx = canvas.getContext('2d');
+    const { offsetWidth: width, offsetHeight: height } = canvas;
+    const pixels = ctx.getImageData(0, 0, width, height).data;
+    const r = pixels.findIndex((val, idx, arr) => {
+        if (idx % 4 === 0) {
+            const r = arr[idx];
+            const g = arr[idx + 1];
+            const b = arr[idx + 2];
+            const currentHex = rgbToHex({ r, g, b })
+            if (currentHex === targetHex) {
+                return true;
+            }
+        }
+        return false;
+    });
+
+    return r < 0 ? undefined : {
+        x: (r * .25) % width,
+        y: Math.floor((r * .25) / width),
+    };
+};
+// ignore the color prop after initial render
+const isEqual = (prevProps, nextProps) => Object.entries(nextProps).reduce((acc, [key, val]) => !acc ? acc : key === 'color' ? true : val === prevProps[key], true);
+
 const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onColorChange }) => {
+    // two canvas components
     const padCanvas = useRef(null);
     const slideCanvas = useRef(null);
+    // state
     const [active, setActive] = useState(false);
+    // state - dragging
     const [padDragging, setPadDragging] = useState(false);
-    const [padPixelCoords, setPadPixelCoords] = useState(false);
     const [slideDragging, setSlideDragging] = useState(false);
+    // state - coordinates
+    const [padPixelCoords, setPadPixelCoordinates] = useState(false);
+    const [slidePixelCoordinates, setSlidePixelCoordinates] = useState(false);
+    // state - hex color for trigger and whatever's embedding the component.
     const hexColorString = toHex(color);
     const rgb = hexToRgb(hexColorString);
     const hue = rgbToHsl(rgb);
     const hueBase = { ...hue, s: 1, l: .5 };
     const rgbBase = hslToRgb({ ...hueBase });
-    const hexBase = rgbToHex({ ...rgbBase });
+    const [hexBase, setHexBase] = useState(rgbToHex({ ...rgbBase }));
     const [currentColor, setCurrentColor] = useState(hexColorString);
     const toggleActive = () => setActive(!active);
+
     useEffect(() => {
-        drawPadCanvas(padCanvas.current, hexBase);
-        drawSlideCanvas(slideCanvas.current);
+        const { current: canvas } = padCanvas;
+        const { offsetWidth: width, offsetWidth: height } = canvas;
+        const context = canvas.getContext('2d');
+
+        if (width > 0 && height > 0) {
+            context.clearRect(0, 0, width, height);
+            drawPadCanvas(canvas, hexBase);
+            const coordinates = padPixelCoords || findColorCoordinates(canvas, currentColor);
+
+            if (coordinates) {
+                const rgb = coordinatesToColor(coordinates, canvas.getContext('2d'));
+                const hex = rgbToHex(rgb);
+
+                onColorChange(rgb);
+                drawCursor({
+                    canvas: padCanvas.current,
+                    color: '#ffffff',
+                    coordinates,
+                    // compositeOperation: 'lighter',
+                });
+
+                if (hex !== currentColor) {
+                    setCurrentColor(rgbToHex(rgb));
+                }
+            }
+        }
+    });
+
+    useEffect(() => {
+        const { current: canvas } = slideCanvas;
+        const { offsetWidth: width, offsetWidth: height } = canvas;
+        const context = canvas.getContext('2d');
+
+        if (width > 0 && height > 0) {
+            context.clearRect(0, 0, width, height);
+            drawSlideCanvas(canvas);
+            const coordinates = slidePixelCoordinates || findColorCoordinates(canvas, hexBase);
+
+            if (coordinates) {
+                const rgb = coordinatesToColor(coordinates, canvas.getContext('2d'));
+                const hex = rgbToHex(rgb);
+                // onColorChange(rgb);
+                console.log('color', toHex(0xffffff - parseInt(hex.replace('#', ''), 16)));
+                drawCursor({
+                    canvas: slideCanvas.current,
+                    // color: '#000000',
+                    color: toHex(0xffffff - parseInt(hex.replace('#', ''), 16)),
+                    coordinates,
+                    mode: 'x',
+                    // compositeOperation: 'lighter',
+                    alpha: 1,
+                });
+
+                if (hex !== hexBase) {
+                    setHexBase(hex);
+                }
+            }
+        }
     });
 
     return (
-        <Trigger backgroundColor={hexColorString} onClick={toggleActive}>
+        <Trigger backgroundColor={currentColor} onClick={toggleActive}>
             <Panel active={active} onClick={event => event.stopPropagation()} onMouseMove={event => event.preventDefault()}>
                 <PadCanvas ref={padCanvas} width={padWidth} height={padHeight}
                     onClick={event => {
@@ -196,39 +318,44 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
                     onMouseMove={event => {
                         event.preventDefault();
                         if (padDragging) {
-                            setPadPixelCoords({ x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY });
-                            colorChange(event, onColorChange);
+                            const { target: canvas } = event;
+                            const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
+                            setPadPixelCoordinates(coordinates);
                         }
                     }}
                     onMouseDown={event => {
-                        setPadPixelCoords({ x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY });
-                        colorChange(event, onColorChange);
+                        const { target: canvas } = event;
+                        const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
+                        setPadPixelCoordinates(coordinates);
                         setPadDragging(true);
                     }}
                     onMouseUp={event => {
                         setPadDragging(false);
                     }}
-                    onMouseOut={event => {
-                        setPadDragging(false);
-                    }}
+                    // onMouseOut={event => {
+                    //     setPadDragging(false);
+                    // }}
                     onPointerDown={event => {
-                        setPadPixelCoords({ x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY });
-                        colorChange(event, onColorChange);
+                        const { target: canvas } = event;
+                        const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
+                        setPadPixelCoordinates(coordinates);
                         setPadDragging(true);
                     }}
                     onPointerMove={event => {
                         event.preventDefault();
                         if (padDragging) {
-                            setPadPixelCoords({ x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY });
-                            colorChange(event, onColorChange);
+                            const { target: canvas } = event;
+                            const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
+                            setPadPixelCoordinates(coordinates);
                         }
                     }}
                     onPointerUp={event => {
                         setPadDragging(false);
                     }}
-                    onPointerLeave={event => {
-                        setPadDragging(false);
-                    }}
+                    // onPointerLeave={event => {
+                    //     setPadDragging(false);
+                    // }}
+                    dragging={padDragging}
                 />
                 <SlideCanvas ref={slideCanvas} width={slideWidth} height={slideHeight}
                     onClick={event => {
@@ -237,37 +364,33 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
                     }}
                     onMouseMove={event => {
                         event.preventDefault();
-                        if (padDragging) {
-                            colorChange(event, onColorChange);
+                        if (slideDragging) {
+                            const { target: canvas } = event;
+                            const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
+                            setSlidePixelCoordinates(coordinates);
                         }
                     }}
                     onMouseDown={event => {
-                        setPadDragging(true);
+                        const { target: canvas } = event;
+                        const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
+                        setSlidePixelCoordinates(coordinates);
+                        setSlideDragging(true);
                     }}
                     onMouseUp={event => {
-                        setPadDragging(false);
+                        setSlideDragging(false);
                     }}
                     onMouseOut={event => {
-                        setPadDragging(false);
+                        setSlideDragging(false);
                     }}
                     onPointerDown={event => {
-                        setPadPixelCoords({ x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY });
-                        colorChange(event, onColorChange);
-                        setPadDragging(true);
                     }}
                     onPointerMove={event => {
-                        event.preventDefault();
-                        if (padDragging) {
-                            setPadPixelCoords({ x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY });
-                            colorChange(event, onColorChange);
-                        }
                     }}
                     onPointerUp={event => {
-                        setPadDragging(false);
                     }}
                     onPointerLeave={event => {
-                        setPadDragging(false);
                     }}
+                    dragging={slideDragging}
                 />
                 <ValuesWrapper>
                     <Label>
@@ -277,7 +400,7 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
                         HSL:<Input type="text" value={`${hue.h.toFixed(2)}/${hue.s.toFixed(2)}/${hue.l.toFixed(2)}`} readOnly />
                     </Label>
                     <Label>
-                        Hex:<Input type="text" value={hexColorString} readOnly />
+                        Hex:<Input type="text" value={currentColor} readOnly />
                     </Label>
                 </ValuesWrapper>
             </Panel>
@@ -287,10 +410,10 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
 
 ColorPicker.defaultProps = {
     color: 0xff0000,
-    padWidth: 200,
-    padHeight: 200,
-    slideWidth: 40,
-    slideHeight: 200,
+    padWidth: 256,
+    padHeight: 256,
+    slideWidth: 48,
+    slideHeight: 256,
     onColorChange: ({ r, g, b }) => ({ r, g, b }),
 };
 
@@ -303,6 +426,5 @@ ColorPicker.propTypes = {
     onColorChange: PropTypes.func,
 };
 
-export default ColorPicker;
-// export default connect(mapStateToProps, mapDispatchToProps)(ColorPicker);
+export default React.memo(ColorPicker, isEqual);
 

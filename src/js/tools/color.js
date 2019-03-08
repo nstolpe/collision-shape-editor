@@ -1,4 +1,5 @@
 // /src/js/tools/color.js
+import { property } from 'App/tools/utilities';
 
 // https://jsfiddle.net/t5nq6jjc/1
 // https://stackoverflow.com/a/9493060 (link above from comments)
@@ -43,8 +44,18 @@ export const hslToRgb = ({ h, s, l }) => {
     };
 };
 
-// https://stackoverflow.com/a/5624139
-export const rgbToHex = ({ r, g, b, hex=true }) => `${hex ? '#' : ''}${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+/**
+ * Converts rgb values (0-255) to the string representation of their hexadecimal integer
+ * values. Optionally prepends a # to the string.
+ * Source: https://stackoverflow.com/a/5624139
+ *
+ * @param r {number}  red value
+ * @param g {number}  green value
+ * @param b {number}  blue value
+ * @param hex {bool}  if true, `#` will be prepended to the returned hex string.
+ * @return {string}
+ */
+export const rgbToHex = ({ r, g, b }, hex=true) => `${hex ? '#' : ''}${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 
 // https://stackoverflow.com/a/5624139
 export const hexToRgb = hex => {
@@ -57,11 +68,21 @@ export const hexToRgb = hex => {
 };
 
 /**
- * Converts anything to a hex string. Works bests with integers.
+ * Will convert numbers
  *
  * @param  number  The number that
  */
-export const toHex = number => `#${('00000' + (~~number).toString(16)).substr(-6)}`;
+export const toHex = (number, hex=true, min=6) => {
+    const hexString = parseInt(
+        property(
+            (parseInt(number, 10) || Object(number)).toString(16).split('.')[0].match(/^(?:#|0x)?(?<hex>[0-9A-Fa-f]+)$/),
+            ['groups', 'hex'],
+            0
+        ), 16
+    ).toString(16);
+
+    return `${hex ? '#' : ''}${'0'.repeat(Math.max(min - hexString.length, 0)) + hexString}`;
+};
 
 export default {
     rgbToHsl,
