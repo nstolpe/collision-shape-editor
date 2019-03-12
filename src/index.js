@@ -2,14 +2,14 @@ import React, { useEffect } from 'react';
 import { render } from 'react-dom';
 import { AppContext, Container, Stage, withApp } from 'react-pixi-fiber';
 import { Provider, connect, ReactReduxContext } from "react-redux";
-import * as PIXI from "pixi.js";
-console.log(PIXI);
+import * as PIXI from 'pixi.js';
 // import App from 'App/components/App';
 // import ContextBridge from 'App/components/ContextBridge';
 import {
     resize,
     setBackgroundColor,
 } from 'App/actions/actions';
+// import App from 'App/components/App';
 import AppWrapper from 'App/components/AppWrapper';
 import ColorPicker from 'App/components/ColorPicker';
 import Controls from 'App/components/Controls';
@@ -33,17 +33,15 @@ window.store = store;
 const mapDispatchToProps = dispatch => ({
     onChange: e => {
         const colorString = e.target.value;
-        const color = parseInt(colorString.replace('#',''), 16);
+        const color = parseInt(colorString.replace('#', ''), 16);
         dispatch(setBackgroundColor(color));
     },
 });
-const EffectViewport = props => {
-    const { renderer } = props.app;
-    const { backgroundColor } = props;
+const EffectViewport = ({ app, app: { renderer }, backgroundColor, children }) => {
     if (renderer.backgroundColor !== backgroundColor) {
         renderer.backgroundColor = backgroundColor;
     }
-    return (<Viewport>{props.children}</Viewport>);
+    return (<Viewport>{children}</Viewport>);
 };
 const ConnectedViewport = connect(state => state, null, null, { context: ScreenContext })(withApp(EffectViewport));
 const ConnectedScreen = connect(state => state)(Screen);

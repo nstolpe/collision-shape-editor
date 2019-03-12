@@ -17,6 +17,7 @@ const Label = styled.label`
     text-align: center;
     background-color: #c2c2c2;
     color: #ffffff;
+    user-select: none;
 `;
 
 const Input = styled.input`

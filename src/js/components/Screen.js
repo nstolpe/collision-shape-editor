@@ -1,4 +1,5 @@
 // src/js/components/Screen.js
+import * as PIXI from "pixi.js";
 import PropTypes from 'prop-types';
 import React from 'react';
 import { AppContext, Stage } from 'react-pixi-fiber';
@@ -7,12 +8,10 @@ import { Provider, connect, ReactReduxContext } from 'react-redux';
 import { StageCanvas } from 'App/data/styles';
 
 // needs context
-const Screen = ({ context, children }) => (
+const Screen = ({ context, children, width, height }) => (
     <ReactReduxContext.Consumer>{({ store }) => {
         const {
             backgroundColor,
-            width,
-            height,
             resolution
         } = store.getState();
 
@@ -25,12 +24,11 @@ const Screen = ({ context, children }) => (
                         backgroundColor: backgroundColor,
                         autoResize: true,
                         resolution: resolution,
+                        antialias: true,
                     }
                 }
                 style={StageCanvas}
                 hitArea={new PIXI.Rectangle(0, 0, width, height)}
-                width={width}
-                height={height}
                 interactive
             >
                 <AppContext.Consumer>{app => (

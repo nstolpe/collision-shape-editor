@@ -291,7 +291,6 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
             let coordinates;
             context.clearRect(0, 0, width, height);
             drawSlideCanvas(canvas);
-            // const coordinates = slidePixelCoordinates || findColorCoordinates(canvas, hexBase);
 
             if (slidePixelCoordinates) {
                 coordinates = slidePixelCoordinates;
@@ -303,8 +302,6 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
             if (coordinates) {
                 const rgb = coordinatesToColor(coordinates, canvas.getContext('2d'));
                 const hex = rgbToHex(rgb);
-                // onColorChange(rgb);
-                console.log('color', toHex(0xffffff - parseInt(hex.replace('#', ''), 16)));
                 drawCursor({
                     canvas: slideCanvas.current,
                     // color: '#000000',

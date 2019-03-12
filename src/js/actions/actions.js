@@ -64,7 +64,6 @@ export const setCtrlPressed = pressed => ({
     data: { pressed },
 });
 
-
 export const setTestContainerPosition = ({ x, y }) => ({
     type: SET_TEST_CONTAINER_POSITION,
     data: { x, y },
