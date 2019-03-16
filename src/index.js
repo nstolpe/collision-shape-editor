@@ -1,7 +1,16 @@
 import React, { useEffect } from 'react';
 import { render } from 'react-dom';
-import { AppContext, Container, Stage, withApp } from 'react-pixi-fiber';
-import { Provider, connect, ReactReduxContext } from "react-redux";
+import {
+    AppContext,
+    Container,
+    Stage,
+    withApp,
+} from 'react-pixi-fiber';
+import {
+    connect,
+    Provider,
+    ReactReduxContext,
+} from "react-redux";
 import * as PIXI from 'pixi.js';
 // import App from 'App/components/App';
 // import ContextBridge from 'App/components/ContextBridge';
@@ -37,13 +46,7 @@ const mapDispatchToProps = dispatch => ({
         dispatch(setBackgroundColor(color));
     },
 });
-const EffectViewport = ({ app, app: { renderer }, backgroundColor, children }) => {
-    if (renderer.backgroundColor !== backgroundColor) {
-        renderer.backgroundColor = backgroundColor;
-    }
-    return (<Viewport>{children}</Viewport>);
-};
-const ConnectedViewport = connect(state => state, null, null, { context: ScreenContext })(withApp(EffectViewport));
+
 const ConnectedScreen = connect(state => state)(Screen);
 
 // store used in both renderers
@@ -52,9 +55,9 @@ render(
         <AppWrapper>
             <ScreenWrapper>
                 <Screen context={ScreenContext}>
-                    <ConnectedViewport>
+                    <Viewport>
                         <TestContainer />
-                    </ConnectedViewport>
+                    </Viewport>
                 </Screen>
             </ScreenWrapper>
             <Controls></Controls>

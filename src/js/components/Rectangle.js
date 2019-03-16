@@ -3,40 +3,12 @@
 import { CustomPIXIComponent } from 'react-pixi-fiber';
 import * as PIXI from 'pixi.js';
 
-import { pixiHandlersToEvents } from  'App/tools/data';
+import {
+    pixiHandlersToEvents,
+    updateListeners,
+} from  'App/tools/custom-pixi-component';
 
 const TYPE = 'Rectangle';
-
-const updateListeners = (instance, oldProps, newProps) => {
-    const oldEventListeners = Object.entries(oldProps).reduce(
-        (listeners, [event, listener]) => event in pixiHandlersToEvents ?
-            { ...listeners, [pixiHandlersToEvents[event]]: listener } : listeners,
-        {}
-    );
-
-    const newEventListeners = Object.entries(newProps).reduce(
-        (listeners, [event, listener]) => event in pixiHandlersToEvents ?
-            { ...listeners, [pixiHandlersToEvents[event]]: listener } : listeners,
-        {}
-    );
-    Object.entries(newEventListeners).forEach(([event, listener]) => {
-        if (oldEventListeners.hasOwnProperty(event)) {
-            if (oldEventListeners[event] !== listener) {
-                instance.off(event, oldEventListeners[event]);
-                instance.on(event, listener);
-                delete oldEventListeners[event];
-            }
-        } else {
-            instance.on(event, listener);
-        }
-    });
-
-    Object.entries(oldEventListeners).forEach(([event, listener]) => {
-        if (!newEventListeners.hasOwnProperty(event)) {
-            instance.off(event, listener);
-        }
-    });
-};
 
 const defaults = {
     interactive: false,

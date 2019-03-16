@@ -40,5 +40,4 @@ const TestContainer = props => {
     );
 };
 
-// export default TestContainer;
 export default connect(mapStateToProps, null, null, { context: ScreenContext })(TestContainer);

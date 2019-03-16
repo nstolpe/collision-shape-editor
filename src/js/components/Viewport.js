@@ -1,10 +1,14 @@
 // src/js/components/Viewport.js
-import { CustomPIXIComponent } from "react-pixi-fiber";
+import {
+    CustomPIXIComponent,
+    withApp,
+} from "react-pixi-fiber";
 import { connect } from "react-redux";
 import * as PIXI from "pixi.js";
 import Viewport from 'pixi-viewport';
 
 import { scaleUI } from 'App/actions/actions';
+import ScreenContext from 'App/contexts/ScreenContext';
 
 const TYPE = "Viewport";
 
@@ -17,13 +21,14 @@ const TYPE = "Viewport";
 const mapStateToProps = state => {
     return { ...state }
 };
-// const mapDispatchToProps = dispatch => ({
-//     scaleUI: ({ x, y }) => dispatch(scaleUI({ x, y })),
-//     addVertex: ({x, y }) => dispatch(addVertex({ x, y })),
-// });
+const mapDispatchToProps = dispatch => ({
+    scaleUI: ({ x, y }) => dispatch(scaleUI({ x, y })),
+    // addVertex: ({x, y }) => dispatch(addVertex({ x, y })),
+});
 
 const behavior = {
     customDisplayObject: function(props) {
+        const { app: { renderer }, backgroundColor } = props;
         const instance = new Viewport({ ...props });
         instance.on('zoomed', e => props.scaleUI(e.viewport.scale));
         // instance.on('pointertap', e => {
@@ -37,6 +42,7 @@ const behavior = {
         //     }
         // });
         instance.on('pointertap', props.pointertap);
+        renderer.backgroundColor = backgroundColor;
 
         return instance;
     },
@@ -48,6 +54,12 @@ const behavior = {
             .resize();
     },
     customApplyProps: function(instance, oldProps, newProps) {
+        const { app: { renderer }, backgroundColor } = newProps;
+
+        if (backgroundColor !== oldProps.backgroundColor) {
+            renderer.backgroundColor = backgroundColor;
+        }
+
         switch (true) {
             case newProps.ctrlPressed:
                 instance.cursor = "pointer";
@@ -61,4 +73,5 @@ const behavior = {
 };
 
 // export default connect(mapDispatchToProps, mapDispatchToProps)(CustomPIXIComponent(behavior, TYPE));
-export default CustomPIXIComponent(behavior, TYPE);
+// export default CustomPIXIComponent(behavior, TYPE);
+export default connect(mapStateToProps, mapDispatchToProps, null, { context: ScreenContext })(withApp(CustomPIXIComponent(behavior, TYPE)));
