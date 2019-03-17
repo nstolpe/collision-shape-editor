@@ -3,7 +3,11 @@ import * as PIXI from "pixi.js";
 import PropTypes from 'prop-types';
 import React from 'react';
 import { AppContext, Stage } from 'react-pixi-fiber';
-import { Provider, connect, ReactReduxContext } from 'react-redux';
+import {
+    connect,
+    Provider,
+    ReactReduxContext,
+} from 'react-redux';
 
 import { StageCanvas } from 'App/data/styles';
 

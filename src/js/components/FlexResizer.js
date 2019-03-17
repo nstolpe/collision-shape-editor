@@ -1,4 +1,4 @@
-// src/js/components/ScreenWrapper.js
+// src/js/components/FlexResizer.js
 import React, {
     useEffect,
     useRef,
@@ -6,7 +6,7 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
-const ScreenWrapper = styled.div`
+const FlexResizer = styled.div`
     flex: 1;
     overflow: hidden;
 `;
@@ -14,12 +14,12 @@ const ScreenWrapper = styled.div`
 export default ({ children }) => {
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
-    const screenWrapper = useRef(null);
+    const flexResizer = useRef(null);
 
     useEffect(() => {
         const resize = () => {
-            setWidth(screenWrapper.current.offsetWidth);
-            setHeight(screenWrapper.current.offsetHeight);
+            setWidth(flexResizer.current.offsetWidth);
+            setHeight(flexResizer.current.offsetHeight);
         };
 
         window.addEventListener('resize', resize);
@@ -28,5 +28,5 @@ export default ({ children }) => {
         return () => window.removeEventListener('resize', resize);
     }, []);
 
-    return (<ScreenWrapper ref={screenWrapper}>{React.Children.map(children, child => React.cloneElement(child, { width, height }))}</ScreenWrapper>);
+    return (<FlexResizer ref={flexResizer}>{React.Children.map(children, child => React.cloneElement(child, { width, height }))}</FlexResizer>);
 };

@@ -23,7 +23,7 @@ import AppWrapper from 'App/components/AppWrapper';
 import ColorPicker from 'App/components/ColorPicker';
 import Controls from 'App/components/Controls';
 import Screen from 'App/components/Screen';
-import ScreenWrapper from 'App/components/ScreenWrapper';
+import FlexResizer from 'App/components/FlexResizer';
 import ScreenContext from 'App/contexts/ScreenContext';
 import TestContainer from 'App/components/TestContainer';
 import Viewport from 'App/components/Viewport';
@@ -39,28 +39,18 @@ store.dispatch(resize({
 
 window.store = store;
 
-const mapDispatchToProps = dispatch => ({
-    onChange: e => {
-        const colorString = e.target.value;
-        const color = parseInt(colorString.replace('#', ''), 16);
-        dispatch(setBackgroundColor(color));
-    },
-});
-
-const ConnectedScreen = connect(state => state)(Screen);
-
 // store used in both renderers
 render(
     <Provider store={store}>
         <AppWrapper>
-            <ScreenWrapper>
+            <FlexResizer>
                 <Screen context={ScreenContext}>
                     <Viewport>
                         <TestContainer />
                     </Viewport>
                 </Screen>
-            </ScreenWrapper>
-            <Controls></Controls>
+            </FlexResizer>
+            <Controls />
         </AppWrapper>
     </Provider>,
     appContainer

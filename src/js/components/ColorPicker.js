@@ -9,7 +9,6 @@ import React, {
 import { connect } from "react-redux";
 import styled from 'styled-components';
 
-import { setBackgroundColor } from 'App/actions/actions';
 import {
     hexToRgb,
     hslToRgb,
@@ -98,15 +97,6 @@ const Label = styled.label`
 
 const Input = styled.input`
 `;
-const mapStateToProps = (state, ownProps) => ({ ...state });
-
-const mapDispatchToProps = dispatch => ({
-    onChange: event => {
-        const colorString = event.target.value;
-        const color = parseInt(colorString.replace('#',''), 16);
-        dispatch(setBackgroundColor(color));
-    },
-});
 
 const drawPadCanvas = (canvas, colorString) => {
     const ctx = canvas.getContext('2d');
@@ -149,7 +139,6 @@ const drawCursor = ({ canvas, color, coordinates, mode='xy', alpha=0.5, composit
     ctx.strokeStyle = color;
     ctx.lineWidth = 1;
 
-
     if (['x', 'xy'].includes(mode)) {
         ctx.beginPath();
         ctx.moveTo(0, coordinates.y);
@@ -172,6 +161,7 @@ const drawSlideCanvas = (canvas) => {
     if (canvas.offsetWidth < 1 || canvas.offsetHeight < 1) {
         return;
     }
+
     const ctx = canvas.getContext('2d');
     const width = canvas.offsetWidth;
     const height = canvas.offsetHeight;
@@ -221,6 +211,7 @@ const findColorCoordinates = (canvas, targetHex) => {
         y: Math.floor((r * .25) / width),
     };
 };
+
 // ignore the color prop after initial render
 const isEqual = (prevProps, nextProps) => Object.entries(nextProps).reduce((acc, [key, val]) => !acc ? acc : key === 'color' ? true : val === prevProps[key], true);
 
@@ -341,9 +332,7 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
                         setPadPixelCoordinates(coordinates);
                         setPadDragging(true);
                     }}
-                    onMouseUp={event => {
-                        setPadDragging(false);
-                    }}
+                    onMouseUp={event => setPadDragging(false)}
                     onPointerDown={event => {
                         const { target: canvas } = event;
                         const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
@@ -439,4 +428,3 @@ ColorPicker.propTypes = {
 };
 
 export default React.memo(ColorPicker, isEqual);
-
