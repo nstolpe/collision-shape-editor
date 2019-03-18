@@ -40,9 +40,18 @@ const Screen = ({ context, children, width, height }) => (
             >
                 <AppContext.Consumer>{app => (
                     <Provider store={store} context={context}>
-                        <ConnectedViewport onZoomed={event => {
-                            store.dispatch(scaleUI(event.viewport.scale))
-                        }} app={app}>{children}</ConnectedViewport>
+                        <ConnectedViewport
+                            onZoomed={event => {
+                                store.dispatch(scaleUI(event.viewport.scale))
+                            }}
+                            app={app}
+                            screenWidth={width}
+                            screenHeight={height}
+                            worldWidth={width}
+                            worldHeight={height}
+                        >
+                            {React.Children.map(children, child => React.cloneElement(child, { width, height }))}
+                        </ConnectedViewport>
                     </Provider>
                 )}</AppContext.Consumer>
             </Stage>

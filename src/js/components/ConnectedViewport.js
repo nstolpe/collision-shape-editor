@@ -50,8 +50,8 @@ class ConnectedViewport extends PureComponent {
                     addSprite({
                         name: textureSource.id,
                         texture: resources[textureSource.id].texture,
-                        x: 0,
-                        y: 0,
+                        x: this.props.screenWidth * 0.5,
+                        y: this.props.screenHeight * 0.5,
                         rotation: 0,
                         scale: [1, 1],
                         scaleMode: PIXI.SCALE_MODES.NEAREST,
@@ -63,13 +63,7 @@ class ConnectedViewport extends PureComponent {
 
     render() {
         return (
-            <Viewport
-                screenWidth={this.props.app.stage.width}
-                screenHeight={this.props.app.stage.height}
-                worldWidth={this.props.width}
-                worldHeight={this.props.height}
-                {...this.props}
-            />
+            <Viewport {...this.props}/>
         );
     }
 };

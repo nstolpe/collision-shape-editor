@@ -20,8 +20,8 @@ import {
 
 const initialState = {
     backgroundColor: 0x44fc03,
-    width: 0,
-    height: 0,
+    // width: 0,
+    // height: 0,
     resolution: window.devicePixelRatio,
     lastResize: Date.now(),
     images: {

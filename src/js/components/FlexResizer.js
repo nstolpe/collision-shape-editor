@@ -1,10 +1,14 @@
 // src/js/components/FlexResizer.js
 import React, {
     useEffect,
+    useLayoutEffect,
     useRef,
     useState,
 } from 'react';
+import { dispatch } from 'react-redux';
 import styled from 'styled-components';
+
+import { resize } from 'App/actions/actions';
 
 const FlexResizer = styled.div`
     flex: 1;
@@ -18,12 +22,20 @@ export default ({ children }) => {
     const flexResizer = useRef(null);
 
     useEffect(() => {
+        const interval = 50;
+        let timeout;
+
+        // throttled resize listener
         const resize = () => {
-            setWidth(flexResizer.current.offsetWidth);
-            setHeight(flexResizer.current.offsetHeight);
+            window.clearTimeout(timeout);
+            timeout = window.setTimeout(() => {
+                setWidth(flexResizer.current.offsetWidth);
+                setHeight(flexResizer.current.offsetHeight);
+            }, interval);
         };
 
         window.addEventListener('resize', resize);
+
         resize();
 
         return () => window.removeEventListener('resize', resize);

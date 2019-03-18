@@ -55,7 +55,16 @@ const behavior = {
             .resize();
     },
     customApplyProps: function(instance, oldProps, newProps) {
-        const { app: { renderer }, backgroundColor } = newProps;
+        const {
+            app: { renderer },
+            backgroundColor,
+            screenWidth,
+            screenHeight,
+            worldWidth,
+            worldHeight,
+        } = newProps;
+
+        instance.resize(screenWidth, screenHeight, worldWidth, worldHeight);
 
         if (backgroundColor !== oldProps.backgroundColor) {
             renderer.backgroundColor = backgroundColor;

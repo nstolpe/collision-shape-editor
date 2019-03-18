@@ -2,25 +2,29 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { Sprite } from 'react-pixi-fiber';
 import {v4 as uuid} from 'uuid';
 
+import ScaleNearestSprite from 'App/components/ScaleNearestSprite';
 import ScreenContext from 'App/contexts/ScreenContext';
 
-const mapStateToProps = state => ({ ...state });
+const mapStateToProps = (state, ownProps) => {
+    const { width, height } = ownProps;
+    return { ...state, width, height };
+};
 
-const Sprites = ({sprites}) => {
+const Sprites = ({ sprites }) => {
     return (
         <>
             {sprites.map(({ name, texture, x, y, rotation, scale, scaleMode }) => {
                 const id = `${uuid()}::${name}`
-                return (<Sprite
+                return (<ScaleNearestSprite
                     key={id}
                     name={id}
                     texture={texture}
                     x={x}
                     y={y}
                     rotation={rotation}
+                    // pivot
                 />)
             })}
         </>
