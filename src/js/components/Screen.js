@@ -9,7 +9,10 @@ import {
     ReactReduxContext,
 } from 'react-redux';
 
+import { scaleUI } from 'App/actions/actions';
 import { StageCanvas } from 'App/data/styles';
+import Viewport from 'App/components/Viewport';
+import ConnectedViewport from 'App/components/ConnectedViewport';
 
 // needs context
 const Screen = ({ context, children, width, height }) => (
@@ -37,7 +40,9 @@ const Screen = ({ context, children, width, height }) => (
             >
                 <AppContext.Consumer>{app => (
                     <Provider store={store} context={context}>
-                        {React.Children.map(children, child => React.cloneElement(child, { app }))}
+                        <ConnectedViewport onZoomed={event => {
+                            store.dispatch(scaleUI(event.viewport.scale))
+                        }} app={app}>{children}</ConnectedViewport>
                     </Provider>
                 )}</AppContext.Consumer>
             </Stage>

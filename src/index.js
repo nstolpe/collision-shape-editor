@@ -3,6 +3,7 @@ import { render } from 'react-dom';
 import {
     AppContext,
     Container,
+    Sprite,
     Stage,
     withApp,
 } from 'react-pixi-fiber';
@@ -16,17 +17,20 @@ import * as PIXI from 'pixi.js';
 // import ContextBridge from 'App/components/ContextBridge';
 import {
     resize,
+    scaleUI,
     setBackgroundColor,
 } from 'App/actions/actions';
+
+// components
 // import App from 'App/components/App';
 import AppWrapper from 'App/components/AppWrapper';
-import ColorPicker from 'App/components/ColorPicker';
 import Controls from 'App/components/Controls';
-import Screen from 'App/components/Screen';
 import FlexResizer from 'App/components/FlexResizer';
+import Screen from 'App/components/Screen';
+import Sprites from 'App/components/Sprites';
 import ScreenContext from 'App/contexts/ScreenContext';
 import TestContainer from 'App/components/TestContainer';
-import Viewport from 'App/components/Viewport';
+
 import store from 'App/store/store';
 
 const appContainer = document.getElementById('app-container');
@@ -39,16 +43,19 @@ store.dispatch(resize({
 
 window.store = store;
 
+// const Sprite = props => {
+//     const sprite =
+//     return (<S/>)
+// }
 // store used in both renderers
 render(
     <Provider store={store}>
         <AppWrapper>
             <FlexResizer>
-                <Screen context={ScreenContext}>
-                    <Viewport>
+                    <Screen context={ScreenContext}>
                         <TestContainer />
-                    </Viewport>
-                </Screen>
+                        <Sprites />
+                    </Screen>
             </FlexResizer>
             <Controls />
         </AppWrapper>

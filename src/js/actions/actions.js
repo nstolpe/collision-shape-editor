@@ -11,6 +11,9 @@ import {
     SET_BACKGROUND_COLOR,
     SET_ALT_PRESSED,
     SET_CTRL_PRESSED,
+    ADD_TEXTURE_SOURCE,
+    REMOVE_TEXTURE_SOURCE,
+    ADD_SPRITE,
     SET_TEST_CONTAINER_POSITION,
 } from "App/constants/action-types";
 
@@ -62,6 +65,21 @@ export const setAltPressed = pressed => ({
 export const setCtrlPressed = pressed => ({
     type: SET_CTRL_PRESSED,
     data: { pressed },
+});
+
+export const addTextureSource = (id, data) => ({
+    type: ADD_TEXTURE_SOURCE,
+    data: { id, data },
+});
+
+export const removeTextureSource = source => ({
+    type: REMOVE_TEXTURE_SOURCE,
+    data: { source },
+});
+
+export const addSprite = sprite => ({
+    type: ADD_SPRITE,
+    data: { sprite },
 });
 
 export const setTestContainerPosition = ({ x, y }) => ({

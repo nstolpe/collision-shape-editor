@@ -12,6 +12,9 @@ import {
     SET_CTRL_PRESSED,
     START_VERTEX_MOVE,
     STOP_VERTEX_MOVE,
+    ADD_TEXTURE_SOURCE,
+    REMOVE_TEXTURE_SOURCE,
+    ADD_SPRITE,
     SET_TEST_CONTAINER_POSITION,
 } from "App/constants/action-types";
 
@@ -24,6 +27,8 @@ const initialState = {
     images: {
         default: 'turtle-body.png',
     },
+    textureSources: [],
+    sprites: [],
     vertices: [],
     movingVertices: [],
     UIScale: { x: 1, y: 1 },
@@ -85,6 +90,21 @@ const rootReducer = (state = initialState, action) => {
             return {
                 ...state,
                 ctrlPressed: data.pressed,
+            };
+        case ADD_TEXTURE_SOURCE:
+            return {
+                ...state,
+                textureSources: [ ...state.textureSources, { ...data } ],
+            };
+        case REMOVE_TEXTURE_SOURCE:
+            return {
+                ...state,
+                textureSources: state.textureSources.filter(textureSource => textureSource.id !== data.source.id),
+            };
+        case ADD_SPRITE:
+            return {
+                ...state,
+                sprites: [ ...state.sprites, { ...data.sprite } ],
             };
         case SET_TEST_CONTAINER_POSITION:
             return {

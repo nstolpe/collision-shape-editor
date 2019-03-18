@@ -3,10 +3,7 @@
 import { CustomPIXIComponent } from 'react-pixi-fiber';
 import * as PIXI from 'pixi.js';
 
-import {
-    pixiHandlersToEvents,
-    updateListeners,
-} from  'App/tools/custom-pixi-component';
+import { updateListeners } from  'App/tools/custom-pixi-component';
 
 const TYPE = 'Rectangle';
 

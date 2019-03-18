@@ -3,7 +3,10 @@ import React from 'react';
 import { connect } from "react-redux";
 import styled from 'styled-components';
 
-import { setBackgroundColor } from 'App/actions/actions';
+import {
+    addTextureSource,
+    setBackgroundColor,
+} from 'App/actions/actions';
 import ColorPicker from 'App/components/ColorPicker';
 import FileLoader from 'App/components/FileLoader';
 import {
@@ -30,13 +33,16 @@ const mapDispatchToProps = dispatch => ({
     onColorChange: ({ r, g, b }) => {
         const color = parseInt(rgbToHex({ r, g, b }).replace('#',''), 16);
         dispatch(setBackgroundColor(color));
-    }
+    },
+    onLoad: (name, data) => {
+        dispatch(addTextureSource(name, data))
+    },
 });
 
-const Controls = ({ children, backgroundColor, onChange, onColorChange }) => {
+const Controls = ({ children, backgroundColor, onChange, onColorChange, onLoad }) => {
     return(
         <Styled>
-            <FileLoader />
+            <FileLoader onLoad={onLoad} accept="image/*" multiple />
             <ColorPicker color={backgroundColor} onColorChange={onColorChange} />
             {children}
         </Styled>

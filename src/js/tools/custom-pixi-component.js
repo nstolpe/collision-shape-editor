@@ -30,18 +30,18 @@ export const pixiHandlersToEvents = {
 };
 
 // update listeners on a custom pixi component. call in `customApplyProps`
-export const updateListeners = (instance, oldProps, newProps) => {
+export const updateListeners = (instance, oldProps, newProps, handlersToEvents=pixiHandlersToEvents) => {
     // get just the listener props from oldProps
     const oldEventListeners = Object.entries(oldProps).reduce(
-        (listeners, [event, listener]) => event in pixiHandlersToEvents ?
-            { ...listeners, [pixiHandlersToEvents[event]]: listener } : listeners,
+        (listeners, [event, listener]) => event in handlersToEvents ?
+            { ...listeners, [handlersToEvents[event]]: listener } : listeners,
         {}
     );
 
     // get just the listener props from newProps
     const newEventListeners = Object.entries(newProps).reduce(
-        (listeners, [event, listener]) => event in pixiHandlersToEvents ?
-            { ...listeners, [pixiHandlersToEvents[event]]: listener } : listeners,
+        (listeners, [event, listener]) => event in handlersToEvents ?
+            { ...listeners, [handlersToEvents[event]]: listener } : listeners,
         {}
     );
 
