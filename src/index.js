@@ -8,6 +8,7 @@ import Controls from 'App/components/Controls';
 import FlexResizer from 'App/components/FlexResizer';
 import Screen from 'App/components/Screen';
 import Sprites from 'App/components/Sprites';
+import Vertices from 'App/components/Vertices';
 import ScreenContext from 'App/contexts/ScreenContext';
 
 import store from 'App/store/store';
@@ -22,6 +23,7 @@ render(
             <FlexResizer>
                 <Screen context={ScreenContext}>
                     <Sprites />
+                    <Vertices />
                 </Screen>
             </FlexResizer>
             <Controls />

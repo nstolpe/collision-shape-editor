@@ -15,6 +15,7 @@ const defaults = {
     y: 0,
     radius: 0,
     pivot: [0, 0],
+    scale: [1, 1],
     alpha: 1,
     strokeWidth: 0,
     strokeColor: 0x000000,
@@ -36,6 +37,7 @@ export const behavior = {
             radius,
             interactive,
             buttonMode,
+            scale,
             alpha,
             position,
             pivot,
@@ -48,6 +50,7 @@ export const behavior = {
         instance.lineStyle(strokeWidth, strokeColor, strokeAlpha, strokeAlignment);
         instance.pivot.set(...pivot);
         instance.position.set(x, y);
+        instance.scale.set(scale[0], scale[1]);
 
         instance.clear();
         instance.beginFill(fill);

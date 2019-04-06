@@ -16,10 +16,14 @@ import {
     REMOVE_TEXTURE_SOURCE,
     ADD_SPRITE,
     SET_TEST_CONTAINER_POSITION,
-} from "App/constants/action-types";
+} from 'App/constants/action-types';
+import Modes from 'App/constants/modes';
+import Tools from 'App/constants/tools';
 
 const initialState = {
     backgroundColor: 0x44fc03,
+    mode: Modes.VERTEX,
+    tool: Tools.ADD,
     // width: 0,
     // height: 0,
     resolution: window.devicePixelRatio,
@@ -29,7 +33,23 @@ const initialState = {
     },
     textureSources: [],
     sprites: [],
-    vertices: [],
+    vertices: [
+        {
+            x: 200,
+            y: 400,
+            id: uuid(),
+        },
+        {
+            x: 223,
+            y: 456,
+            id: uuid(),
+        },
+        {
+            x: 500,
+            y: 800,
+            id: uuid(),
+        },
+    ],
     movingVertices: [],
     UIScale: { x: 1, y: 1 },
     ctrlPressed: false,
