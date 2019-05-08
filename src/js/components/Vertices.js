@@ -1,5 +1,4 @@
 // components/Vertices.js
-
 import React from 'react';
 import { connect } from 'react-redux';
 import * as PIXI from 'pixi.js';
@@ -51,6 +50,7 @@ const Vertices = props => (
                     fill={0xe62bdc}
                     strokeColor={0xffffff}
                     strokeWidth={2}
+                    strokeAlignment={1}
                     interactive
                     buttonMode
                     // cursor={props.altPressed ? "no-drop" : "move"}
