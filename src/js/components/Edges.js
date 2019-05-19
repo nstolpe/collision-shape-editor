@@ -28,7 +28,10 @@ export const behavior = {
     instance.hitArea = new PIXI.Polygon(vertices.reduce((points, vertex) => [ ...points, vertex.x, vertex.y ], []));
     instance.interactive = true;
 
-    // resets pointerdown, which wasn't being assigned well.
+    /**
+     * Pointer handlers weren't assigning just as props, so old and new need to be compared.
+     * @TODO move this out and handle PIXI events: http://pixijs.download/dev/docs/PIXI.Graphics.html#event:added
+     */
     if (typeof newProps.pointerdown === 'function' && typeof oldProps.pointerdown === 'function' && newProps.pointerdown !== oldProps.pointerdown) {
         instance.off('pointerdown', oldProps.pointerdown);
         instance.on('pointerdown', newProps.pointerdown);
@@ -54,5 +57,5 @@ export const behavior = {
   }
 };
 
-export default CustomPIXIComponent(behavior, TYPE);
-// export default connect(mapStateToProps)(CustomPIXIComponent(behavior, TYPE));
+// export default CustomPIXIComponent(behavior, TYPE);
+export default connect(mapStateToProps)(CustomPIXIComponent(behavior, TYPE));

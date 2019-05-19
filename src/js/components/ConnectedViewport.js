@@ -3,7 +3,6 @@ import * as PIXI from 'pixi.js';
 import { connect } from "react-redux";
 import React, {
     PureComponent,
-    useState,
 } from 'react';
 
 import {

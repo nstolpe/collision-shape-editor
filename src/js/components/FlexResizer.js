@@ -29,8 +29,8 @@ export default ({ children }) => {
         const resize = () => {
             window.clearTimeout(timeout);
             timeout = window.setTimeout(() => {
-                setWidth(flexResizer.current.offsetWidth);
-                setHeight(flexResizer.current.offsetHeight);
+                setWidth(flexResizer.current ? flexResizer.current.offsetWidth : 0);
+                setHeight(flexResizer.current ? flexResizer.current.offsetHeight : 0);
             }, interval);
         };
 
