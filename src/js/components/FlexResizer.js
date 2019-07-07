@@ -41,5 +41,9 @@ export default ({ children }) => {
         return () => window.removeEventListener('resize', resize);
     }, []);
 
-    return (<FlexResizer ref={flexResizer}>{React.Children.map(children, child => React.cloneElement(child, { width, height }))}</FlexResizer>);
+    return (
+        <FlexResizer ref={flexResizer}>{
+            React.Children.map(children, child => React.cloneElement(child, { width, height }))
+        }</FlexResizer>
+    );
 };

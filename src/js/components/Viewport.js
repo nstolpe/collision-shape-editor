@@ -5,7 +5,7 @@ import {
 } from "react-pixi-fiber";
 import { connect } from "react-redux";
 import * as PIXI from "pixi.js";
-import Viewport from 'pixi-viewport';
+import { Viewport } from 'pixi-viewport'
 
 // import { addVertex } from 'App/actions/actions';
 import ScreenContext from 'App/contexts/ScreenContext';
