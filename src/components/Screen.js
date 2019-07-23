@@ -9,10 +9,10 @@ import {
     ReactReduxContext,
 } from 'react-redux';
 
-import { scaleUI } from 'App/actions/actions';
-import { StageCanvas } from 'App/data/styles';
-import Viewport from 'App/components/Viewport';
-import ConnectedViewport from 'App/components/ConnectedViewport';
+import { scaleUI } from 'actions/actions';
+import { StageCanvas } from 'data/styles';
+import Viewport from 'components/Viewport';
+import ConnectedViewport from 'components/ConnectedViewport';
 
 // needs context
 const Screen = ({ context, children, width, height }) => (

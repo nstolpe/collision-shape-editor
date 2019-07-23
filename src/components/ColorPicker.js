@@ -15,7 +15,7 @@ import {
     rgbToHex,
     rgbToHsl,
     toHex,
-} from 'App/tools/color';
+} from 'tools/color';
 
 const Trigger = styled.a.attrs(
     ({ triggerWidth, triggerHeight, backgroundColor }) => ({

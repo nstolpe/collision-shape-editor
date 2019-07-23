@@ -12,10 +12,10 @@ import {
     moveVertex,
     startVertexMove,
     stopVertexMove,
-} from 'App/actions/actions';
+} from 'actions/actions';
 
-import Circle from 'App/components/Circle';
-import ScreenContext from 'App/contexts/ScreenContext';
+import Circle from 'components/Circle';
+import ScreenContext from 'contexts/ScreenContext';
 
 
 const mapStateToProps = state => ({ ...state });

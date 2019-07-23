@@ -4,8 +4,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import {v4 as uuid} from 'uuid';
 
-import ScaleNearestSprite from 'App/components/ScaleNearestSprite';
-import ScreenContext from 'App/contexts/ScreenContext';
+import ScaleNearestSprite from 'components/ScaleNearestSprite';
+import ScreenContext from 'contexts/ScreenContext';
 
 const mapStateToProps = (state, ownProps) => {
     const { width, height } = ownProps;

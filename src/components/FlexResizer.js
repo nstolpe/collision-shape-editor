@@ -8,7 +8,7 @@ import React, {
 import { dispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { resize } from 'App/actions/actions';
+import { resize } from 'actions/actions';
 
 const FlexResizer = styled.div`
     flex: 1;

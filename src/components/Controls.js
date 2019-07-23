@@ -6,13 +6,13 @@ import styled from 'styled-components';
 import {
     addTextureSource,
     setBackgroundColor,
-} from 'App/actions/actions';
-import ColorPicker from 'App/components/ColorPicker';
-import FileLoader from 'App/components/FileLoader';
+} from 'actions/actions';
+import ColorPicker from 'components/ColorPicker';
+import FileLoader from 'components/FileLoader';
 import {
     toHex,
     rgbToHex,
-} from 'App/tools/color';
+} from 'tools/color';
 
 const Styled = styled.div`
     background-color: #ebebeb;

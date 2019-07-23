@@ -8,11 +8,11 @@ import * as PIXI from "pixi.js";
 import { Viewport } from 'pixi-viewport'
 
 // import { addVertex } from 'App/actions/actions';
-import ScreenContext from 'App/contexts/ScreenContext';
+import ScreenContext from 'contexts/ScreenContext';
 import {
     pixiHandlersToEvents,
     updateListeners,
-} from  'App/tools/custom-pixi-component';
+} from  'tools/custom-pixi-component';
 
 const TYPE = "Viewport";
 

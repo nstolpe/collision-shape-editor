@@ -7,9 +7,9 @@ import {
     addSprite,
     removeTextureSource,
     scaleUI,
-} from 'App/actions/actions';
-import ScreenContext from 'App/contexts/ScreenContext';
-import Viewport from 'App/components/Viewport';
+} from 'actions/actions';
+import ScreenContext from 'contexts/ScreenContext';
+import Viewport from 'components/Viewport';
 
 const mapStateToProps = (state, ownProps) => ({ ...state });
 

@@ -2,7 +2,6 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { AppWrapper as style } from 'App/data/styles';
 const Styled = styled.div`
     display: flex;
     width: 100%;

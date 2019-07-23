@@ -1,10 +1,12 @@
 // /src/js/tools/color.js
-import { property } from 'App/tools/utilities';
+import { property } from 'tools/utilities';
 
 // https://jsfiddle.net/t5nq6jjc/1
 // https://stackoverflow.com/a/9493060 (link above from comments)
 export const rgbToHsl = ({ r, g, b }) => {
-    r /= 255, g /= 255, b /= 255;
+    r /= 255;
+    g /= 255;
+    b /= 255;
     const max = Math.max(r, g, b), min = Math.min(r, g, b);
     let h, s, l = (max + min) / 2;
 

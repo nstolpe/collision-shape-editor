@@ -16,9 +16,9 @@ import {
     REMOVE_TEXTURE_SOURCE,
     ADD_SPRITE,
     SET_TEST_CONTAINER_POSITION,
-} from 'App/constants/action-types';
-import Modes from 'App/constants/modes';
-import Tools from 'App/constants/tools';
+} from 'constants/action-types';
+import Modes from 'constants/modes';
+import Tools from 'constants/tools';
 
 const initialState = {
     backgroundColor: 0x44fc03,

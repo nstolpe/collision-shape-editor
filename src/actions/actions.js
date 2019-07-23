@@ -15,7 +15,7 @@ import {
     REMOVE_TEXTURE_SOURCE,
     ADD_SPRITE,
     SET_TEST_CONTAINER_POSITION,
-} from "App/constants/action-types";
+} from "constants/action-types";
 
 export const addVertex = ({ x, y }) => ({
     type: ADD_VERTEX,
