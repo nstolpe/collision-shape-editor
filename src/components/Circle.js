@@ -22,7 +22,7 @@ const defaults = {
     strokeAlpha: 1.0,
     strokeAlignment: 0,
 };
-
+window.PIXI = PIXI
 export const behavior = {
     customDisplayObject: props => new PIXI.Graphics(),
     customApplyProps: function(instance, oldProps, newProps) {
@@ -47,12 +47,12 @@ export const behavior = {
         instance.buttonMode = !!buttonMode;
         instance.alpha = alpha;
 
-        instance.lineStyle(strokeWidth, strokeColor, strokeAlpha, strokeAlignment);
         instance.pivot.set(...pivot);
         instance.position.set(x, y);
         instance.scale.set(scale[0], scale[1]);
 
         instance.clear();
+        instance.lineStyle(strokeWidth, strokeColor, strokeAlpha, strokeAlignment);
         instance.beginFill(fill);
         instance.drawCircle(0, 0, radius);
         instance.endFill();
