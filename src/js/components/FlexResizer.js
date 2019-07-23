@@ -15,7 +15,7 @@ const FlexResizer = styled.div`
     overflow: hidden;
 `;
 
-// resizes on window.resize, stores width and height, sends them to children.
+// resizes on window.resize, stores width and height, sends them as props to children.
 export default ({ children }) => {
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);

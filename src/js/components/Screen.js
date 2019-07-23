@@ -41,9 +41,6 @@ const Screen = ({ context, children, width, height }) => (
                 <AppContext.Consumer>{app => (
                     <Provider store={store} context={context}>
                         <ConnectedViewport
-                            onZoomed={event => {
-                                store.dispatch(scaleUI(event.viewport.scale))
-                            }}
                             app={app}
                             screenWidth={width}
                             screenHeight={height}
