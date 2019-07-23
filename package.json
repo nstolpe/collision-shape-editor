@@ -35,7 +35,7 @@
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-pixi-fiber": "^0.9.0",
+    "react-pixi-fiber": "file:../react-pixi-fiber",
     "react-redux": "^7.1.0",
     "redux": "^4.0.1",
     "styled-components": "^4.2.0",
