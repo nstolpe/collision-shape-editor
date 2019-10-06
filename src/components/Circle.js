@@ -3,61 +3,62 @@
 import { CustomPIXIComponent } from 'react-pixi-fiber';
 import * as PIXI from 'pixi.js';
 
-import { updateListeners } from  'tools/custom-pixi-component';
-
 const TYPE = 'Circle';
 
-const defaults = {
-    interactive: false,
-    buttonMode: false,
-    fill: 0xffffff,
-    x: 0,
-    y: 0,
-    radius: 0,
-    pivot: [0, 0],
-    scale: [1, 1],
-    alpha: 1,
-    strokeWidth: 0,
-    strokeColor: 0x000000,
-    strokeAlpha: 1.0,
-    strokeAlignment: 0,
-};
-window.PIXI = PIXI
+// const defaults = {
+//     interactive: false,
+//     buttonMode: false,
+//     fill: 0xffffff,
+//     x: 0,
+//     y: 0,
+//     radius: 0,
+//     pivot: [0, 0],
+//     scale: [1, 1],
+//     alpha: 1,
+//     strokeWidth: 0,
+//     strokeColor: 0x000000,
+//     strokeAlpha: 1.0,
+//     strokeAlignment: 0,
+// };
+const oldPropsKeys = [
+    'fill',
+    'strokeAlignment',
+    'strokeAlpha',
+    'strokeColor',
+    'strokeWidth',
+    'radius',
+];
+
 export const behavior = {
     customDisplayObject: props => new PIXI.Graphics(),
     customApplyProps: function(instance, oldProps, newProps) {
         const {
             fill,
-            strokeWidth,
-            strokeColor,
-            strokeAlpha,
             strokeAlignment,
-            x,
-            y,
+            strokeAlpha,
+            strokeColor,
+            strokeWidth,
             radius,
-            interactive,
-            buttonMode,
-            scale,
-            alpha,
-            position,
-            pivot,
-        } = { ...defaults, ...newProps };
+            ...newPropsRest
+        } = newProps;
 
-        instance.interactive = !!interactive;
-        instance.buttonMode = !!buttonMode;
-        instance.alpha = alpha;
+        const oldPropsRest = Object.entries(oldProps).reduce((target, [prop, propValue]) => {
+            if (!oldPropsKeys.includes(prop)) {
+                target[prop] = propValue;
+            }
+            return target;
+        }, {});
 
-        instance.pivot.set(...pivot);
-        instance.position.set(x, y);
-        instance.scale.set(scale[0], scale[1]);
+        if (typeof oldProps !== "undefined") {
+          instance.clear();
+        }
 
-        instance.clear();
         instance.lineStyle(strokeWidth, strokeColor, strokeAlpha, strokeAlignment);
         instance.beginFill(fill);
         instance.drawCircle(0, 0, radius);
         instance.endFill();
 
-        updateListeners(instance, oldProps, newProps);
+        this.applyDisplayObjectProps(oldPropsRest, newPropsRest);
     }
 };
 
