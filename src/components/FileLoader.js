@@ -1,7 +1,6 @@
 // src/js/components/FileUploader.js
 import PropTypes from 'prop-types';
 import React from 'react';
-import { connect } from "react-redux";
 import styled from 'styled-components';
 
 const Label = styled.label`

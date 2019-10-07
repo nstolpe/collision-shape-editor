@@ -7,8 +7,6 @@ import React, {
 } from 'react';
 import { Sprite } from 'react-pixi-fiber';
 
-import ScreenContext from 'contexts/ScreenContext';
-
 /**
  * A sprite component that has its scale mode set to NEAREST.
  */

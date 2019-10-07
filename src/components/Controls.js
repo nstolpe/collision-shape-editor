@@ -10,7 +10,6 @@ import {
 import ColorPicker from 'components/ColorPicker';
 import FileLoader from 'components/FileLoader';
 import {
-    toHex,
     rgbToHex,
 } from 'tools/color';
 

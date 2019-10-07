@@ -1,14 +1,12 @@
 // src/js/components/FlexResizer.js
 import React, {
     useEffect,
-    useLayoutEffect,
     useRef,
     useState,
 } from 'react';
-import { dispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { resize } from 'actions/actions';
+// import { resize } from 'actions/actions';
 
 const FlexResizer = styled.div`
     flex: 1;
