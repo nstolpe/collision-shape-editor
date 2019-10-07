@@ -8,8 +8,8 @@ import {
 import {
     deleteVertex,
     moveVertex,
-    startVertexMove,
-    stopVertexMove,
+    startMoveVertex,
+    stopMoveVertex,
 } from 'actions/actions';
 
 import Vertex from 'components/Vertex';
@@ -21,8 +21,8 @@ const mapStateToProps = state => ({ ...state });
 const mapDispatchToProps = dispatch => ({
     deleteVertex: id => dispatch(deleteVertex(id)),
     moveVertex: ({ x, y, id }) => dispatch(moveVertex({ x, y, id })),
-    startVertexMove: ({ x, y, id }) => dispatch(startVertexMove({ x, y, id })),
-    stopVertexMove: ({ x, y, id }) => dispatch(stopVertexMove({ x, y, id })),
+    startMoveVertex: ({ x, y, id }) => dispatch(startMoveVertex({ x, y, id })),
+    stopMoveVertex: ({ x, y, id }) => dispatch(stopMoveVertex({ x, y, id })),
 });
 
 const Vertices = props => (
@@ -35,7 +35,7 @@ const Vertices = props => (
             ];
             const ctrlPressed = props.ctrlPressed;
             const altPressed = props.altPressed;
-            const movingVertices = props.movingVertices;
+            const movingVerticeIds = props.movingVerticeIds;
             const vertexProps = {
                 ...props,
                 id,
@@ -44,9 +44,9 @@ const Vertices = props => (
                 scale,
                 altPressed,
                 ctrlPressed,
-                movingVertices,
-                startVertexMove,
-                stopVertexMove,
+                movingVerticeIds,
+                startMoveVertex,
+                stopMoveVertex,
                 moveVertex,
                 deleteVertex,
             };

@@ -10,8 +10,8 @@ import ScreenContext from 'contexts/ScreenContext';
 import {
     deleteVertex,
     moveVertex,
-    startVertexMove,
-    stopVertexMove,
+    startMoveVertex,
+    stopMoveVertex,
 } from 'actions/actions';
 
 const mapStateToProps = state => ({ ...state });
@@ -19,8 +19,8 @@ const mapStateToProps = state => ({ ...state });
 const mapDispatchToProps = dispatch => ({
     deleteVertex: id => dispatch(deleteVertex(id)),
     moveVertex: ({ x, y, id }) => dispatch(moveVertex({ x, y, id })),
-    startVertexMove: ({ x, y, id }) => dispatch(startVertexMove({ x, y, id })),
-    stopVertexMove: ({ x, y, id }) => dispatch(stopVertexMove({ x, y, id })),
+    startMoveVertex: id => dispatch(startMoveVertex(id)),
+    stopMoveVertex: id => dispatch(stopMoveVertex(id)),
 });
 
 const Vertex = props => {
@@ -28,9 +28,9 @@ const Vertex = props => {
         id,
         altPressed,
         ctrlPressed,
-        movingVertices,
-        startVertexMove,
-        stopVertexMove,
+        movingVerticeIds,
+        startMoveVertex,
+        stopMoveVertex,
         moveVertex,
         deleteVertex,
         ...propsRest
@@ -54,7 +54,7 @@ const Vertex = props => {
                         deleteVertex(id);
                         break;
                     case !altPressed && !ctrlPressed:
-                        startVertexMove({ x: e.target.x, y: e.target.y, id });
+                        startMoveVertex(id);
                         break;
                     default:
                         break;
@@ -72,15 +72,15 @@ const Vertex = props => {
                 const pointGlobalCoords = e.target.toGlobal({x:0,y:0});
                 console.log(`x: ${graphicGlobalCoords.x} y: ${graphicGlobalCoords.y}, x: ${pointGlobalCoords.x} y: ${pointGlobalCoords.y}`);
                 console.log(`x diff: ${graphicGlobalCoords.x - pointGlobalCoords.x} y diff: ${graphicGlobalCoords.y - pointGlobalCoords.y}`);
-                stopVertexMove({ x: e.target.x, y: e.target.y, id });
+                stopMoveVertex(id);
             }}
             pointerupoutside={e => {
                 e.stopPropagation();
-                stopVertexMove({ x: e.target.x, y: e.target.y, id });
+                stopMoveVertex(id);
             }}
             pointermove={e => {
                 const coordinates = e.data.getLocalPosition(e.currentTarget.parent);
-                if (movingVertices.find(vertex => e.currentTarget.name.replace('vertex_', '') === vertex.id)) {
+                if (movingVerticeIds.find(vertexId => e.currentTarget.name.replace('vertex_', '') === vertexId)) {
                     moveVertex({ ...coordinates, id });
                 }
             }}

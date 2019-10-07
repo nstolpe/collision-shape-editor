@@ -3,8 +3,8 @@
 export const ADD_VERTEX = 'ADD_VERTEX';
 export const DELETE_VERTEX = 'DELETE_VERTEX';
 export const MOVE_VERTEX = 'MOVE_VERTEX';
-export const START_VERTEX_MOVE = 'START_VERTEX_MOVE';
-export const STOP_VERTEX_MOVE = 'STOP_VERTEX_MOVE';
+export const START_MOVE_VERTEX = 'START_MOVE_VERTEX';
+export const STOP_MOVE_VERTEX = 'STOP_MOVE_VERTEX';
 
 export const RESIZE = 'RESIZE';
 export const SCALE_UI = 'SCALE_UI';

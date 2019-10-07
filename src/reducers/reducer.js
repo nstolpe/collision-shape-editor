@@ -10,8 +10,8 @@ import {
     SET_BACKGROUND_COLOR,
     SET_ALT_PRESSED,
     SET_CTRL_PRESSED,
-    START_VERTEX_MOVE,
-    STOP_VERTEX_MOVE,
+    START_MOVE_VERTEX,
+    STOP_MOVE_VERTEX,
     ADD_TEXTURE_SOURCE,
     REMOVE_TEXTURE_SOURCE,
     ADD_SPRITE,
@@ -50,14 +50,14 @@ const initialState = {
             id: uuid(),
         },
     ],
-    movingVertices: [],
+    movingVerticeIds: [],
     UIScale: { x: 1, y: 1 },
     ctrlPressed: false,
     altPressed: false,
     testContainerPosition: { x: 0, y: 0 },
 };
 
-const rootReducer = (state = initialState, action) => {
+const rootReducer = (state=initialState, action) => {
     const data = action.data;
     switch (action.type) {
         case ADD_VERTEX:
@@ -76,15 +76,15 @@ const rootReducer = (state = initialState, action) => {
                 ...state,
                 vertices: state.vertices.map(vertex => vertex.id === data.id ? data : vertex),
             };
-        case START_VERTEX_MOVE:
+        case START_MOVE_VERTEX:
             return {
                 ...state,
-                movingVertices: [...state.movingVertices, { ...data }],
+                movingVerticeIds: [...state.movingVerticeIds, data.id],
             };
-        case STOP_VERTEX_MOVE:
+        case STOP_MOVE_VERTEX:
             return {
                 ...state,
-                movingVertices: state.movingVertices.filter(vertex => vertex.id !== data.id),
+                movingVerticeIds: state.movingVerticeIds.filter(vertexId => vertexId !== data.id),
             };
         case RESIZE:
             return {

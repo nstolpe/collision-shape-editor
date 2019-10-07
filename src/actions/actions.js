@@ -4,8 +4,8 @@ import {
     ADD_VERTEX,
     DELETE_VERTEX,
     MOVE_VERTEX,
-    START_VERTEX_MOVE,
-    STOP_VERTEX_MOVE,
+    START_MOVE_VERTEX,
+    STOP_MOVE_VERTEX,
     RESIZE,
     SCALE_UI,
     SET_BACKGROUND_COLOR,
@@ -32,14 +32,14 @@ export const moveVertex = ({ x, y, id }) => ({
     data: { x, y, id },
 });
 
-export const startVertexMove = ({ x, y, id }) => ({
-    type: START_VERTEX_MOVE,
-    data: { x, y, id },
+export const startMoveVertex = id => ({
+    type: START_MOVE_VERTEX,
+    data: { id },
 });
 
-export const stopVertexMove = ({ x, y, id }) => ({
-    type: STOP_VERTEX_MOVE,
-    data: { x, y, id },
+export const stopMoveVertex = id => ({
+    type: STOP_MOVE_VERTEX,
+    data: { id },
 });
 
 export const resize = ({ width, height }) => ({
