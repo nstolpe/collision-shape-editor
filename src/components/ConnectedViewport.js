@@ -23,7 +23,7 @@ const ConnectedViewport = props => {
     const {
         textureSources = [],
         removeTextureSource,
-        app: { loader: loader },
+        app: { loader },
         addSprite,
         screenWidth,
         screenHeight,
@@ -56,7 +56,16 @@ const ConnectedViewport = props => {
         [props.textureSources]
     );
 
-    return (<Viewport {...props} />)
+    return (
+        <Viewport
+            onZoomed={
+                ({ viewport }) => {
+                    props.scaleUI(viewport.scale)
+                }
+            }
+            {...props}
+        />
+    )
 };
 
 export default connect(mapStateToProps, mapDispatchToProps, null, { context: ScreenContext })(ConnectedViewport);
