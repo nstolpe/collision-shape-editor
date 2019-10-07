@@ -17,15 +17,10 @@ import {
     toHex,
 } from 'tools/color';
 
-const Trigger = styled.a.attrs(
-    ({ triggerWidth, triggerHeight, backgroundColor }) => ({
-        style: {
-            width: triggerWidth == null ? '5.4em' : triggerWidth,
-            height: triggerHeight == null ?'5.4em' : triggerHeight,
-            backgroundColor: backgroundColor,
-        },
-    }),
-)`
+const Trigger = styled.a`
+    width: ${({ triggerWidth }) => triggerWidth == null ? '5.4em' : triggerWidth};
+    height: ${({ triggerHeight }) => triggerHeight == null ?'5.4em' : triggerHeight};
+    background-color: ${({ backgroundColor }) => backgroundColor};
     text-decoration: none;
     display: inline-block;
     box-sizing: border-box;
@@ -38,6 +33,7 @@ const Trigger = styled.a.attrs(
         box-shadow: 0 0 2px #ffffff;
     }
 `;
+
 const Panel = styled.div`
     position: absolute;
     display: ${({active}) => active ? 'flex' : 'none'};
@@ -70,21 +66,21 @@ const cursor = `url("data:image/svg+xml;utf8,
 
 const PadCanvas = styled.canvas`
     display: inline-block;
-    width: ${({width}) => `${width}px`};
-    height: ${({height}) => `${height}px`};
+    width: ${({ width }) => `${width}px`};
+    height: ${({ height }) => `${height}px`};
     vertical-align: middle;
     cursor: crosshair;
-    cursor: ${({dragging}) => dragging ? 'none' : cursor};
+    cursor: ${({ dragging }) => dragging ? 'none' : cursor};
     touch-action: none;
 `;
 
 const SlideCanvas = styled.canvas`
     display: inline-block;
-    width: ${({width}) => `${width}px`};
-    height: ${({height}) => `${height}px`};
+    width: ${({ width }) => `${width}px`};
+    height: ${({ height }) => `${height}px`};
     vertical-align: middle;
-    cursor: ${({dragging}) => dragging ? 'none' : cursor};
-    margin: ${({width}) => `0 ${width * .25}px`};
+    cursor: ${({ dragging }) => dragging ? 'none' : cursor};
+    margin: ${({ width }) => `0 ${width * .25}px`};
     touch-action: none;
 `;
 
@@ -212,12 +208,14 @@ const findColorCoordinates = (canvas, targetHex) => {
     };
 };
 
-// ignore the color prop after initial render
-const isEqual = (prevProps, nextProps) => Object.entries(nextProps).reduce((acc, [key, val]) => !acc ? acc : key === 'color' ? true : val === prevProps[key], true);
+// ignore the color prop after initial render. used with memo
+// const isEqual = (prevProps, nextProps) => Object.entries(nextProps).reduce((acc, [key, val]) => !acc ? acc : key === 'color' ? true : val === prevProps[key], true);
+
 
 const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onColorChange }) => {
-    // two canvas components
+    // saturation & lightness 2d pad
     const padCanvas = useRef(null);
+    // hue 1d slide
     const slideCanvas = useRef(null);
     // state
     const [active, setActive] = useState(false);
@@ -238,7 +236,9 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
     const toggleActive = () => setActive(!active);
 
     useEffect(() => {
+        // const canvas= padCanvas.current;
         const { current: canvas } = padCanvas;
+
         const { offsetWidth: width, offsetWidth: height } = canvas;
         const context = canvas.getContext('2d');
 
@@ -321,20 +321,17 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
                     onMouseMove={event => {
                         event.preventDefault();
                         if (padDragging) {
-                            const { target: canvas } = event;
                             const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
                             setPadPixelCoordinates(coordinates);
                         }
                     }}
                     onMouseDown={event => {
-                        const { target: canvas } = event;
                         const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
                         setPadPixelCoordinates(coordinates);
                         setPadDragging(true);
                     }}
                     onMouseUp={event => setPadDragging(false)}
                     onPointerDown={event => {
-                        const { target: canvas } = event;
                         const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
                         setPadPixelCoordinates(coordinates);
                         setPadDragging(true);
@@ -360,13 +357,11 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
                     onMouseMove={event => {
                         event.preventDefault();
                         if (slideDragging) {
-                            const { target: canvas } = event;
                             const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
                             setSlidePixelCoordinates(coordinates);
                         }
                     }}
                     onMouseDown={event => {
-                        const { target: canvas } = event;
                         const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
                         setSlidePixelCoordinates(coordinates);
                         setSlideDragging(true);
@@ -375,7 +370,6 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
                         setSlideDragging(false);
                     }}
                     onPointerDown={event => {
-                        const { target: canvas } = event;
                         const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
                         setSlidePixelCoordinates(coordinates);
                         setSlideDragging(true);
@@ -427,4 +421,5 @@ ColorPicker.propTypes = {
     onColorChange: PropTypes.func,
 };
 
-export default React.memo(ColorPicker, isEqual);
+export default ColorPicker;
+// export default React.memo(ColorPicker, isEqual);
