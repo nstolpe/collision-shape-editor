@@ -15,7 +15,6 @@ import {
     ADD_TEXTURE_SOURCE,
     REMOVE_TEXTURE_SOURCE,
     ADD_SPRITE,
-    SET_TEST_CONTAINER_POSITION,
 } from 'constants/action-types';
 import Modes from 'constants/modes';
 import Tools from 'constants/tools';
@@ -125,11 +124,6 @@ const rootReducer = (state=initialState, action) => {
             return {
                 ...state,
                 sprites: [ ...state.sprites, { ...data.sprite } ],
-            };
-        case SET_TEST_CONTAINER_POSITION:
-            return {
-                ...state,
-                testContainerPosition: { ...data },
             };
         default:
             console.log(`undefined action: ${action.type}`, action);

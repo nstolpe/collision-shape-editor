@@ -14,7 +14,6 @@ import {
     ADD_TEXTURE_SOURCE,
     REMOVE_TEXTURE_SOURCE,
     ADD_SPRITE,
-    SET_TEST_CONTAINER_POSITION,
 } from "constants/action-types";
 
 export const addVertex = ({ x, y }) => ({
@@ -81,10 +80,3 @@ export const addSprite = sprite => ({
     type: ADD_SPRITE,
     data: { sprite },
 });
-
-export const setTestContainerPosition = ({ x, y }) => ({
-    type: SET_TEST_CONTAINER_POSITION,
-    data: { x, y },
-});
-
-window.setTestContainerPosition = setTestContainerPosition;
