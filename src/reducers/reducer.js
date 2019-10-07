@@ -63,7 +63,7 @@ const rootReducer = (state = initialState, action) => {
         case ADD_VERTEX:
             return {
                 ...state,
-                vertices: [ ...state.vertices, { ...data, id: uuid() } ],
+                vertices: [...state.vertices, { ...data, id: uuid() }],
             };
         case DELETE_VERTEX:
             return {
@@ -79,7 +79,7 @@ const rootReducer = (state = initialState, action) => {
         case START_VERTEX_MOVE:
             return {
                 ...state,
-                movingVertices: [ ...state.movingVertices, { ...data } ],
+                movingVertices: [...state.movingVertices, { ...data }],
             };
         case STOP_VERTEX_MOVE:
             return {

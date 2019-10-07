@@ -153,7 +153,7 @@ const App = (props) => {
                                 name="edges-container"
                             >
                                 <Edges {...props} pointerdown={e=>console.log(e)}/>
-                                <Vertices context={props.context} {...props} />
+                                <Vertices />
                             </Container>
                         </Viewport>
                     )}
@@ -166,7 +166,7 @@ window.addEventListener('resize', e => {
     const now = Date.now();
     const last = store.getState().lastResize;
     const appContainer = document.getElementById('app-container');
-
+console.log('foo')
     if (!last  || now - last > 250) {
         store.dispatch(resize({
             width: appContainer.offsetWidth,

@@ -20,14 +20,6 @@ const TYPE = 'Circle';
 //     strokeAlpha: 1.0,
 //     strokeAlignment: 0,
 // };
-const oldPropsKeys = [
-    'fill',
-    'strokeAlignment',
-    'strokeAlpha',
-    'strokeColor',
-    'strokeWidth',
-    'radius',
-];
 
 export const behavior = {
     customDisplayObject: props => new PIXI.Graphics(),
@@ -41,13 +33,15 @@ export const behavior = {
             radius,
             ...newPropsRest
         } = newProps;
-
-        const oldPropsRest = Object.entries(oldProps).reduce((target, [prop, propValue]) => {
-            if (!oldPropsKeys.includes(prop)) {
-                target[prop] = propValue;
-            }
-            return target;
-        }, {});
+        const {
+            fill: oldFill,
+            radius: oldRadius,
+            strokeAlignment: oldStrokeAlignment,
+            strokeAlpha: oldStrokeAlpha,
+            strokeColor: oldStrokeColor,
+            strokeWidth: oldStrokeWidth,
+            ...oldPropsRest
+        } = oldProps;
 
         if (typeof oldProps !== "undefined") {
           instance.clear();
