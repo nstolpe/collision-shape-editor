@@ -63,7 +63,7 @@ const Vertex = props => {
             pointerup={e => {
                 e.stopPropagation();
                 // @TODO make stage available via context.
-                const stage = e.target.parent.parent.parent;
+                // const stage = e.target.parent.parent.parent;
                 console.log(e.target);
                 // debugger;
                 const graphic = e.target;
