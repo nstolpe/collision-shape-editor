@@ -6,7 +6,6 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import { connect } from "react-redux";
 import styled from 'styled-components';
 
 import {
@@ -45,12 +44,12 @@ const Panel = styled.div`
     cursor: default;
 `;
 
-const CanvasWrapper = styled.div`
-    display: flex;
-    display: inline-block;
-    box-sizing: border-box;
-    position: relative;
-`;
+// const CanvasWrapper = styled.div`
+//     display: flex;
+//     display: inline-block;
+//     box-sizing: border-box;
+//     position: relative;
+// `;
 
 const ValuesWrapper = styled.div`
     display: flex;
@@ -94,36 +93,6 @@ const Label = styled.label`
 const Input = styled.input`
 `;
 
-const drawPadCanvas = (canvas, colorString) => {
-    const ctx = canvas.getContext('2d');
-    const width = canvas.offsetWidth;
-    const height = canvas.offsetHeight;
-    const gradientWhite = ctx.createLinearGradient(0, 0, width, 0);
-    const gradientBlack = ctx.createLinearGradient(0, 0, 0, height);
-
-    gradientWhite.addColorStop(0, 'rgba(255,255,255,1)');
-    gradientWhite.addColorStop(1, 'rgba(255,255,255,0)');
-    gradientBlack.addColorStop(0, 'rgba(0,0,0,0)');
-    gradientBlack.addColorStop(1, 'rgba(0,0,0,1)');
-
-    // ctx.rect(0, 0, width, height);
-
-    ctx.fillStyle = colorString;
-    ctx.fillRect(0, 0, width, height);
-
-    ctx.fillStyle = gradientWhite;
-    ctx.fillRect(0, 0, width, height);
-
-    ctx.fillStyle = gradientBlack;
-    ctx.fillRect(0, 1, width, height);
-
-    // ensure the first pixel is white, the gradients don't usually get it.
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, 1, 1);
-    // ensure the pixel at width, height is the base color.
-    ctx.fillStyle = colorString;
-    ctx.fillRect(width - 1, 0, 1, 1);
-};
 
 const drawCursor = ({ canvas, color, coordinates, mode='xy', alpha=0.5, compositeOperation='source-over' }) => {
     const ctx = canvas.getContext('2d');
@@ -153,26 +122,26 @@ const drawCursor = ({ canvas, color, coordinates, mode='xy', alpha=0.5, composit
     ctx.globalCompositeOperation = 'source-over';
 };
 
-const drawSlideCanvas = (canvas) => {
-    if (canvas.offsetWidth < 1 || canvas.offsetHeight < 1) {
-        return;
-    }
+// const drawSlideCanvas = (canvas) => {
+//     if (canvas.offsetWidth < 1 || canvas.offsetHeight < 1) {
+//         return;
+//     }
 
-    const ctx = canvas.getContext('2d');
-    const width = canvas.offsetWidth;
-    const height = canvas.offsetHeight;
-    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+//     const ctx = canvas.getContext('2d');
+//     const width = canvas.offsetWidth;
+//     const height = canvas.offsetHeight;
+//     const gradient = ctx.createLinearGradient(0, 0, 0, height);
 
-    gradient.addColorStop(0, 'rgba(255, 0, 0, 1)');
-    gradient.addColorStop(0.17, 'rgba(255, 255, 0, 1)');
-    gradient.addColorStop(0.34, 'rgba(0, 255, 0, 1)');
-    gradient.addColorStop(0.51, 'rgba(0, 255, 255, 1)');
-    gradient.addColorStop(0.68, 'rgba(0, 0, 255, 1)');
-    gradient.addColorStop(0.85, 'rgba(255, 0, 255, 1)');
-    gradient.addColorStop(1, 'rgba(255, 0, 0, 1)');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-};
+//     gradient.addColorStop(0, 'rgba(255, 0, 0, 1)');
+//     gradient.addColorStop(0.17, 'rgba(255, 255, 0, 1)');
+//     gradient.addColorStop(0.34, 'rgba(0, 255, 0, 1)');
+//     gradient.addColorStop(0.51, 'rgba(0, 255, 255, 1)');
+//     gradient.addColorStop(0.68, 'rgba(0, 0, 255, 1)');
+//     gradient.addColorStop(0.85, 'rgba(255, 0, 255, 1)');
+//     gradient.addColorStop(1, 'rgba(255, 0, 0, 1)');
+//     ctx.fillStyle = gradient;
+//     ctx.fillRect(0, 0, width, height);
+// };
 
 const coordinatesToColor = ({ x, y }, ctx) => {
     let color;
@@ -215,8 +184,10 @@ const findColorCoordinates = (canvas, targetHex) => {
 const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onColorChange }) => {
     // saturation & lightness 2d pad
     const padCanvas = useRef(null);
+    const currentPadCanvas = padCanvas.current;
     // hue 1d slide
     const slideCanvas = useRef(null);
+    const currentSlideCanvas = slideCanvas.current;
     // state
     const [active, setActive] = useState(false);
     // state - dragging
@@ -236,79 +207,116 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
     const toggleActive = () => setActive(!active);
 
     useEffect(() => {
-        // const canvas= padCanvas.current;
-        const { current: canvas } = padCanvas;
+        if (currentPadCanvas) {
+            const { offsetWidth: width, offsetWidth: height } = currentPadCanvas;
+            const ctx = currentPadCanvas.getContext('2d');
+            const gradientWhite = ctx.createLinearGradient(0, 0, width, 0);
+            const gradientBlack = ctx.createLinearGradient(0, 0, 0, height);
 
-        const { offsetWidth: width, offsetWidth: height } = canvas;
-        const context = canvas.getContext('2d');
+            if (width > 0 && height > 0) {
+                let coordinates;
+                ctx.clearRect(0, 0, width, height);
 
-        if (width > 0 && height > 0) {
-            let coordinates;
-            context.clearRect(0, 0, width, height);
-            drawPadCanvas(canvas, hexBase);
+                // drawPadCanvas
+                gradientWhite.addColorStop(0, 'rgba(255,255,255,1)');
+                gradientWhite.addColorStop(1, 'rgba(255,255,255,0)');
+                gradientBlack.addColorStop(0, 'rgba(0,0,0,0)');
+                gradientBlack.addColorStop(1, 'rgba(0,0,0,1)');
 
-            if (padPixelCoordinates) {
-                coordinates = padPixelCoordinates;
-            } else {
-                coordinates = findColorCoordinates(canvas, currentColor);
-                setPadPixelCoordinates(coordinates);
-            }
+                // ctx.rect(0, 0, width, height);
 
-            if (coordinates) {
-                const rgb = coordinatesToColor(coordinates, canvas.getContext('2d'));
-                const hex = rgbToHex(rgb);
+                ctx.fillStyle = hexBase;
+                ctx.fillRect(0, 0, width, height);
 
-                onColorChange(rgb);
-                drawCursor({
-                    canvas: padCanvas.current,
-                    color: '#ffffff',
-                    coordinates,
-                    // compositeOperation: 'lighter',
-                });
+                ctx.fillStyle = gradientWhite;
+                ctx.fillRect(0, 0, width, height);
 
-                if (hex !== currentColor) {
-                    setCurrentColor(rgbToHex(rgb));
+                ctx.fillStyle = gradientBlack;
+                ctx.fillRect(0, 1, width, height);
+
+                // ensure the first pixel is white, the gradients don't usually get it.
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, 1, 1);
+                // ensure the pixel at width, height is the base color.
+                ctx.fillStyle = hexBase;
+                ctx.fillRect(width - 1, 0, 1, 1);
+                // /drawPadCanvas
+
+                if (padPixelCoordinates) {
+                    coordinates = padPixelCoordinates;
+                } else {
+                    coordinates = findColorCoordinates(currentPadCanvas, currentColor);
+                    setPadPixelCoordinates(coordinates);
+                }
+
+                if (coordinates) {
+                    const rgb = coordinatesToColor(coordinates, currentPadCanvas.getContext('2d'));
+                    const hex = rgbToHex(rgb);
+
+                    onColorChange(rgb);
+                    drawCursor({
+                        canvas: padCanvas.current,
+                        color: '#ffffff',
+                        coordinates,
+                        // compositeOperation: 'lighter',
+                    });
+
+                    if (hex !== currentColor) {
+                        setCurrentColor(rgbToHex(rgb));
+                    }
                 }
             }
         }
-    });
+    }, [currentPadCanvas, currentColor, hexBase, onColorChange, padPixelCoordinates]);
 
     useEffect(() => {
-        const { current: canvas } = slideCanvas;
-        const { offsetWidth: width, offsetWidth: height } = canvas;
-        const context = canvas.getContext('2d');
+        if (currentSlideCanvas) {
+            const { offsetWidth: width, offsetHeight: height } = currentSlideCanvas;
+            const ctx = currentSlideCanvas.getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
 
-        if (width > 0 && height > 0) {
-            let coordinates;
-            context.clearRect(0, 0, width, height);
-            drawSlideCanvas(canvas);
+            gradient.addColorStop(0, 'rgba(255, 0, 0, 1)');
+            gradient.addColorStop(0.17, 'rgba(255, 255, 0, 1)');
+            gradient.addColorStop(0.34, 'rgba(0, 255, 0, 1)');
+            gradient.addColorStop(0.51, 'rgba(0, 255, 255, 1)');
+            gradient.addColorStop(0.68, 'rgba(0, 0, 255, 1)');
+            gradient.addColorStop(0.85, 'rgba(255, 0, 255, 1)');
+            gradient.addColorStop(1, 'rgba(255, 0, 0, 1)');
 
-            if (slidePixelCoordinates) {
-                coordinates = slidePixelCoordinates;
-            } else {
-                coordinates = findColorCoordinates(canvas, hexBase);
-                setSlidePixelCoordinates(coordinates);
-            }
+            if (width > 0 && height > 0) {
+                let coordinates;
+                ctx.clearRect(0, 0, width, height);
 
-            if (coordinates) {
-                const rgb = coordinatesToColor(coordinates, canvas.getContext('2d'));
-                const hex = rgbToHex(rgb);
-                drawCursor({
-                    canvas: slideCanvas.current,
-                    // color: '#000000',
-                    color: toHex(0xffffff - parseInt(hex.replace('#', ''), 16)),
-                    coordinates,
-                    mode: 'x',
-                    // compositeOperation: 'lighter',
-                    alpha: 1,
-                });
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
 
-                if (hex !== hexBase) {
-                    setHexBase(hex);
+                if (slidePixelCoordinates) {
+                    coordinates = slidePixelCoordinates;
+                } else {
+                    coordinates = findColorCoordinates(currentSlideCanvas, hexBase);
+                    setSlidePixelCoordinates(coordinates);
+                }
+
+                if (coordinates) {
+                    const rgb = coordinatesToColor(coordinates, currentSlideCanvas.getContext('2d'));
+                    const hex = rgbToHex(rgb);
+                    drawCursor({
+                        canvas: slideCanvas.current,
+                        // color: '#000000',
+                        color: toHex(0xffffff - parseInt(hex.replace('#', ''), 16)),
+                        coordinates,
+                        mode: 'x',
+                        // compositeOperation: 'lighter',
+                        alpha: 1,
+                    });
+
+                    if (hex !== hexBase) {
+                        setHexBase(hex);
+                    }
                 }
             }
         }
-    });
+    }, [currentSlideCanvas, hexBase, slidePixelCoordinates]);
 
     return (
         <Trigger backgroundColor={currentColor} onClick={toggleActive}>
@@ -339,7 +347,7 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
                     onPointerMove={event => {
                         event.preventDefault();
                         if (padDragging) {
-                            const { target: canvas } = event;
+                            // const { target: canvas } = event;
                             const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
                             setPadPixelCoordinates(coordinates);
                         }
@@ -377,7 +385,7 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
                     onPointerMove={event => {
                         event.preventDefault();
                         if (slideDragging) {
-                            const { target: canvas } = event;
+                            // const { target: canvas } = event;
                             const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
                             setSlidePixelCoordinates(coordinates);
                         }
@@ -422,4 +430,3 @@ ColorPicker.propTypes = {
 };
 
 export default ColorPicker;
-// export default React.memo(ColorPicker, isEqual);
