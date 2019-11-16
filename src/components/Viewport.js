@@ -1,20 +1,9 @@
 // src/js/components/Viewport.js
-import {
-    CustomPIXIComponent,
-    withApp,
-} from "react-pixi-fiber";
-import { connect } from "react-redux";
-import * as PIXI from "pixi.js";
+import deepEqual from 'deep-equal';
+import { CustomPIXIComponent } from "react-pixi-fiber";
 import { Viewport } from 'pixi-viewport'
 
-// import { addVertex } from 'App/actions/actions';
-import ScreenContext from 'contexts/ScreenContext';
-import {
-    pixiHandlersToEvents,
-    updateListeners,
-} from  'tools/custom-pixi-component';
-
-const TYPE = "Viewport";
+export const TYPE = "Viewport";
 
 // props:
 // screenWidth
@@ -22,17 +11,49 @@ const TYPE = "Viewport";
 // worldWidth
 // worldHeight
 // interaction = app.renderer.interaction
-const mapStateToProps = state => {
-    return { ...state }
+export const EVENT_BY_PROPNAME = {
+    onbouncexend: 'bounce-x-end',
+    onbouncexstart: 'bounce-x-start',
+    onbounceyend: 'bounce-y-end',
+    onbounceystart: 'bounce-y-start',
+    onclicked: 'clicked',
+    ondragend: 'drag-end',
+    ondragstart: 'drag-start',
+    onframeend: 'frame-end',
+    onmouseedgeend: 'mouse-edge-end',
+    onmouseedgestart: 'mouse-edge-start',
+    onmoved: 'moved',
+    onmovedend: 'moved-end',
+    onpinchend: 'pinch-end',
+    onpinchstart: 'pinch-start',
+    onsnapend: 'snap-end',
+    onsnapstart: 'snap-start',
+    onsnapzoomend: 'snap-zoom-end',
+    onsnapzoomstart: 'snap-zoom-start',
+    onwheel: 'wheel',
+    onwheelscroll: 'wheel-scroll',
+    onzoomed: 'zoomed',
+    onzoomedend: 'zoomed-end',
 };
-const mapDispatchToProps = dispatch => ({
-    // addVertex: ({x, y }) => dispatch(addVertex({ x, y })),
-});
 
-const behavior = {
-    customDisplayObject: function(props) {
-        const { app: { renderer }, backgroundColor, ...rest } = props;
-        const instance = new Viewport({ ...rest, interaction: renderer.plugins.interaction });
+export const PLUGIN_PROPS = [
+    'bounce',
+    'clamp',
+    'clampZoom',
+    'decelerate',
+    'drag',
+    'follow',
+    'mouseEdges',
+    'pinch',
+    'snap',
+    'snapZoom',
+    'wheel',
+];
+
+export const behavior = {
+    customDisplayObject: props => {
+        const { app: { renderer }, ...rest } = props;
+        const instance = new Viewport({ interaction: renderer.plugins.interaction, ...rest });
         // instance.on('pointertap', e => {
         //     switch (true) {
         //         case props.ctrlPressed && !props.altPressed:
@@ -43,44 +64,70 @@ const behavior = {
         //             break;
         //     }
         // });
-        renderer.backgroundColor = backgroundColor;
 
         return instance;
     },
-    customDidAttach: instance => {
-        instance
-            .drag()
-            .pinch()
-            .wheel({ percent: 0.05 })
-            .resize();
-    },
     customApplyProps: function(instance, oldProps, newProps) {
         const {
-            app: { renderer },
-            backgroundColor,
             screenWidth,
             screenHeight,
             worldWidth,
             worldHeight,
-        } = newProps;
+            ...newPropsRest
+        } = Object.entries(newProps)
+                .filter(([propName, prop]) => (
+                    !Object.keys(EVENT_BY_PROPNAME).includes(propName) && !PLUGIN_PROPS.includes(propName)
+                ))
+                // .filter(([propName, prop]) => !PLUGIN_PROPS.includes(propName))
+                .reduce((props, [propName, prop]) => ({ ...props, [propName]: prop }), {});
+        const {
+            app,
+            screenWidth: oldScreenWidth,
+            screenHeight: oldScreenHeight,
+            worldWidth: oldWorldWidth,
+            worldHeight: oldWorldHeight,
+            ...oldPropsRest
+        } = Object.entries(oldProps)
+                .filter(([propName, prop]) => (
+                    !Object.keys(EVENT_BY_PROPNAME).includes(propName) && !PLUGIN_PROPS.includes(propName)
+                ))
+                // .filter(([propName, prop]) => !PLUGIN_PROPS.includes(propName))
+                .reduce((props, [propName, prop]) => ({ ...props, [propName]: prop }), {});
 
         instance.resize(screenWidth, screenHeight, worldWidth, worldHeight);
 
-        if (backgroundColor !== oldProps.backgroundColor) {
-            renderer.backgroundColor = backgroundColor;
-        }
+        Object.entries(newProps).forEach(([propName, prop]) => {
+            updateEventProp(instance, propName, prop, oldProps[propName])
+            updatePluginProp(instance, propName, prop, oldProps[propName]);
+        });
 
-        switch (true) {
-            case newProps.ctrlPressed:
-                instance.cursor = "pointer";
-                break;
-            default:
-                instance.cursor = "grab";
-                break;
-        }
-        updateListeners(instance, oldProps, newProps, { ...pixiHandlersToEvents, onZoomed: 'zoomed' });
-        // this.applyDisplayObjectProps(oldProps,newProps)
+        this.applyDisplayObjectProps(oldPropsRest, newPropsRest);
     },
 };
+
+export const updatePluginProp = (instance, pluginName, options, oldOptions) => {
+    // @TODO do something better for shallow comparison
+    if (PLUGIN_PROPS.includes(pluginName) && !deepEqual(options, oldOptions)) {
+        Object.entries(options).length ? instance[pluginName](options) : instance[pluginName]();
+    }
+};
+
+export const updateEventProp = (instance, propName, prop, oldProp) => {
+    if (Object.keys(EVENT_BY_PROPNAME).includes(propName)) {
+        // const eventName = EVENT_BY_PROPNAME[propName];
+        // const listener = prop;
+
+        // instance.off(eventName, oldProp);
+        // instance.on(eventName, listener);
+    }
+};
+
+// export const updateEventProp = (instance, propName, prop, oldProp) => {
+//     const eventName = EVENT_BY_PROPNAME[propName];
+//     const listener = prop;
+
+//     instance.off(eventName, oldProp);
+//     instance.on(eventName, listener);
+// };
 
 export default CustomPIXIComponent(behavior, TYPE);
