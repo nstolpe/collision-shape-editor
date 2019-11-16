@@ -19,7 +19,7 @@ import {
 
 import Edges from 'App/components/Edges';
 import Vertices from 'App/components/Vertices';
-import Viewport from 'App/components/Viewport';
+import Viewport from 'App/components/base/Viewport';
 import {
     addVertex,
     resize,

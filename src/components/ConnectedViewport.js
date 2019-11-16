@@ -10,7 +10,7 @@ import {
     scaleUI,
 } from 'actions/actions';
 import ScreenContext from 'contexts/ScreenContext';
-import Viewport from 'components/Viewport';
+import Viewport from 'components/base/Viewport';
 
 const mapStateToProps = (state, ownProps) => ({ ...state });
 

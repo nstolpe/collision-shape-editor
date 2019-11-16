@@ -4,14 +4,12 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { AppContext, Stage } from 'react-pixi-fiber';
 import {
-    connect,
     Provider,
     ReactReduxContext,
 } from 'react-redux';
 
 import { scaleUI } from 'actions/actions';
 import { StageCanvas } from 'data/styles';
-import Viewport from 'components/Viewport';
 import ConnectedViewport from 'components/ConnectedViewport';
 
 // needs context
@@ -60,5 +58,4 @@ Screen.propTypes = {
     context: PropTypes.object.isRequired,
 };
 
-// export default connect(state => state)(Screen);
 export default Screen;

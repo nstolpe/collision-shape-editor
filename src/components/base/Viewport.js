@@ -1,4 +1,4 @@
-// src/js/components/Viewport.js
+// src/js/components/base/Viewport.js
 import deepEqual from 'deep-equal';
 import { CustomPIXIComponent } from "react-pixi-fiber";
 import { Viewport } from 'pixi-viewport'
@@ -78,7 +78,6 @@ export const behavior = {
                 .filter(([propName, prop]) => (
                     !Object.keys(EVENT_BY_PROPNAME).includes(propName) && !PLUGIN_PROPS.includes(propName)
                 ))
-                // .filter(([propName, prop]) => !PLUGIN_PROPS.includes(propName))
                 .reduce((props, [propName, prop]) => ({ ...props, [propName]: prop }), {});
         const {
             app,
@@ -91,7 +90,6 @@ export const behavior = {
                 .filter(([propName, prop]) => (
                     !Object.keys(EVENT_BY_PROPNAME).includes(propName) && !PLUGIN_PROPS.includes(propName)
                 ))
-                // .filter(([propName, prop]) => !PLUGIN_PROPS.includes(propName))
                 .reduce((props, [propName, prop]) => ({ ...props, [propName]: prop }), {});
 
         instance.resize(screenWidth, screenHeight, worldWidth, worldHeight);
@@ -114,11 +112,11 @@ export const updatePluginProp = (instance, pluginName, options, oldOptions) => {
 
 export const updateEventProp = (instance, propName, prop, oldProp) => {
     if (Object.keys(EVENT_BY_PROPNAME).includes(propName)) {
-        // const eventName = EVENT_BY_PROPNAME[propName];
-        // const listener = prop;
+        const eventName = EVENT_BY_PROPNAME[propName];
+        const listener = prop;
 
-        // instance.off(eventName, oldProp);
-        // instance.on(eventName, listener);
+        instance.off(eventName, oldProp);
+        instance.on(eventName, listener);
     }
 };
 
