@@ -58,9 +58,9 @@ const initialState = {
 };
 
 const reducer = (state, action) => {
-    const { data } = action;
+    const { data, type } = action;
 
-    switch (action.type) {
+    switch (type) {
         case ADD_VERTEX:
             const { x, y } = data;
 

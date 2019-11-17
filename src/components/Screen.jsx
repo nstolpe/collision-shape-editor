@@ -10,7 +10,7 @@ import {
 
 import { scaleUI } from 'actions/actions';
 import { StageCanvas } from 'data/styles';
-import ConnectedViewport from 'components/ConnectedViewport';
+import InteractiveViewport from 'components/InteractiveViewport';
 
 // needs context
 const Screen = ({ context, children, width, height }) => (
@@ -38,7 +38,7 @@ const Screen = ({ context, children, width, height }) => (
             >
                 <AppContext.Consumer>{app => (
                     <Provider store={store} context={context}>
-                        <ConnectedViewport
+                        <InteractiveViewport
                             app={app}
                             screenWidth={width}
                             screenHeight={height}
@@ -46,7 +46,7 @@ const Screen = ({ context, children, width, height }) => (
                             worldHeight={height}
                         >
                             {React.Children.map(children, child => React.cloneElement(child, { width, height }))}
-                        </ConnectedViewport>
+                        </InteractiveViewport>
                     </Provider>
                 )}</AppContext.Consumer>
             </Stage>

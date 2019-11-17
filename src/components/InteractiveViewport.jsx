@@ -1,4 +1,4 @@
-// src/js/components/ConnectedViewport.js
+// src/js/components/InteractiveViewport.js
 import * as PIXI from 'pixi.js';
 import { connect } from "react-redux";
 import React, { useEffect, useContext, useRef, useState } from 'react';
@@ -21,9 +21,8 @@ const mapDispatchToProps = dispatch => ({
     scaleUI: scale => dispatch(scaleUI(scale)),
 });
 
-const ConnectedViewport = props => {
+const InteractiveViewport = props => {
     const viewport = useRef(null);
-    // const [backgroundColor, setBackgroundColor] = useState(props.backgroundColor);
     const {
         textureSources = [],
         backgroundColor,
@@ -34,20 +33,10 @@ const ConnectedViewport = props => {
         screenHeight,
     } = props;
     const context = useContext(ScreenContext);
-    // debugger;
+
     useEffect(() => {
         renderer.backgroundColor = backgroundColor;
     }, [renderer, backgroundColor]);
-
-    // useEffect(() => {
-    //     console.log('viewport')
-    //     console.log(viewport)
-    //     viewport.current
-    //         .drag()
-    //         .pinch()
-    //         // .wheel({ percent: 0.05 })
-    //         .resize();
-    // }, []);
 
     useEffect(
         () => {
@@ -83,9 +72,10 @@ const ConnectedViewport = props => {
             pinch
             wheel={{ percent: 0.05 }}
             onzoomed={({ viewport }) => props.scaleUI(viewport.scale)}
+            onwheel={function f(e) { console.log(e) }}
             {...props}
         />
     )
 };
 
-export default connect(mapStateToProps, mapDispatchToProps, null, { context: ScreenContext })(ConnectedViewport);
+export default connect(mapStateToProps, mapDispatchToProps, null, { context: ScreenContext })(InteractiveViewport);

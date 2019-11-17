@@ -50,6 +50,17 @@ export const PLUGIN_PROPS = [
     'wheel',
 ];
 
+export const propGrouprules = [
+    {
+        group: 'eventProps',
+        test: propName => Object.keys(EVENT_BY_PROPNAME).includes(propName),
+    },
+    {
+        group: 'pluginProps',
+        test: propName => PLUGIN_PROPS.includes(propName),
+    },
+];
+
 export const behavior = {
     customDisplayObject: props => {
         const { app: { renderer }, ...rest } = props;
@@ -69,38 +80,73 @@ export const behavior = {
     },
     customApplyProps: function(instance, oldProps, newProps) {
         const {
-            screenWidth,
-            screenHeight,
-            worldWidth,
-            worldHeight,
-            ...newPropsRest
-        } = Object.entries(newProps)
-                .filter(([propName, prop]) => (
-                    !Object.keys(EVENT_BY_PROPNAME).includes(propName) && !PLUGIN_PROPS.includes(propName)
-                ))
-                .reduce((props, [propName, prop]) => ({ ...props, [propName]: prop }), {});
+            eventProps,
+            pluginProps,
+            restProps: {
+                screenWidth,
+                screenHeight,
+                worldWidth,
+                worldHeight,
+                ...newPropsRest
+            },
+        } = groupProps(newProps, propGrouprules);
+
         const {
-            app,
-            screenWidth: oldScreenWidth,
-            screenHeight: oldScreenHeight,
-            worldWidth: oldWorldWidth,
-            worldHeight: oldWorldHeight,
-            ...oldPropsRest
-        } = Object.entries(oldProps)
-                .filter(([propName, prop]) => (
-                    !Object.keys(EVENT_BY_PROPNAME).includes(propName) && !PLUGIN_PROPS.includes(propName)
-                ))
-                .reduce((props, [propName, prop]) => ({ ...props, [propName]: prop }), {});
+            restProps: {
+                screenWidth: oldScreenWidth,
+                screenHeight: oldScreenHeight,
+                worldWidth: oldWorldWidth,
+                worldHeight: oldWorldHeight,
+                ...oldPropsRest
+            }
+        } = groupProps(oldProps, propGrouprules);
 
         instance.resize(screenWidth, screenHeight, worldWidth, worldHeight);
 
-        Object.entries(newProps).forEach(([propName, prop]) => {
-            updateEventProp(instance, propName, prop, oldProps[propName])
-            updatePluginProp(instance, propName, prop, oldProps[propName]);
-        });
+        Object.entries(eventProps).forEach(([propName, prop]) => updateEventProp(instance, propName, prop, oldProps[propName]));
+        Object.entries(pluginProps).forEach(([propName, prop]) => updatePluginProp(instance, propName, prop, oldProps[propName]));
 
         this.applyDisplayObjectProps(oldPropsRest, newPropsRest);
     },
+};
+
+/**
+ *
+ * @param {Object} props  React props object.
+ * @param {Object[]} rules         Prop groups and rules for sorting into them
+ * @param {string} rules[].group   Name of the prop group
+ * @param {function} rules[].test  Function that will evaluate the `propName` based on some
+ *                                 internal criteria. Takes the prop name as its single argument.
+ */
+export const groupProps = (props, rules) => {
+    // const groups = rules.reduce((groups, { group, test}) => { ...groups, [group]: {} }, {});
+
+    return Object.entries(props).reduce((mappedProps, [propName, prop]) => {
+        let grouped = false;
+
+        for (let i = 0, l = rules.length; i < l; i++) {
+            const { group, test } = rules[i];
+
+            // add the group key to mappedProps if it's not there yet.
+            if (!mappedProps.hasOwnProperty(group)) {
+                mappedProps[group] = {};
+            }
+
+            // if the propName passes its first test, add it to the group and exit.
+            if (test(propName)) {
+                mappedProps[group][propName] = prop;
+                grouped = true;
+                break;
+            }
+        }
+
+        // if the prop wasn't grouped in the loop above, add it to restProps
+        if (!grouped) {
+            mappedProps.restProps[propName] = prop;
+        }
+
+        return mappedProps;
+    }, { restProps: {} });
 };
 
 export const updatePluginProp = (instance, pluginName, options, oldOptions) => {
@@ -119,13 +165,5 @@ export const updateEventProp = (instance, propName, prop, oldProp) => {
         instance.on(eventName, listener);
     }
 };
-
-// export const updateEventProp = (instance, propName, prop, oldProp) => {
-//     const eventName = EVENT_BY_PROPNAME[propName];
-//     const listener = prop;
-
-//     instance.off(eventName, oldProp);
-//     instance.on(eventName, listener);
-// };
 
 export default CustomPIXIComponent(behavior, TYPE);
