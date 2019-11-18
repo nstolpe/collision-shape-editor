@@ -1,5 +1,5 @@
 // src/js/store/Store.js
-import React, { useState, useReducer } from 'react';
+import React, { useState, useReducer, useContext } from 'react';
 import {v4 as uuid} from 'uuid';
 
 import {
@@ -19,6 +19,10 @@ import {
 } from "constants/action-types";
 import ScreenContext from 'contexts/ScreenContext';
 import Modes from 'constants/modes';
+
+const AppContext = React.createContext();
+
+export const useAppContext = () => useContext(AppContext);
 
 const initialState = {
     backgroundColor: 0x44fc03,
@@ -149,7 +153,7 @@ const Store = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState);
 
     return (
-        <AppContext.Provider value={{ state, dispatch }}>
+        <AppContext.Provider value={{ ...state, dispatch }}>
             {children}
         </AppContext.Provider>
     )
