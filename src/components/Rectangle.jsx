@@ -45,8 +45,6 @@ export const behavior = {
             pivot,
         } = { ...defaults, ...newProps };
 
-        instance.interactive = !!interactive;
-        instance.buttonMode = !!buttonMode;
         instance.alpha = alpha;
 
         instance.lineStyle(strokeWidth, strokeColor, strokeAlpha, strokeAlignment);
@@ -59,7 +57,7 @@ export const behavior = {
         instance.drawRect(0, 0, width, height);
         instance.endFill();
 
-        updateListeners(instance, oldProps, newProps);
+        this.applyDisplayObjectProps(oldPropsRest, newPropsRest);
     }
 };
 
