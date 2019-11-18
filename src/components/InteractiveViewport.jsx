@@ -2,6 +2,7 @@
 import * as PIXI from 'pixi.js';
 import { connect } from "react-redux";
 import React, { useEffect, useContext, useRef, useState } from 'react';
+import { usePixiApp } from 'react-pixi-fiber';
 
 import {
     addSprite,
@@ -23,11 +24,13 @@ const mapDispatchToProps = dispatch => ({
 
 const InteractiveViewport = props => {
     const viewport = useRef(null);
+    const { loader, renderer } = usePixiApp();
+
     const {
         textureSources = [],
         backgroundColor,
         removeTextureSource,
-        app: { loader, renderer },
+        // app: { loader, renderer },
         addSprite,
         screenWidth,
         screenHeight,
@@ -72,7 +75,7 @@ const InteractiveViewport = props => {
             pinch
             wheel={{ percent: 0.05 }}
             onzoomed={({ viewport }) => props.scaleUI(viewport.scale)}
-            onwheel={function f(e) { console.log(e) }}
+            renderer={renderer}
             {...props}
         />
     )

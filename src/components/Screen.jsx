@@ -36,19 +36,16 @@ const Screen = ({ context, children, width, height }) => (
                 hitArea={new PIXI.Rectangle(0, 0, width, height)}
                 interactive
             >
-                <AppContext.Consumer>{app => (
-                    <Provider store={store} context={context}>
-                        <InteractiveViewport
-                            app={app}
-                            screenWidth={width}
-                            screenHeight={height}
-                            worldWidth={width}
-                            worldHeight={height}
-                        >
-                            {React.Children.map(children, child => React.cloneElement(child, { width, height }))}
-                        </InteractiveViewport>
-                    </Provider>
-                )}</AppContext.Consumer>
+                <Provider store={store} context={context}>
+                    <InteractiveViewport
+                        screenWidth={width}
+                        screenHeight={height}
+                        worldWidth={width}
+                        worldHeight={height}
+                    >
+                        {React.Children.map(children, child => React.cloneElement(child, { width, height }))}
+                    </InteractiveViewport>
+                </Provider>
             </Stage>
         );
     }}</ReactReduxContext.Consumer>

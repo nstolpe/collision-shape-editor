@@ -63,7 +63,7 @@ export const propGrouprules = [
 
 export const behavior = {
     customDisplayObject: props => {
-        const { app: { renderer }, ...rest } = props;
+        const { renderer, ...rest } = props;
         const instance = new Viewport({ interaction: renderer.plugins.interaction, ...rest });
         // instance.on('pointertap', e => {
         //     switch (true) {
