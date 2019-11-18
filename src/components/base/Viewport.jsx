@@ -64,7 +64,8 @@ export const propGrouprules = [
 export const behavior = {
     customDisplayObject: props => {
         const { renderer, ...rest } = props;
-        const instance = new Viewport({ interaction: renderer.plugins.interaction, ...rest });
+        const { plugins: { interaction } } = renderer;
+        const instance = new Viewport({ ...rest, interaction });
         // instance.on('pointertap', e => {
         //     switch (true) {
         //         case props.ctrlPressed && !props.altPressed:
