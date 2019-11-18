@@ -60,25 +60,29 @@ const Child = () => {
             radius={radius}
             fill={fill}
             position={position}
-            interactive={true}
+            interactive
             buttonMode
             pointertap={e => dispatch({ type: CHANGE_FILL, data: { fill: 0xffffff - fill } })}
         />
     );
 };
 
+// Renders the `Stage` with `InnerStore` inside it but above any children
 const GraphicsScreen = ({ children }) => {
     const state = useOuterContext();
     return (
         <Stage
             width={state.width}
             height={state.height}
+            options={{ backgroundColor: state.backgroundColor }}
         >
             <InnerStore state={state}>{children}</InnerStore>
         </Stage>);
 };
 
+// state
 const initialState = {
+    backgroundColor: 0x777777,
     radius: 20,
     fill: 0xffffff,
     width: 200,
@@ -89,6 +93,7 @@ const initialState = {
 const CHANGE_FILL = 'CHANGE_FILL';
 const CHANGE_RADIUS = 'CHANGE_RADIUS';
 
+// reducer to pass to `useReducer` inside `OuterStore`.
 const reducer = (state, { data, type }) => {
     switch (type) {
         case CHANGE_FILL:
@@ -102,7 +107,7 @@ const reducer = (state, { data, type }) => {
     };
 };
 
-
+// the outer store for the whole app. adds `dispatch` to state so it can be updated.
 const OuterStore = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -113,6 +118,8 @@ const OuterStore = ({ children }) => {
     );
 };
 
+// the inner store for components rendered by PIXI. render it inside of
+// Stage and pass it `state` from `useOuterContext()`.
 const InnerStore = ({ children, state }) => {
     return (
         <InnerContext.Provider value={state}>
