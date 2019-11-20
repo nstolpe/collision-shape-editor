@@ -1,5 +1,4 @@
-// src/js/store/Store.js
-import React, { useState, useReducer, useContext } from 'react';
+// src/reducers/root-reducer.js
 import {v4 as uuid} from 'uuid';
 
 import {
@@ -16,15 +15,11 @@ import {
     ADD_TEXTURE_SOURCE,
     REMOVE_TEXTURE_SOURCE,
     ADD_SPRITE,
-} from "constants/action-types";
-import ScreenContext from 'contexts/ScreenContext';
+} from 'constants/action-types';
 import Modes from 'constants/modes';
+import Tools from 'constants/tools';
 
-const AppContext = React.createContext();
-
-export const useAppContext = () => useContext(AppContext);
-
-const initialState = {
+export const initialState = {
     backgroundColor: 0x44fc03,
     mode: Modes.VERTEX,
     tool: Tools.ADD,
@@ -66,39 +61,29 @@ const reducer = (state, action) => {
 
     switch (type) {
         case ADD_VERTEX:
-            const { x, y } = data;
-
             return {
                 ...state,
-                vertices: [...state.vertices, { data.x, data.y, id: uuid() }],
+                vertices: [...state.vertices, { x: data.x, y: data.y, id: uuid() }],
             };
         case DELETE_VERTEX:
-            const { id } = data;
-
             return {
                 ...state,
-                vertices: state.vertices.filter(vertex => vertex.id !== id),
+                vertices: state.vertices.filter(vertex => vertex.id !== data.id),
             };
         case MOVE_VERTEX:
-            const { id, x, y } = data;
-
             return {
                 ...state,
                 vertices: state.vertices.map(vertex => vertex.id === data.id ? data : vertex),
             };
         case START_MOVE_VERTEX:
-            const { id } = data;
-
             return {
                 ...state,
-                movingVerticeIds: [...state.movingVerticeIds, id],
+                movingVerticeIds: [...state.movingVerticeIds, data.id],
             };
         case STOP_MOVE_VERTEX:
-            const { id } = data;
-
             return {
                 ...state,
-                movingVerticeIds: state.movingVerticeIds.filter(vertexId => vertexId !== id),
+                movingVerticeIds: state.movingVerticeIds.filter(vid => vid !== data.id),
             };
         case RESIZE:
             return {
@@ -106,17 +91,14 @@ const reducer = (state, action) => {
                 ...action.data,
             };
         case SCALE_UI:
-            const { x, y } = data;
-
             return {
                 ...state,
-                UIScale: { x, y },
+                UIScale: { x: data.x, y: data.y },
             };
         case SET_BACKGROUND_COLOR:
-            const { backgroundColor } = data;
             return {
                 ...state,
-                backgroundColor,
+                backgroundColor: data.backgroundColor,
             };
         case SET_ALT_PRESSED:
             return {
@@ -149,14 +131,4 @@ const reducer = (state, action) => {
     }
 };
 
-const Store = ({ children }) => {
-    const [state, dispatch] = useReducer(reducer, initialState);
-
-    return (
-        <AppContext.Provider value={{ ...state, dispatch }}>
-            {children}
-        </AppContext.Provider>
-    )
-};
-
-export default Store;
+export default reducer;
