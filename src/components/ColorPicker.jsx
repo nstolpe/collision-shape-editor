@@ -83,8 +83,17 @@ const Label = styled.label`
 const Input = styled.input`
 `;
 
-
-const SaturationValueCanvas = ({ activeColor, height, width, onColorChange, setActiveColor }) => {
+const SaturationValueCanvas = ({
+    activeHue,
+    activeSaturation,
+    activeValue,
+    height,
+    width,
+    onColorChange,
+    setActiveColor,
+    setActiveSaturation,
+    setActiveValue,
+}) => {
     const [dragging, setDragging] = useState(false);
     const handlePointerDown = event => {
         event.preventDefault();
@@ -96,10 +105,12 @@ const SaturationValueCanvas = ({ activeColor, height, width, onColorChange, setA
         event.preventDefault();
         event.stopPropagation();
         if (dragging) {
-            const { nativeEvent: { offsetX: saturation, offsetY: value } } = event;
-            // console.log('saturation', saturation, 'value', value);
-            const color = chroma(activeColor.set('hsv.s', saturation / width).set('hsv.v', 1 - (value / height)));
-            // console.log('color', color.hsv())
+            const { nativeEvent: { offsetX: x, offsetY: y } } = event;
+            const saturation = x / width;
+            const value = 1 - (y / height);
+            const color = chroma({ h: activeHue, s: saturation, v: value });
+            setActiveSaturation(saturation);
+            setActiveValue(value);
             setActiveColor(color);
             onColorChange({ r: color.get('rgb.r'), g: color.get('rgb.g'), b: color.get('rgb.b') });
         }
@@ -109,8 +120,12 @@ const SaturationValueCanvas = ({ activeColor, height, width, onColorChange, setA
         event.preventDefault();
         event.stopPropagation();
         if (dragging) {
-            const { nativeEvent: { offsetX: saturation, offsetY: value } } = event;
-            const color = chroma(activeColor.set('hsv.s', saturation / width).set('hsv.v', 1 - (value / height)));
+            const { nativeEvent: { offsetX: x, offsetY: y } } = event;
+            const saturation = x / width;
+            const value = 1 - (y / height);
+            const color = chroma({ h: activeHue, s: saturation, v: value });
+            setActiveSaturation(saturation);
+            setActiveValue(value);
             setActiveColor(color);
             onColorChange({ r: color.get('rgb.r'), g: color.get('rgb.g'), b: color.get('rgb.b') });
             setDragging(false);
@@ -126,11 +141,10 @@ const SaturationValueCanvas = ({ activeColor, height, width, onColorChange, setA
             const valueGradient = ctx.createLinearGradient(0, 0, 0, height);
 
             // only need the hue for the background.
-            const color = chroma({ h: activeColor.get('hsv.h'), s: 1, v: 1 });
+            const color = chroma({ h: activeHue, s: 1, v: 1 });
             const hex = color.hex();
-            const [,saturation, value] = activeColor.hsv();
-            const x = saturation * width;
-            const y = value * height;
+            const x = activeSaturation * width;
+            const y = activeValue * height;
 
             ctx.clearRect(0, 0, width, height);
 
@@ -186,7 +200,7 @@ const SaturationValueCanvas = ({ activeColor, height, width, onColorChange, setA
             ctx.fillStyle = colGradient;
             ctx.fillRect(x, 0, 1, height);
         }
-    }, [activeColor, height, width]);
+    }, [activeHue, activeSaturation, activeValue, height, width]);
 
     return (
         <PadCanvas ref={canvas} width={width} height={height}
@@ -199,7 +213,7 @@ const SaturationValueCanvas = ({ activeColor, height, width, onColorChange, setA
     );
 };
 
-const HueCanvas = ({ activeColor, height, width, onColorChange, setActiveColor }) => {
+const HueCanvas = ({ activeHue, activeSaturation, activeValue, setActiveColor, setActiveHue, height, width, onColorChange }) => {
     const [dragging, setDragging] = useState(false);
 
     const handlePointerDown = event => {
@@ -208,12 +222,15 @@ const HueCanvas = ({ activeColor, height, width, onColorChange, setActiveColor }
         setDragging(true);
     };
 
+    const handlePointerLeave = event => setDragging(false);
+
     const handlePointerMove = event => {
         event.preventDefault();
         event.stopPropagation();
         if (dragging) {
             const hue = event.nativeEvent.offsetY;
-            const color = chroma(activeColor).set('hsv.h', hue);
+            const color = chroma({ h: hue, s: activeSaturation, v: activeValue });
+            setActiveHue(hue);
             setActiveColor(color);
             onColorChange({ r: color.get('rgb.r'), g: color.get('rgb.g'), b: color.get('rgb.b') });
         }
@@ -224,7 +241,8 @@ const HueCanvas = ({ activeColor, height, width, onColorChange, setActiveColor }
         event.stopPropagation();
         if (dragging) {
             const hue = event.nativeEvent.offsetY;
-            const color = chroma(activeColor).set('hsv.h', hue);
+            const color = chroma({ h: hue, s: activeSaturation, v: activeValue });
+            setActiveHue(hue);
             setActiveColor(color);
             onColorChange({ r: color.get('rgb.r'), g: color.get('rgb.g'), b: color.get('rgb.b') });
             setDragging(false);
@@ -242,12 +260,11 @@ const HueCanvas = ({ activeColor, height, width, onColorChange, setActiveColor }
 
                 for (let row = 0; row < height; row += interval) {
                     const color = chroma({ h: Math.ceil(row), s: 1, l: 0.5 });
-                    const activeHue = activeColor.get('hsv.h');
                     ctx.fillStyle = color.hex();
 
                     // if this is the active row indicate it.
-                    if (activeHue > row && activeHue <= (row + interval)) {
-                        const inverse = chroma(0xffffff - parseInt(activeColor.hex().replace('#', ''), 16));
+                    if (activeHue >= row && activeHue < (row + interval)) {
+                        const inverse = chroma(0xffffff - parseInt(color.hex().replace('#', ''), 16));
                         ctx.fillStyle = inverse.hex();
                     }
 
@@ -255,11 +272,12 @@ const HueCanvas = ({ activeColor, height, width, onColorChange, setActiveColor }
                 }
             }
         }
-    }, [activeColor, height, width]);
+    }, [activeHue, activeSaturation, activeValue, height, width]);
 
     return (
         <SlideCanvas ref={canvas} width={width} height={height}
             onPointerDown={handlePointerDown}
+            onPointerLeave={handlePointerLeave}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             dragging={dragging}
@@ -283,15 +301,23 @@ const ColorPicker = ({ initialColor, padWidth, padHeight, slideWidth, slideHeigh
                 <SaturationValueCanvas
                     width={padWidth}
                     height={padHeight}
-                    activeColor={activeColor}
+                    activeHue={activeHue}
+                    activeSaturation={activeSaturation}
+                    activeValue={activeValue}
+                    activeHue={activeHue}
                     setActiveColor={setActiveColor}
+                    setActiveSaturation={setActiveSaturation}
+                    setActiveValue={setActiveValue}
                     onColorChange={onColorChange}
                 />
                 <HueCanvas
                     width={slideWidth}
                     height={slideHeight}
-                    activeColor={activeColor}
+                    activeHue={activeHue}
+                    activeSaturation={activeSaturation}
+                    activeValue={activeValue}
                     setActiveColor={setActiveColor}
+                    setActiveHue={setActiveHue}
                     onColorChange={onColorChange}
                 />
                 <ValuesWrapper>
@@ -299,7 +325,7 @@ const ColorPicker = ({ initialColor, padWidth, padHeight, slideWidth, slideHeigh
                         RGB:<Input type="text" value={`${activeColor.get('rgb.r')}/${activeColor.get('rgb.g')}/${activeColor.get('rgb.b')}`} readOnly />
                     </Label>
                     <Label>
-                        HSV:<Input type="text" value={`${activeColor.get('hsv.h').toFixed()}/${activeColor.get('hsv.s').toFixed(3)}/${activeColor.get('hsv.v').toFixed(3)}`} readOnly />
+                        HSV:<Input type="text" value={`${activeHue}/${activeSaturation.toFixed(3)}/${activeValue.toFixed(3)}`} readOnly />
                     </Label>
                     <Label>
                         Hex:<Input type="text" value={activeColor.hex()} readOnly />

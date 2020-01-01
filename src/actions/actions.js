@@ -51,9 +51,9 @@ export const scaleUI = ({ x, y }) => ({
     data: { x, y },
 });
 
-export const setBackgroundColor = color => ({
+export const setBackgroundColor = backgroundColor => ({
     type: SET_BACKGROUND_COLOR,
-    data: { color },
+    data: { backgroundColor },
 });
 
 export const setAltPressed = pressed => ({
