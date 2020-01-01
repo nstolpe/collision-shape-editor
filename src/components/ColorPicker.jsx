@@ -2,23 +2,19 @@
 // reference: https://codepen.io/amwill/pen/ZbdGeW
 import PropTypes from 'prop-types';
 import React, {
-    useEffect,
-    useRef,
+    useCallback,
     useState,
 } from 'react';
 import styled from 'styled-components';
+import chroma from 'chroma-js';
 
-import {
-    hexToRgb,
-    hslToRgb,
-    rgbToHex,
-    rgbToHsl,
-    toHex,
-} from 'tools/color';
-
-const Trigger = styled.a`
-    width: ${({ triggerWidth }) => triggerWidth == null ? '5.4em' : triggerWidth};
-    height: ${({ triggerHeight }) => triggerHeight == null ?'5.4em' : triggerHeight};
+const Trigger = styled.a.attrs(({ triggerWidth, triggerHeight, backgroundColor }) => ({
+    width: triggerWidth == null ? '5.4em' : triggerWidth,
+    height: triggerHeight == null ?'5.4em' : triggerHeight,
+    backgroundColor: backgroundColor,
+}))`
+    width: ${({ width }) => width};
+    height: ${({ height }) => height};
     background-color: ${({ backgroundColor }) => backgroundColor};
     text-decoration: none;
     display: inline-block;
@@ -33,6 +29,7 @@ const Trigger = styled.a`
     }
 `;
 
+
 const Panel = styled.div`
     position: absolute;
     display: ${({active}) => active ? 'flex' : 'none'};
@@ -44,12 +41,6 @@ const Panel = styled.div`
     cursor: default;
 `;
 
-// const CanvasWrapper = styled.div`
-//     display: flex;
-//     display: inline-block;
-//     box-sizing: border-box;
-//     position: relative;
-// `;
 
 const ValuesWrapper = styled.div`
     display: flex;
@@ -68,7 +59,6 @@ const PadCanvas = styled.canvas`
     width: ${({ width }) => `${width}px`};
     height: ${({ height }) => `${height}px`};
     vertical-align: middle;
-    cursor: crosshair;
     cursor: ${({ dragging }) => dragging ? 'none' : cursor};
     touch-action: none;
 `;
@@ -94,316 +84,225 @@ const Input = styled.input`
 `;
 
 
-const drawCursor = ({ canvas, color, coordinates, mode='xy', alpha=0.5, compositeOperation='source-over' }) => {
-    const ctx = canvas.getContext('2d');
-    const width = canvas.offsetWidth;
-    const height = canvas.offsetHeight;
-
-    ctx.globalCompositeOperation = compositeOperation;
-    ctx.globalAlpha = alpha;
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1;
-
-    if (['x', 'xy'].includes(mode)) {
-        ctx.beginPath();
-        ctx.moveTo(0, coordinates.y);
-        ctx.lineTo(width, coordinates.y);
-        ctx.stroke();
+const SaturationValueCanvas = ({ activeColor, height, width, onColorChange, setActiveColor }) => {
+    const [dragging, setDragging] = useState(false);
+    const handlePointerDown = event => {
+        event.preventDefault();
+        event.stopPropagation();
+        setDragging(true);
     }
 
-    if (['y', 'xy'].includes(mode)) {
-        ctx.beginPath();
-        ctx.moveTo(coordinates.x, 0);
-        ctx.lineTo(coordinates.x, height);
-        ctx.stroke();
-    }
-
-    ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = 'source-over';
-};
-
-// const drawSlideCanvas = (canvas) => {
-//     if (canvas.offsetWidth < 1 || canvas.offsetHeight < 1) {
-//         return;
-//     }
-
-//     const ctx = canvas.getContext('2d');
-//     const width = canvas.offsetWidth;
-//     const height = canvas.offsetHeight;
-//     const gradient = ctx.createLinearGradient(0, 0, 0, height);
-
-//     gradient.addColorStop(0, 'rgba(255, 0, 0, 1)');
-//     gradient.addColorStop(0.17, 'rgba(255, 255, 0, 1)');
-//     gradient.addColorStop(0.34, 'rgba(0, 255, 0, 1)');
-//     gradient.addColorStop(0.51, 'rgba(0, 255, 255, 1)');
-//     gradient.addColorStop(0.68, 'rgba(0, 0, 255, 1)');
-//     gradient.addColorStop(0.85, 'rgba(255, 0, 255, 1)');
-//     gradient.addColorStop(1, 'rgba(255, 0, 0, 1)');
-//     ctx.fillStyle = gradient;
-//     ctx.fillRect(0, 0, width, height);
-// };
-
-const coordinatesToColor = ({ x, y }, ctx) => {
-    let color;
-    try {
-        color = ctx.getImageData(x, y, 1, 1).data;
-    } catch (e) {
-        debugger;
-    }
-
-    return { r: color[0], g: color[1], b: color[2] };
-};
-
-const findColorCoordinates = (canvas, targetHex) => {
-    const ctx = canvas.getContext('2d');
-    const { offsetWidth: width, offsetHeight: height } = canvas;
-    const pixels = ctx.getImageData(0, 0, width, height).data;
-    const r = pixels.findIndex((val, idx, arr) => {
-        if (idx % 4 === 0) {
-            const r = arr[idx];
-            const g = arr[idx + 1];
-            const b = arr[idx + 2];
-            const currentHex = rgbToHex({ r, g, b })
-            if (currentHex === targetHex) {
-                return true;
-            }
+    const handlePointerMove = event => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (dragging) {
+            const { nativeEvent: { offsetX: saturation, offsetY: value } } = event;
+            // console.log('saturation', saturation, 'value', value);
+            const color = chroma(activeColor.set('hsv.s', saturation / width).set('hsv.v', 1 - (value / height)));
+            // console.log('color', color.hsv())
+            setActiveColor(color);
+            onColorChange({ r: color.get('rgb.r'), g: color.get('rgb.g'), b: color.get('rgb.b') });
         }
-        return false;
-    });
-
-    return r < 0 ? undefined : {
-        x: (r * .25) % width,
-        y: Math.floor((r * .25) / width),
     };
-};
 
-// ignore the color prop after initial render. used with memo
-// const isEqual = (prevProps, nextProps) => Object.entries(nextProps).reduce((acc, [key, val]) => !acc ? acc : key === 'color' ? true : val === prevProps[key], true);
-
-
-const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onColorChange }) => {
-    // saturation & lightness 2d pad
-    const padCanvas = useRef(null);
-    const currentPadCanvas = padCanvas.current;
-    // hue 1d slide
-    const slideCanvas = useRef(null);
-    const currentSlideCanvas = slideCanvas.current;
-    // state
-    const [active, setActive] = useState(false);
-    // state - dragging
-    const [padDragging, setPadDragging] = useState(false);
-    const [slideDragging, setSlideDragging] = useState(false);
-    // state - coordinates
-    const [padPixelCoordinates, setPadPixelCoordinates] = useState(false);
-    const [slidePixelCoordinates, setSlidePixelCoordinates] = useState(false);
-    // state - hex color for trigger and whatever's embedding the component.
-    const hexColorString = toHex(color);
-    const rgb = hexToRgb(hexColorString);
-    const hue = rgbToHsl(rgb);
-    const hueBase = { ...hue, s: 1, l: .5 };
-    const rgbBase = hslToRgb({ ...hueBase });
-    const [hexBase, setHexBase] = useState(rgbToHex({ ...rgbBase }));
-    const [currentColor, setCurrentColor] = useState(hexColorString);
-    const toggleActive = () => setActive(!active);
-
-    useEffect(() => {
-        if (currentPadCanvas) {
-            const { offsetWidth: width, offsetWidth: height } = currentPadCanvas;
-            const ctx = currentPadCanvas.getContext('2d');
-            const gradientWhite = ctx.createLinearGradient(0, 0, width, 0);
-            const gradientBlack = ctx.createLinearGradient(0, 0, 0, height);
-
-            if (width > 0 && height > 0) {
-                let coordinates;
-                ctx.clearRect(0, 0, width, height);
-
-                // drawPadCanvas
-                gradientWhite.addColorStop(0, 'rgba(255,255,255,1)');
-                gradientWhite.addColorStop(1, 'rgba(255,255,255,0)');
-                gradientBlack.addColorStop(0, 'rgba(0,0,0,0)');
-                gradientBlack.addColorStop(1, 'rgba(0,0,0,1)');
-
-                // ctx.rect(0, 0, width, height);
-
-                ctx.fillStyle = hexBase;
-                ctx.fillRect(0, 0, width, height);
-
-                ctx.fillStyle = gradientWhite;
-                ctx.fillRect(0, 0, width, height);
-
-                ctx.fillStyle = gradientBlack;
-                ctx.fillRect(0, 1, width, height);
-
-                // ensure the first pixel is white, the gradients don't usually get it.
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, 1, 1);
-                // ensure the pixel at width, height is the base color.
-                ctx.fillStyle = hexBase;
-                ctx.fillRect(width - 1, 0, 1, 1);
-                // /drawPadCanvas
-
-                if (padPixelCoordinates) {
-                    coordinates = padPixelCoordinates;
-                } else {
-                    coordinates = findColorCoordinates(currentPadCanvas, currentColor);
-                    setPadPixelCoordinates(coordinates);
-                }
-
-                if (coordinates) {
-                    const rgb = coordinatesToColor(coordinates, currentPadCanvas.getContext('2d'));
-                    const hex = rgbToHex(rgb);
-
-                    onColorChange(rgb);
-                    drawCursor({
-                        canvas: padCanvas.current,
-                        color: '#ffffff',
-                        coordinates,
-                        // compositeOperation: 'lighter',
-                    });
-
-                    if (hex !== currentColor) {
-                        setCurrentColor(rgbToHex(rgb));
-                    }
-                }
-            }
+    const handlePointerUp = event => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (dragging) {
+            const { nativeEvent: { offsetX: saturation, offsetY: value } } = event;
+            const color = chroma(activeColor.set('hsv.s', saturation / width).set('hsv.v', 1 - (value / height)));
+            setActiveColor(color);
+            onColorChange({ r: color.get('rgb.r'), g: color.get('rgb.g'), b: color.get('rgb.b') });
+            setDragging(false);
         }
-    }, [currentPadCanvas, currentColor, hexBase, onColorChange, padPixelCoordinates]);
+    };
 
-    useEffect(() => {
-        if (currentSlideCanvas) {
-            const { offsetWidth: width, offsetHeight: height } = currentSlideCanvas;
-            const ctx = currentSlideCanvas.getContext('2d');
-            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    const handlePointerLeave = event => setDragging(false);
 
-            gradient.addColorStop(0, 'rgba(255, 0, 0, 1)');
-            gradient.addColorStop(0.17, 'rgba(255, 255, 0, 1)');
-            gradient.addColorStop(0.34, 'rgba(0, 255, 0, 1)');
-            gradient.addColorStop(0.51, 'rgba(0, 255, 255, 1)');
-            gradient.addColorStop(0.68, 'rgba(0, 0, 255, 1)');
-            gradient.addColorStop(0.85, 'rgba(255, 0, 255, 1)');
-            gradient.addColorStop(1, 'rgba(255, 0, 0, 1)');
+    const canvas = useCallback(cnvs => {
+        if (cnvs && width > 0 && height > 0 ) {
+            const ctx = cnvs.getContext('2d');
+            const saturationGradient = ctx.createLinearGradient(0, 0, width, 0);
+            const valueGradient = ctx.createLinearGradient(0, 0, 0, height);
 
-            if (width > 0 && height > 0) {
-                let coordinates;
-                ctx.clearRect(0, 0, width, height);
+            // only need the hue for the background.
+            const color = chroma({ h: activeColor.get('hsv.h'), s: 1, v: 1 });
+            const hex = color.hex();
+            const [,saturation, value] = activeColor.hsv();
+            const x = saturation * width;
+            const y = value * height;
 
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, width, height);
+            ctx.clearRect(0, 0, width, height);
 
-                if (slidePixelCoordinates) {
-                    coordinates = slidePixelCoordinates;
-                } else {
-                    coordinates = findColorCoordinates(currentSlideCanvas, hexBase);
-                    setSlidePixelCoordinates(coordinates);
-                }
+            // saturation gradient: white-to-transparent, left-to-right
+            saturationGradient.addColorStop(0, 'rgba(255,255,255,1)');
+            saturationGradient.addColorStop(1, 'rgba(255,255,255,0)');
+            // value gradient: black-to-transparent, bottom-to-top
+            valueGradient.addColorStop(0, 'rgba(0,0,0,0)');
+            valueGradient.addColorStop(1, 'rgba(0,0,0,1)');
 
-                if (coordinates) {
-                    const rgb = coordinatesToColor(coordinates, currentSlideCanvas.getContext('2d'));
-                    const hex = rgbToHex(rgb);
-                    drawCursor({
-                        canvas: slideCanvas.current,
-                        // color: '#000000',
-                        color: toHex(0xffffff - parseInt(hex.replace('#', ''), 16)),
-                        coordinates,
-                        mode: 'x',
-                        // compositeOperation: 'lighter',
-                        alpha: 1,
-                    });
+            // draw the active color's hue
+            ctx.fillStyle = hex;
+            ctx.fillRect(0, 0, width, height);
 
-                    if (hex !== hexBase) {
-                        setHexBase(hex);
-                    }
-                }
-            }
+            // draw the saturation gradient
+            ctx.fillStyle = saturationGradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // draw the svalue gradient
+            ctx.fillStyle = valueGradient;
+            ctx.fillRect(0, 1, width, height);
+
+            // ensure the first pixel is white, the gradient might overwrite it.
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 1, 1);
+
+            // ensure the pixel at `width - 1`, `0` is the activeColor hue, the gradient might overwrite it.
+            ctx.fillStyle = hex;
+            ctx.fillRect(width - 1, 0, 1, 1);
+
+            // draw the cursor
+            // get first and last pixels on row and column
+            const rowFirst = ctx.getImageData(0, height - y, 1, 1).data;
+            const rowLast = ctx.getImageData(width - 1, height - y, 1, 1).data;
+
+            const colFirst = ctx.getImageData(x, 0, 1, 1).data;
+            const colLast = ctx.getImageData(x, height - 1, 1, 1).data;
+
+            // create gradients
+            const rowGradient = ctx.createLinearGradient(0, height - y, width, 1);
+            const colGradient = ctx.createLinearGradient(x, 0, 1, height);
+
+            // create inverse gradients from first and last row and column pixel values
+            rowGradient.addColorStop(0, `rgba(${255 - rowFirst[0]},${255 - rowFirst[1]},${255 - rowFirst[2]},1)`);
+            rowGradient.addColorStop(1, `rgba(${255 - rowLast[0]},${255 - rowLast[1]},${255 - rowLast[2]},1)`);
+            colGradient.addColorStop(0, `rgba(${255 - colFirst[0]},${255 - colFirst[1]},${255 - colFirst[2]},1)`);
+            colGradient.addColorStop(1, `rgba(${255 - colLast[0]},${255 - colLast[1]},${255 - colLast[2]},1)`);
+
+            // draw the gradients
+            ctx.fillStyle = rowGradient;
+            ctx.fillRect(0, height - y, width, 1);
+
+            ctx.fillStyle = colGradient;
+            ctx.fillRect(x, 0, 1, height);
         }
-    }, [currentSlideCanvas, hexBase, slidePixelCoordinates]);
+    }, [activeColor, height, width]);
 
     return (
-        <Trigger backgroundColor={currentColor} onClick={toggleActive}>
+        <PadCanvas ref={canvas} width={width} height={height}
+            onPointerDown={handlePointerDown}
+            onPointerLeave={handlePointerLeave}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            dragging={dragging}
+        />
+    );
+};
+
+const HueCanvas = ({ activeColor, height, width, onColorChange, setActiveColor }) => {
+    const [dragging, setDragging] = useState(false);
+
+    const handlePointerDown = event => {
+        event.preventDefault();
+        event.stopPropagation();
+        setDragging(true);
+    };
+
+    const handlePointerMove = event => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (dragging) {
+            const hue = event.nativeEvent.offsetY;
+            const color = chroma(activeColor).set('hsv.h', hue);
+            setActiveColor(color);
+            onColorChange({ r: color.get('rgb.r'), g: color.get('rgb.g'), b: color.get('rgb.b') });
+        }
+    };
+
+    const handlePointerUp = event => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (dragging) {
+            const hue = event.nativeEvent.offsetY;
+            const color = chroma(activeColor).set('hsv.h', hue);
+            setActiveColor(color);
+            onColorChange({ r: color.get('rgb.r'), g: color.get('rgb.g'), b: color.get('rgb.b') });
+            setDragging(false);
+        }
+    };
+
+    const canvas = useCallback(cnvs => {
+        if (cnvs) {
+            const ctx = cnvs.getContext('2d');
+
+            if (width > 0 && height > 0) {
+                ctx.clearRect(0, 0, width, height);
+
+                const interval = height / 360;
+
+                for (let row = 0; row < height; row += interval) {
+                    const color = chroma({ h: Math.ceil(row), s: 1, l: 0.5 });
+                    const activeHue = activeColor.get('hsv.h');
+                    ctx.fillStyle = color.hex();
+
+                    // if this is the active row indicate it.
+                    if (activeHue > row && activeHue <= (row + interval)) {
+                        const inverse = chroma(0xffffff - parseInt(activeColor.hex().replace('#', ''), 16));
+                        ctx.fillStyle = inverse.hex();
+                    }
+
+                    ctx.fillRect(0, Math.ceil(row), width, Math.ceil(row));
+                }
+            }
+        }
+    }, [activeColor, height, width]);
+
+    return (
+        <SlideCanvas ref={canvas} width={width} height={height}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            dragging={dragging}
+        />
+    );
+};
+
+const ColorPicker = ({ initialColor, padWidth, padHeight, slideWidth, slideHeight, onColorChange }) => {
+    // color is a number, make it a chroma instance
+    const [activeColor, setActiveColor] = useState(chroma(initialColor));
+    const color = chroma(initialColor);
+    const [activeHue, setActiveHue] = useState(~~color.get('hsv.h'));
+    const [activeSaturation, setActiveSaturation] = useState(color.get('hsv.s'));
+    const [activeValue, setActiveValue] = useState(color.get('hsv.v'));
+    const [active, setActive] = useState(false);
+    const toggleActive = () => setActive(active => !active);
+
+    return (
+        <Trigger backgroundColor={activeColor} onClick={toggleActive}>
             <Panel active={active} onClick={event => event.stopPropagation()} onMouseMove={event => event.preventDefault()}>
-                <PadCanvas ref={padCanvas} width={padWidth} height={padHeight}
-                    onClick={event => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }}
-                    onMouseMove={event => {
-                        event.preventDefault();
-                        if (padDragging) {
-                            const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
-                            setPadPixelCoordinates(coordinates);
-                        }
-                    }}
-                    onMouseDown={event => {
-                        const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
-                        setPadPixelCoordinates(coordinates);
-                        setPadDragging(true);
-                    }}
-                    onMouseUp={event => setPadDragging(false)}
-                    onPointerDown={event => {
-                        const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
-                        setPadPixelCoordinates(coordinates);
-                        setPadDragging(true);
-                    }}
-                    onPointerMove={event => {
-                        event.preventDefault();
-                        if (padDragging) {
-                            // const { target: canvas } = event;
-                            const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
-                            setPadPixelCoordinates(coordinates);
-                        }
-                    }}
-                    onPointerUp={event => {
-                        setPadDragging(false);
-                    }}
-                    dragging={padDragging}
+                <SaturationValueCanvas
+                    width={padWidth}
+                    height={padHeight}
+                    activeColor={activeColor}
+                    setActiveColor={setActiveColor}
+                    onColorChange={onColorChange}
                 />
-                <SlideCanvas ref={slideCanvas} width={slideWidth} height={slideHeight}
-                    onClick={event => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }}
-                    onMouseMove={event => {
-                        event.preventDefault();
-                        if (slideDragging) {
-                            const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
-                            setSlidePixelCoordinates(coordinates);
-                        }
-                    }}
-                    onMouseDown={event => {
-                        const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
-                        setSlidePixelCoordinates(coordinates);
-                        setSlideDragging(true);
-                    }}
-                    onMouseUp={event => {
-                        setSlideDragging(false);
-                    }}
-                    onPointerDown={event => {
-                        const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
-                        setSlidePixelCoordinates(coordinates);
-                        setSlideDragging(true);
-                    }}
-                    onPointerMove={event => {
-                        event.preventDefault();
-                        if (slideDragging) {
-                            // const { target: canvas } = event;
-                            const coordinates = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
-                            setSlidePixelCoordinates(coordinates);
-                        }
-                    }}
-                    onPointerUp={event => {
-                        setSlideDragging(false);
-                    }}
-                    dragging={slideDragging}
+                <HueCanvas
+                    width={slideWidth}
+                    height={slideHeight}
+                    activeColor={activeColor}
+                    setActiveColor={setActiveColor}
+                    onColorChange={onColorChange}
                 />
                 <ValuesWrapper>
                     <Label>
-                        RGB:<Input type="text" value={`${rgb.r}/${rgb.g}/${rgb.b}`} readOnly />
+                        RGB:<Input type="text" value={`${activeColor.get('rgb.r')}/${activeColor.get('rgb.g')}/${activeColor.get('rgb.b')}`} readOnly />
                     </Label>
                     <Label>
-                        HSL:<Input type="text" value={`${hue.h.toFixed(2)}/${hue.s.toFixed(2)}/${hue.l.toFixed(2)}`} readOnly />
+                        HSV:<Input type="text" value={`${activeColor.get('hsv.h').toFixed()}/${activeColor.get('hsv.s').toFixed(3)}/${activeColor.get('hsv.v').toFixed(3)}`} readOnly />
                     </Label>
                     <Label>
-                        Hex:<Input type="text" value={currentColor} readOnly />
+                        Hex:<Input type="text" value={activeColor.hex()} readOnly />
                     </Label>
                 </ValuesWrapper>
             </Panel>
@@ -413,10 +312,10 @@ const ColorPicker = ({ color, padWidth, padHeight, slideWidth, slideHeight, onCo
 
 ColorPicker.defaultProps = {
     color: 0xff0000,
-    padWidth: 256,
-    padHeight: 256,
+    padWidth: 360,
+    padHeight: 360,
     slideWidth: 48,
-    slideHeight: 256,
+    slideHeight: 360,
     onColorChange: ({ r, g, b }) => ({ r, g, b }),
 };
 
