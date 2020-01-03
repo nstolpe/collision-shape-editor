@@ -29,7 +29,6 @@ const Trigger = styled.a.attrs(({ triggerWidth, triggerHeight, backgroundColor }
     }
 `;
 
-
 const Panel = styled.div`
     position: absolute;
     display: ${({active}) => active ? 'flex' : 'none'};
@@ -272,7 +271,7 @@ const HueCanvas = ({ activeHue, activeSaturation, activeValue, setActiveColor, s
                 }
             }
         }
-    }, [activeHue, activeSaturation, activeValue, height, width]);
+    }, [activeHue, height, width]);
 
     return (
         <SlideCanvas ref={canvas} width={width} height={height}
@@ -304,7 +303,6 @@ const ColorPicker = ({ initialColor, padWidth, padHeight, slideWidth, slideHeigh
                     activeHue={activeHue}
                     activeSaturation={activeSaturation}
                     activeValue={activeValue}
-                    activeHue={activeHue}
                     setActiveColor={setActiveColor}
                     setActiveSaturation={setActiveSaturation}
                     setActiveValue={setActiveValue}

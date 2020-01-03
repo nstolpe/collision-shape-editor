@@ -2,57 +2,55 @@
 import * as PIXI from "pixi.js";
 import PropTypes from 'prop-types';
 import React from 'react';
-import { AppContext, Stage } from 'react-pixi-fiber';
-import {
-    Provider,
-    ReactReduxContext,
-} from 'react-redux';
+import { Stage } from 'react-pixi-fiber';
 
-import { scaleUI } from 'actions/actions';
-import { StageCanvas } from 'data/styles';
 import InteractiveViewport from 'components/InteractiveViewport';
+import { useRootContext } from 'contexts/RootContext';
+import ScreenContext from 'contexts/ScreenContext';
+import Sprites from 'components/Sprites';
+import Vertices from 'components/Vertices';
 
-// needs context
-const Screen = ({ context, children, width, height }) => (
-    <ReactReduxContext.Consumer>{({ store }) => {
-        const {
-            backgroundColor,
-            resolution
-        } = store.getState();
+const Screen = ({ children, width, height }) => {
+    const state = useRootContext();
 
-        return (
-            <Stage
-                width={width}
-                height={height}
-                options={
-                    {
-                        backgroundColor: backgroundColor,
-                        autoResize: true,
-                        resolution: resolution,
-                        antialias: true,
-                    }
+    return (
+        <Stage
+            options={
+                {
+                    width,
+                    height,
+                    backgroundColor: state.backgroundColor,
+                    autoResize: true,
+                    resolution: state.resolution,
+                    antialias: true,
                 }
-                style={StageCanvas}
-                hitArea={new PIXI.Rectangle(0, 0, width, height)}
-                interactive
-            >
-                <Provider store={store} context={context}>
-                    <InteractiveViewport
-                        screenWidth={width}
-                        screenHeight={height}
-                        worldWidth={width}
-                        worldHeight={height}
-                    >
-                        {React.Children.map(children, child => React.cloneElement(child, { width, height }))}
-                    </InteractiveViewport>
-                </Provider>
-            </Stage>
-        );
-    }}</ReactReduxContext.Consumer>
-);
+            }
+            hitArea={new PIXI.Rectangle(0, 0, width, height)}
+            interactive
+        >
+            <ScreenContext.Provider value={state}>
+                <InteractiveViewport
+                    screenWidth={width}
+                    screenHeight={height}
+                    worldWidth={width}
+                    worldHeight={height}
+                >
+                    <Sprites />
+                    <Vertices />
+                </InteractiveViewport>
+            </ScreenContext.Provider>
+        </Stage>
+    );
+};
 
 Screen.propTypes = {
-    context: PropTypes.object.isRequired,
+    children: PropTypes.array,
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+};
+
+Screen.defaultProps = {
+    children: [],
 };
 
 export default Screen;
