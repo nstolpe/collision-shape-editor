@@ -1,61 +1,55 @@
-// components/Edges.js
-import { CustomPIXIComponent } from "react-pixi-fiber";
-import { connect } from "react-redux";
-import * as PIXI from "pixi.js";
+// src/components/Edges.jsx
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Container } from 'react-pixi-fiber';
 
-const TYPE = "Edges";
-const mapStateToProps = state => ({ ...state });
+import Edge from 'components/Edge';
+import { useScreenContext } from 'contexts/ScreenContext';
 
-export const behavior = {
-  customDisplayObject: props => new PIXI.Graphics(),
-  customApplyProps: (instance, oldProps, newProps) => {
-    const {
-        vertices,
-        stroke,
-        weight,
-        alpha,
-        UIScale,
-    } = Object.assign({
-        stroke: 0xff3e82,
-        weight: 1,
-        alpha: 0.8,
-        UIScale: 1,
-    }, newProps);
+/**
+ * Callback for Array.prototype.map that configures edges for each
+ * set of vertices.
+ */
+export const calculateEdge = (vertex1, idx, vertices) => {
+  const vertex2 = vertices[(idx + 1) % vertices.length];
+  const dx = vertex2.x - vertex1.x;
+  const dy = vertex2.y - vertex1.y;
 
-    instance.clear();
-    instance.alpha = alpha;
-    instance.lineStyle(weight / UIScale.x, stroke);
-    instance.hitArea = new PIXI.Polygon(vertices.reduce((points, vertex) => [ ...points, vertex.x, vertex.y ], []));
-    instance.interactive = true;
-
-    /**
-     * Pointer handlers weren't assigning just as props, so old and new need to be compared.
-     * @TODO move this out and handle PIXI events: http://pixijs.download/dev/docs/PIXI.Graphics.html#event:added
-     */
-    if (typeof newProps.pointerdown === 'function' && typeof oldProps.pointerdown === 'function' && newProps.pointerdown !== oldProps.pointerdown) {
-        instance.off('pointerdown', oldProps.pointerdown);
-        instance.on('pointerdown', newProps.pointerdown);
-    } else if (typeof newProps.pointerdown === 'function' && typeof oldProps.pointerdown !== 'function') {
-        instance.on('pointerdown', newProps.pointerdown);
-    } else if (typeof oldProps.pointerdown === 'function' && typeof newProps.pointerdown !== 'function') {
-        instance.off('pointerdown', oldProps.pointerdown);
-    }
-
-    if (vertices && vertices.length) {
-        for (let i = 0, l = vertices.length; i <= l; i++) {
-            const { x, y } = vertices[i] || vertices[0];
-            switch (i) {
-                case 0:
-                    instance.moveTo(vertices[0].x, vertices[0].y);
-                    break;
-                default:
-                    instance.lineTo(x, y);
-                    break;
-            }
-        }
-    }
-  }
+  return {
+    vertex1,
+    vertex2,
+    rotation: Math.atan2(dy, dx),
+    length: Math.sqrt((dx * dx) + (dy * dy)),
+  };
 };
 
-// export default CustomPIXIComponent(behavior, TYPE);
-export default connect(mapStateToProps)(CustomPIXIComponent(behavior, TYPE));
+const Edges = ({ scale, setCursor }) => {
+  const { vertices } = useScreenContext();
+  const edges = vertices.map(calculateEdge);
+
+  return (
+    <Container name='Edges'>
+      {edges.map((edge, key) => {
+        const { vertex1: { x, y } } = edge;
+        const props = { ...edge, key, setCursor, x, y };
+
+        return <Edge {...props} />;
+      })}
+    </Container>
+  );
+};
+
+Edges.propTypes = {
+  scale: PropTypes.shape({
+    x: PropTypes.number,
+    y: PropTypes.number,
+  }),
+  setCursor: PropTypes.func,
+};
+
+Edges.defaultProps = {
+  scale: { x: 1, y: 1 },
+  setCursor: () => {},
+};
+
+export default Edges;

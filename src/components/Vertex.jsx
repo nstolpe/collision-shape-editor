@@ -1,115 +1,138 @@
 // components/Vertex.js
-import React from 'react';
-import { connect } from 'react-redux';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as PIXI from 'pixi.js';
 
-import Circle from 'components/Circle';
+import Circle from 'components/base/Circle';
 import ScreenContext from 'contexts/ScreenContext';
+import { move, grab } from 'utils/cursors';
 
 import {
-    deleteVertex,
-    moveVertex,
-    startMoveVertex,
-    stopMoveVertex,
+  deleteVertex,
+  moveVertex,
+  startMoveVertex,
+  stopMoveVertex,
 } from 'actions/actions';
+import { useScreenContext } from 'contexts/ScreenContext';
 
-const mapStateToProps = state => ({ ...state });
+const Vertex = ({
+  hitArea,
+  id,
+  setCursor,
+  setMovingVertices,
+  movingVertices,
+  x,
+  y,
+  ...props
+}) => {
+  const {
+    altPressed,
+    ctrlPressed,
+    dispatch,
+  } = useScreenContext();
 
-const mapDispatchToProps = dispatch => ({
-    deleteVertex: id => dispatch(deleteVertex(id)),
-    moveVertex: ({ x, y, id }) => dispatch(moveVertex({ x, y, id })),
-    startMoveVertex: id => dispatch(startMoveVertex(id)),
-    stopMoveVertex: id => dispatch(stopMoveVertex(id)),
-});
+  const pointerdown = event => {
+    event.stopPropagation();
+    // console.log('pointerdown');
+    // switch (true) {
+    //     case altPressed && !ctrlPressed:
+    //         dispatch(deleteVertex(id));
+    //         break;
+    //     case !altPressed && !ctrlPressed:
+    //         coordinates = event.data.getLocalPosition(event.currentTarget.parent);
+    //         // dispatch(startMoveVertex(id));
+    //         (true);
+    //         setMovingVertices(ids => [...ids, { id, coordinates, isPrimary: event.data.isPrimary, tye: event.data.pointerType }]);
+    //         break;
+    //     default:
+    //         break;
+    // }
+    setCursor(move);
+    if (!movingVertices.find(vertex => vertex.id === event.currentTarget.id && vertex.identifier === event.data.identifier) && event.currentTarget.id === id) {
+      const coordinates = event.data.getLocalPosition(event.currentTarget.parent);
+      setMovingVertices(
+        ids => [...ids, { id, coordinates, identifier: event.data.identifier }]
+      );
+    }
+  };
 
-const Vertex = props => {
-    const {
-        id,
-        altPressed,
-        ctrlPressed,
-        movingVerticeIds,
-        startMoveVertex,
-        stopMoveVertex,
-        moveVertex,
-        deleteVertex,
-        ...propsRest
-    } = props;
-    return (
-        <Circle
-            name={`vertex_${id}`}
-            interactive
-            buttonMode
-            // cursor={props.altPressed ? "no-drop" : "move"}
-            // onPointerTap={e => {
-            //     // e.stopPropagation();
-            //     console.log(`vertex_${id}`);
-            //     console.log(e);
-            // }}
-            pointerdown={e => {
-                e.stopPropagation();
-                console.log(e);
-                switch (true) {
-                    case altPressed && !ctrlPressed:
-                        deleteVertex(id);
-                        break;
-                    case !altPressed && !ctrlPressed:
-                        startMoveVertex(id);
-                        break;
-                    default:
-                        break;
-                }
-            }}
-            pointerup={e => {
-                e.stopPropagation();
-                // @TODO make stage available via context.
-                // const stage = e.target.parent.parent.parent;
-                console.log(e.target);
-                // debugger;
-                const graphic = e.target;
-                // const sprite = stage.children[0].children[0].children[0];
-                const graphicGlobalCoords = graphic.toGlobal({x:0,y:0});
-                const pointGlobalCoords = e.target.toGlobal({x:0,y:0});
-                console.log(`x: ${graphicGlobalCoords.x} y: ${graphicGlobalCoords.y}, x: ${pointGlobalCoords.x} y: ${pointGlobalCoords.y}`);
-                console.log(`x diff: ${graphicGlobalCoords.x - pointGlobalCoords.x} y diff: ${graphicGlobalCoords.y - pointGlobalCoords.y}`);
-                stopMoveVertex(id);
-            }}
-            pointerupoutside={e => {
-                e.stopPropagation();
-                stopMoveVertex(id);
-            }}
-            pointermove={e => {
-                const coordinates = e.data.getLocalPosition(e.currentTarget.parent);
-                if (movingVerticeIds.find(vertexId => e.currentTarget.name.replace('vertex_', '') === vertexId)) {
-                    moveVertex({ ...coordinates, id });
-                }
-            }}
-            hitArea={new PIXI.Circle(0, 0, 5.5)}
-            {...propsRest}
-        />
-    );
+  const pointerup = event => {
+    event.stopPropagation();
+    // @TODO make stage available via context.
+    // const stage = e.target.parent.parent.parent;
+    const graphic = event.target;
+    // const sprite = stage.children[0].children[0].children[0];
+    const graphicGlobalCoords = graphic.toGlobal({x:0,y:0});
+    const pointGlobalCoords = event.target.toGlobal({x:0,y:0});
+    // console.log(`x: ${graphicGlobalCoords.x} y: ${graphicGlobalCoords.y}, x: ${pointGlobalCoords.x} y: ${pointGlobalCoords.y}`);
+    // console.log(`x diff: ${graphicGlobalCoords.x - pointGlobalCoords.x} y diff: ${graphicGlobalCoords.y - pointGlobalCoords.y}`);
+
+    const coordinates = event.data.getLocalPosition(event.currentTarget.parent);
+    // dispatch(moveVertex({ ...coordinates, id }));
+    // dispatch(stopMoveVertex(id));
+    setCursor(grab);
+
+    if (movingVertices.find(vertex => vertex.id === event.currentTarget.id) && event.currentTarget.id === id) {
+      dispatch(moveVertex({ ...coordinates, id }));
+    }
+
+    setMovingVertices(currentMovingVertices => currentMovingVertices.filter(activeVertex => activeVertex.id !== id));
+  };
+
+  const pointerupoutside = event => {
+    event.stopPropagation();
+    setMovingVertices(currentMovingVertices => currentMovingVertices.filter(activeVertex => activeVertex.id !== id));
+  };
+
+  const pointermove = event => {
+    // console.log('pointermove primary',e.data.isPrimary)
+    const coordinates = event.data.getLocalPosition(event.currentTarget.parent);
+
+    if (movingVertices.find(vertex => vertex.id === event.currentTarget.id && vertex.identifier === event.data.identifier) && event.currentTarget.id === id) {
+     dispatch(moveVertex({ ...coordinates, id }));
+    }
+  };
+
+  return (
+    <Circle
+      name={id}
+      id={id}
+      interactive
+      buttonMode
+      cursor={move}
+      pointerdown={pointerdown}
+      pointerup={pointerup}
+      pointerupoutside={pointerupoutside}
+      pointermove={pointermove}
+      hitArea={hitArea}
+      x={x}
+      y={y}
+      {...props}
+    />
+  );
 };
 
 Vertex.defaultProps = {
-    alpha: 0.8,
-    radius: 4.5,
-    fill: 0xe62bdc,
-    strokeColor: 0xffffff,
-    strokeWidth: 2,
-    strokeAlignment: 1,
+  alpha: 0.8,
+  radius: 4.5,
+  fill: 0xe62bdc,
+  strokeColor: 0xffffff,
+  strokeWidth: 2,
+  strokeAlignment: 1,
+  hitArea:new PIXI.Circle(0, 0, 5.5)
 };
 
 Vertex.propTypes = {
-    id: PropTypes.oneOfType([
-        PropTypes.number,
-        PropTypes.string,
-    ]),
-    alpha: PropTypes.number,
-    radius: PropTypes.number,
-    fill: PropTypes.number,
-    strokeColor: PropTypes.number,
-    strokeWidth: PropTypes.number,
-    strokeAlignment: PropTypes.number,
+  id: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string,
+  ]),
+  alpha: PropTypes.number,
+  radius: PropTypes.number,
+  fill: PropTypes.number,
+  strokeColor: PropTypes.number,
+  strokeWidth: PropTypes.number,
+  strokeAlignment: PropTypes.number,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps, null, { context: ScreenContext })(Vertex);
+export default Vertex;

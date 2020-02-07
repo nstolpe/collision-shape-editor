@@ -8,13 +8,12 @@ import reducer, { initialState } from 'reducers/root-reducer';
 
 
 const RootStore = ({ children }) => {
-    const [state, dispatch] = useReducer(reducer, initialState);
-
-    return (
-        <RootContext.Provider value={{ ...state, dispatch }}>
-            {children}
-        </RootContext.Provider>
-    )
+  const [state, dispatch] = useReducer(reducer, initialState);
+  return (
+    <RootContext.Provider value={{ ...state, dispatch }}>
+      {children}
+    </RootContext.Provider>
+  );
 };
 
 export default RootStore;

@@ -65,8 +65,11 @@ export const hslToRgb = ({ h, s, l }) => {
  * @param hex {bool}  if true, `#` will be prepended to the returned hex string.
  * @return {string}
  */
-export const rgbToHex = ({ r, g, b }, hex=true) => `${hex ? '#' : ''}${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
-
+export const rgbToHexString = ({ r, g, b }, hex=true) => `${hex ? '#' : ''}${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+export const rgbToNum = ({ r, g, b }) => parseInt(rgbToHexString({ r, g, b}, false), 16);
+export const numToRgb = num => {
+    hexToRgb(numToHexString(num));
+}
 // https://stackoverflow.com/a/5624139
 export const hexToRgb = hex => {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -82,14 +85,17 @@ export const hexToRgb = hex => {
  *
  * @param  number  The number that
  */
-export const toHex = (number, hex=true, min=6) => {
+export const numToHexString = (number, hex=true, min=6) => {
+    const matches = (parseInt(number, 10) || Object(number)).toString(16).split('.')[0].match(/^(?:#|0x)?(?<hex>[0-9A-Fa-f]+)$/);
+    console.log(matches);
     const hexString = parseInt(
         property(
-            (parseInt(number, 10) || Object(number)).toString(16).split('.')[0].match(/^(?:#|0x)?(?<hex>[0-9A-Fa-f]+)$/),
+            matches,
             ['groups', 'hex'],
             0
         ), 16
     ).toString(16);
+    console.log(number, hexString);
 
     return `${hex ? '#' : ''}${'0'.repeat(Math.max(min - hexString.length, 0)) + hexString}`;
 };
@@ -97,7 +103,9 @@ export const toHex = (number, hex=true, min=6) => {
 export default {
     rgbToHsl,
     hslToRgb,
-    rgbToHex,
+    rgbToHexString,
     hexToRgb,
-    toHex,
+    numToHexString,
+    numToRgb,
+    rgbToNum,
 };

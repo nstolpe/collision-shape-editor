@@ -63,23 +63,27 @@ export const propGrouprules = [
 
 export const behavior = {
     customDisplayObject: props => {
-        const { renderer, ...rest } = props;
-        const { plugins: { interaction } } = renderer;
-        const instance = new Viewport({ ...rest, interaction });
-        // instance.on('pointertap', e => {
-        //     switch (true) {
-        //         case props.ctrlPressed && !props.altPressed:
-        //             const coordinates = e.data.getLocalPosition(e.currentTarget);
-        //             props.dispatch(addVertex(coordinates));
-        //             break;
-        //         default:
-        //             break;
-        //     }
-        // });
-
+        const {
+            restProps: {
+                screenWidth,
+                screenHeight,
+                worldWidth,
+                worldHeight,
+                interaction,
+                ...restProps
+            },
+        } = groupProps(props, propGrouprules);
+        const instance = new Viewport({
+            ...restProps,
+            screenWidth,
+            screenHeight,
+            worldWidth,
+            worldHeight,
+            interaction,
+        });
         return instance;
     },
-    customApplyProps: function(instance, oldProps, newProps) {
+    customApplyProps: function(instance, oldProps = {}, newProps) {
         const {
             eventProps,
             pluginProps,
@@ -102,7 +106,9 @@ export const behavior = {
             }
         } = groupProps(oldProps, propGrouprules);
 
-        instance.resize(screenWidth, screenHeight, worldWidth, worldHeight);
+        if (screenWidth !== oldScreenWidth || screenHeight !== oldScreenHeight || worldWidth !== oldWorldWidth || worldHeight !== oldWorldHeight) {
+            instance.resize(screenWidth, screenHeight, worldWidth, worldHeight);
+        }
 
         Object.entries(eventProps).forEach(([propName, prop]) => updateEventProp(instance, propName, prop, oldProps[propName]));
         Object.entries(pluginProps).forEach(([propName, prop]) => updatePluginProp(instance, propName, prop, oldProps[propName]));

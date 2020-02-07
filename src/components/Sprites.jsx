@@ -5,14 +5,17 @@ import { connect } from 'react-redux';
 import {v4 as uuid} from 'uuid';
 
 import ScaleNearestSprite from 'components/ScaleNearestSprite';
-import ScreenContext from 'contexts/ScreenContext';
+import { useScreenContext } from 'contexts/ScreenContext';
 
 const mapStateToProps = (state, ownProps) => {
-    const { width, height } = ownProps;
-    return { ...state, width, height };
+    // const { width, height } = ownProps;
+    // return { ...state, width, height };
+    return state;
 };
 
-const Sprites = ({ sprites }) => {
+const Sprites = () => {
+    const { sprites } = useScreenContext();
+
     return (
         <>
             {sprites.map(({ name, texture, x, y, rotation, scale, scaleMode }) => {
@@ -31,4 +34,5 @@ const Sprites = ({ sprites }) => {
     );
 };
 
-export default connect(mapStateToProps, null, null, { context: ScreenContext })(Sprites);
+// export default connect(mapStateToProps, null, null, { context: ScreenContext })(Sprites);
+export default Sprites;
