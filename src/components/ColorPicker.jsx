@@ -4,41 +4,60 @@ import PropTypes from 'prop-types';
 import React, {
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from 'react';
-import styled from 'styled-components';
+import styled from 'styled-components/macro';
 import chroma from 'chroma-js';
 
-const Trigger = styled.a.attrs(({ triggerWidth, triggerHeight, backgroundColor }) => ({
-  width: triggerWidth == null ? '5.4em' : triggerWidth,
-  height: triggerHeight == null ? '5.4em' : triggerHeight,
-  backgroundColor: backgroundColor,
+import { Button } from 'components/html/resets';
+
+const Trigger = styled(Button).attrs(({
+  active,
+  backgroundColor,
+  height,
+  width,
+}) => ({
+  style: {
+    backgroundColor,
+    height,
+    width,
+    boxShadow: active ? '0 0 10px rgba(0,0,0,0.5) inset' : 'none',
+  },
 }))`
-  width: ${({ width }) => width};
-  height: ${({ height }) => height};
-  background-color: ${({ backgroundColor }) => backgroundColor};
-  text-decoration: none;
-  display: inline-block;
+  border-radius: 4px;
   box-sizing: border-box;
-  position: relative;
-  transition: opacity 0.2s ease;
-  border-radius: .2em;
-  vertical-align: middle;
   cursor: pointer;
-  &:hover {
-    box-shadow: 0 0 2px #ffffff;
-  }
+  display: inline-block;
+  position: relative;
+  text-decoration: none;
+  transition: box-shadow 0.15s ease-in-out;
+  vertical-align: middle;
 `;
+
+Trigger.defaultProps = {
+  height: '5.4em',
+  width: '5.4em',
+  active: false,
+};
 
 const Panel = styled.div`
   position: absolute;
-  display: ${({active}) => active ? 'flex' : 'none'};
-  bottom: 100%;
-  background-color: #d9d9d9;
+  display: flex;
+  opacity: ${({ active }) => active ? 1 : 0};
+  pointer-events: ${({ active }) => active ? 'auto' : 'none'};
+  z-index: ${({ active }) => active ? 1000 : -1000};
+  background-color: hsl(0, 0%, 75%);
+  margin: 0 !important;
   padding: 1em;
   margin-bottom: 1em;
-  border-radius: .2em .2em 0 0;
+  border-radius: 4px;
   cursor: default;
+  left: ${({ x }) => x}px;
+  top: ${({ y }) => y}px;
+  box-shadow: 0 0 4px 0px rgba(0,0,0,0.6);
+  transition: opacity 0.15s ease-in-out;
+  ${({ active }) => !active ? '& * { visibility: hidden }' : ''}
 `;
 
 
@@ -223,7 +242,7 @@ const HueCanvas = ({ activeHue, activeSaturation, activeValue, setActiveColor, s
     setDragging(true);
   };
 
-const handlePointerLeave = event => setDragging(false);
+  const handlePointerLeave = event => setDragging(false);
 
   const handlePointerMove = event => {
     event.preventDefault();
@@ -294,6 +313,8 @@ const ColorPicker = ({ initialColor, padWidth, padHeight, slideWidth, slideHeigh
   const [activeSaturation, setActiveSaturation] = useState(color.get('hsv.s'));
   const [activeValue, setActiveValue] = useState(color.get('hsv.v'));
   const [active, setActive] = useState(false);
+  const [panelX, setPanelX] = useState(null);
+  const [panelY, setPanelY] = useState(null);
 
   /**
    * Toggles active/inactive for the colorpicker.
@@ -309,34 +330,64 @@ const ColorPicker = ({ initialColor, padWidth, padHeight, slideWidth, slideHeigh
      * or when escape is pressed
      * @TODO confirm this is the best way to handle escape
      */
-    const close = ({ code, target }) => {
-      if (trigger !== target || code === 'Escape') {
-        setActive(false);
+    const close = e => {
+      const { type, target, key, keyCode } = e;
+      const panel = trigger.nextElementSibling;
+
+      switch (type) {
+        case 'keydown':
+          if (active && (key === 'Escape' || key === 'Esc' || keyCode === 27)) {
+            setActive(false);
+          }
+          break;
+        case 'pointerdown':
+          if (active && target !== trigger && !panel.contains(target)) {
+            setActive(false);
+          }
+          break;
+        default:
+          break;
       }
+      document.removeEventListener('keydown', close);
+      document.removeEventListener('pointerdown', close);
     };
 
-    if (trigger) {
-      if (active) {
-        document.addEventListener('keydown', close, false);
-        document.addEventListener('pointerdown', close, false);
-      } else {
-        document.removeEventListener('keydown', close, false);
-        document.removeEventListener('pointerdown', close, false);
-      }
+    if (trigger && active) {
+      document.addEventListener('keydown', close);
+      document.addEventListener('pointerdown', close);
     }
 
     return () => {
-      document.removeEventListener('keydown', close, false);
-      document.removeEventListener('pointerdown', close, false);
+      document.removeEventListener('keydown', close);
+      document.removeEventListener('pointerdown', close);
     };
   }, [active]);
 
+  const panelRef = useCallback(panel => {
+    if (panel !== null) {
+      const trigger = panel.previousElementSibling;
+      const triggerRect = trigger.getBoundingClientRect();
+      const panelRect = panel.getBoundingClientRect();
+      setPanelX(triggerRect.left);
+      setPanelY(triggerRect.top - panelRect.height);
+    }
+  }, []);
+
   return (
-    <Trigger backgroundColor={activeColor} onClick={toggleActive} ref={triggerRef}>
+    <>
+      <Trigger
+        active={active}
+        backgroundColor={activeColor}
+        onClick={toggleActive}
+        ref={triggerRef}
+      />
       <Panel
         active={active}
         onClick={event => event.stopPropagation()}
         onPointerDown={event => event.stopPropagation()}
+        x={panelX}
+        y={panelY}
+        ref={panelRef}
       >
         <SaturationValueCanvas
           width={padWidth}
@@ -361,17 +412,17 @@ const ColorPicker = ({ initialColor, padWidth, padHeight, slideWidth, slideHeigh
         />
         <ValuesWrapper>
           <Label>
-            RGB:<Input type="text" value={`${activeColor.get('rgb.r')}/${activeColor.get('rgb.g')}/${activeColor.get('rgb.b')}`} readOnly />
+            RGB:<Input type="text" value={`${activeColor.get('rgb.r')}/${activeColor.get('rgb.g')}/${activeColor.get('rgb.b')}`} readOnly disabled={active ? false : true}/>
           </Label>
           <Label>
-            HSV:<Input type="text" value={`${activeHue}/${activeSaturation.toFixed(3)}/${activeValue.toFixed(3)}`} readOnly />
+            HSV:<Input type="text" value={`${activeHue}/${activeSaturation.toFixed(3)}/${activeValue.toFixed(3)}`} readOnly  disabled={active ? false : true}/>
           </Label>
           <Label>
-            Hex:<Input type="text" value={activeColor.hex()} readOnly />
+            Hex:<Input type="text" value={activeColor.hex()} readOnly  disabled={active ? false : true}/>
           </Label>
         </ValuesWrapper>
       </Panel>
-    </Trigger>
+    </>
   );
 };
 

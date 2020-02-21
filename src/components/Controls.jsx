@@ -1,6 +1,6 @@
 // src/js/components/Controls.js
 import React from 'react';
-import styled from 'styled-components';
+import styled from 'styled-components/macro';
 import chroma from 'chroma-js';
 
 import {
@@ -8,14 +8,16 @@ import {
   setBackgroundColor,
 } from 'actions/actions';
 import ColorPicker from 'components/ColorPicker';
-import FileLoader from 'components/FileLoader';
+import FileLoader from 'components/html/FileLoader';
+import EdgeIcon from 'components/html/EdgeIcon';
+import VertexIcon from 'components/html/VertexIcon';
 import { useRootContext } from 'contexts/RootContext';
 
 const Styled = styled.div`
-  background-color: #ebebeb;
+  background-color: hsl(0, 0%, 75%);
   padding: 1em;
   & > * {
-    margin-right: 1em;
+    margin-right: 1rem;
   }
 `;
 
@@ -35,6 +37,8 @@ const Controls = ({ children }) => {
     <Styled>
       <FileLoader onLoad={onLoad} accept="image/*" multiple />
       <ColorPicker initialColor={backgroundColor} onColorChange={onColorChange} />
+      <VertexIcon />
+      <EdgeIcon />
       {children}
     </Styled>
   );

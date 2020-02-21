@@ -1,8 +1,8 @@
 // src/js/components/AppWrapper.js
 import React from 'react';
-import styled from 'styled-components';
+import styled from 'styled-components/macro';
 
-const Styled = styled.div`
+const Wrapper = styled.div`
     display: flex;
     width: 100%;
     flex-direction: column;
@@ -11,6 +11,6 @@ const Styled = styled.div`
     line-height: 1.5rem;
 `;
 
-const AppWrapper = props => (<Styled>{props.children}</Styled>);
+const AppWrapper = ({ children }) => <Wrapper>{children}</Wrapper>;
 
 export default AppWrapper;
