@@ -4,7 +4,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import styled from 'styled-components/macro';
+import styled from '@emotion/styled';
+// import styled from 'styled-components/macro';
 
 const FlexResizer = styled.div`
   flex: 1;

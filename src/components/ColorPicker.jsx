@@ -1,5 +1,4 @@
 // src/js/components/ColorPicker.js
-// reference: https://codepen.io/amwill/pen/ZbdGeW
 import PropTypes from 'prop-types';
 import React, {
   useCallback,
@@ -7,38 +6,57 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import styled from 'styled-components/macro';
+import styled from '@emotion/styled/macro';
+import isPropValid from '@emotion/is-prop-valid'
 import chroma from 'chroma-js';
 
 import { Button } from 'components/html/resets';
 
-const Trigger = styled(Button).attrs(({
-  active,
-  backgroundColor,
-  height,
-  width,
-}) => ({
-  style: {
+const Trigger = styled(
+  Button,
+  {
+    shouldForwardProp: prop => isPropValid(prop) && prop !== 'height' && prop !== 'width'
+  }
+)(
+  ({
+    active,
+    backgroundColor,
+    height,
+    width,
+  }) => ({
     backgroundColor,
     height,
     width,
     boxShadow: active ? '0 0 10px rgba(0,0,0,0.5) inset' : 'none',
-  },
-}))`
-  border-radius: 4px;
-  box-sizing: border-box;
-  cursor: pointer;
-  display: inline-block;
-  position: relative;
-  text-decoration: none;
-  transition: box-shadow 0.15s ease-in-out;
-  vertical-align: middle;
-`;
+    borderRadius: '4px',
+    boxSizing: 'border-box',
+    cursor: 'pointer',
+    display: 'inline-block',
+    position: 'relative',
+    textDecoration: 'none',
+    transition: 'box-shadow 0.15s ease-in-out',
+    verticalAlign: 'middle',
+  })
+);
+
+Trigger.propTypes ={
+  active: PropTypes.bool,
+  backgroundColor: PropTypes.string,
+  height: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string,
+  ]),
+  width:  PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string,
+  ]),
+};
 
 Trigger.defaultProps = {
-  height: '5.4em',
-  width: '5.4em',
   active: false,
+  backgroundColor: '#ffffff',
+  height: '5.6em',
+  width: '5.6em',
 };
 
 const Panel = styled.div`
@@ -61,11 +79,15 @@ const Panel = styled.div`
 `;
 
 
+Panel.displayName = 'Panel';
+
 const ValuesWrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 `;
+
+ValuesWrapper.displayName = 'ValuesWrapper';
 
 const cursor = `url("data:image/svg+xml;utf8,
   <svg xmlns='http://www.w3.org/2000/svg' height='19' width='19' viewBox='0 0 19 19'>
@@ -83,6 +105,8 @@ const PadCanvas = styled.canvas`
   touch-action: none;
 `;
 
+PadCanvas.displayName = 'PadCanvas';
+
 const SlideCanvas = styled.canvas`
   display: inline-block;
   width: ${({ width }) => `${width}px`};
@@ -93,6 +117,8 @@ const SlideCanvas = styled.canvas`
   touch-action: none;
 `;
 
+SlideCanvas.displayName = 'SlideCanvas';
+
 const Label = styled.label`
   font-family: sans-serif;
   font-size: 1.4em;
@@ -100,8 +126,12 @@ const Label = styled.label`
   user-select: none;
 `;
 
+Label.displayName = 'Label';
+
 const Input = styled.input`
 `;
+
+Input.displayName = 'Input';
 
 const SaturationValueCanvas = ({
   activeHue,
@@ -124,6 +154,7 @@ const SaturationValueCanvas = ({
   const handlePointerMove = event => {
     event.preventDefault();
     event.stopPropagation();
+
     if (dragging) {
       const { nativeEvent: { offsetX: x, offsetY: y } } = event;
       const saturation = x / width;
@@ -139,6 +170,7 @@ const SaturationValueCanvas = ({
   const handlePointerUp = event => {
     event.preventDefault();
     event.stopPropagation();
+
     if (dragging) {
       const { nativeEvent: { offsetX: x, offsetY: y } } = event;
       const saturation = x / width;
@@ -235,6 +267,7 @@ const SaturationValueCanvas = ({
 
 const HueCanvas = ({ activeHue, activeSaturation, activeValue, setActiveColor, setActiveHue, height, width, onColorChange }) => {
   const [dragging, setDragging] = useState(false);
+  const ratio = height / 360;
 
   const handlePointerDown = event => {
     event.preventDefault();
@@ -247,8 +280,9 @@ const HueCanvas = ({ activeHue, activeSaturation, activeValue, setActiveColor, s
   const handlePointerMove = event => {
     event.preventDefault();
     event.stopPropagation();
+
     if (dragging) {
-      const hue = event.nativeEvent.offsetY;
+      const hue = event.nativeEvent.offsetY / ratio;
       const color = chroma({ h: hue, s: activeSaturation, v: activeValue });
       setActiveHue(hue);
       setActiveColor(color);
@@ -259,8 +293,9 @@ const HueCanvas = ({ activeHue, activeSaturation, activeValue, setActiveColor, s
   const handlePointerUp = event => {
     event.preventDefault();
     event.stopPropagation();
+
     if (dragging) {
-      const hue = event.nativeEvent.offsetY;
+      const hue = event.nativeEvent.offsetY / ratio;
       const color = chroma({ h: hue, s: activeSaturation, v: activeValue });
       setActiveHue(hue);
       setActiveColor(color);
@@ -276,14 +311,13 @@ const HueCanvas = ({ activeHue, activeSaturation, activeValue, setActiveColor, s
       if (width > 0 && height > 0) {
         ctx.clearRect(0, 0, width, height);
 
-        const interval = height / 360;
-
-        for (let row = 0; row < height; row += interval) {
-          const color = chroma({ h: Math.ceil(row), s: 1, l: 0.5 });
+        for (let row = 0; row < height; row++) {
+          const ratioRow = row / ratio;
+          const color = chroma({ h: ratioRow, s: 1, l: 0.5 });
           ctx.fillStyle = color.hex();
 
           // if this is the active row indicate it.
-          if (activeHue >= row && activeHue < (row + interval)) {
+          if (activeHue >= ratioRow && activeHue < ratioRow + (1 / ratio)) {
             const inverse = chroma(0xffffff - parseInt(color.hex().replace('#', ''), 16));
             ctx.fillStyle = inverse.hex();
           }
@@ -333,23 +367,28 @@ const ColorPicker = ({ initialColor, padWidth, padHeight, slideWidth, slideHeigh
     const close = e => {
       const { type, target, key, keyCode } = e;
       const panel = trigger.nextElementSibling;
+      let doClose = false;
 
       switch (type) {
         case 'keydown':
           if (active && (key === 'Escape' || key === 'Esc' || keyCode === 27)) {
-            setActive(false);
+            doClose = true;
           }
           break;
         case 'pointerdown':
           if (active && target !== trigger && !panel.contains(target)) {
-            setActive(false);
+            doClose = true;
           }
           break;
         default:
           break;
       }
-      document.removeEventListener('keydown', close);
-      document.removeEventListener('pointerdown', close);
+
+      if (doClose) {
+        setActive(false);
+        document.removeEventListener('keydown', close);
+        document.removeEventListener('pointerdown', close);
+      }
     };
 
     if (trigger && active) {
@@ -377,9 +416,10 @@ const ColorPicker = ({ initialColor, padWidth, padHeight, slideWidth, slideHeigh
     <>
       <Trigger
         active={active}
-        backgroundColor={activeColor}
+        backgroundColor={activeColor.hex()}
         onClick={toggleActive}
         ref={triggerRef}
+        displayName="Trigger"
       />
       <Panel
         active={active}
@@ -428,10 +468,10 @@ const ColorPicker = ({ initialColor, padWidth, padHeight, slideWidth, slideHeigh
 
 ColorPicker.defaultProps = {
   color: 0xff0000,
-  padWidth: 360,
-  padHeight: 360,
+  padWidth: 256,
+  padHeight: 256,
   slideWidth: 48,
-  slideHeight: 360,
+  slideHeight: 256,
   onColorChange: ({ r, g, b }) => ({ r, g, b }),
 };
 

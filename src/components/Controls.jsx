@@ -1,6 +1,6 @@
 // src/js/components/Controls.js
 import React from 'react';
-import styled from 'styled-components/macro';
+import styled from '@emotion/styled';
 import chroma from 'chroma-js';
 
 import {
@@ -13,13 +13,15 @@ import EdgeIcon from 'components/html/EdgeIcon';
 import VertexIcon from 'components/html/VertexIcon';
 import { useRootContext } from 'contexts/RootContext';
 
-const Styled = styled.div`
+const ControlWrapper = styled.div`
   background-color: hsl(0, 0%, 75%);
   padding: 1em;
   & > * {
-    margin-right: 1rem;
+    margin-right: 1rem !important;
   }
 `;
+
+ControlWrapper.displayName = 'ControlWrapper';
 
 const Controls = ({ children }) => {
   const { backgroundColor, dispatch } = useRootContext();
@@ -34,13 +36,13 @@ const Controls = ({ children }) => {
   };
 
   return(
-    <Styled>
+    <ControlWrapper>
       <FileLoader onLoad={onLoad} accept="image/*" multiple />
       <ColorPicker initialColor={backgroundColor} onColorChange={onColorChange} />
       <VertexIcon />
       <EdgeIcon />
       {children}
-    </Styled>
+    </ControlWrapper>
   );
 };
 

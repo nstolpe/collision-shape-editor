@@ -1,7 +1,7 @@
 // src/js/components/html/FileUploader.js
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components/macro';
+import styled from '@emotion/styled';
 
 const Input = styled.input`
   opacity: 0;

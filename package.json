@@ -17,6 +17,9 @@
   "author": "Nils Stolpe",
   "license": "ISC",
   "dependencies": {
+    "@emotion/core": "^10.0.27",
+    "@emotion/styled": "^10.0.27",
+    "babel-plugin-emotion": "^10.0.27",
     "babel-plugin-macros": "^2.8.0",
     "chroma-js": "^2.1.0",
     "deep-equals": "^0.0.2",

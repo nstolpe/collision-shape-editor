@@ -1,5 +1,5 @@
 // src/components/html/resets.js
-import styled from 'styled-components/macro';
+import styled from '@emotion/styled/macro';
 
 export const Button = styled.button`
   outline: none;
@@ -16,6 +16,8 @@ export const Button = styled.button`
     border: 0;
   }
 `;
+
+Button.displayName = Button;
 
 export default {
   Button,
