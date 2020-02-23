@@ -43,6 +43,7 @@ const Controls = ({ children }) => {
         onColorChange={onColorChange}
         title="background color"
         titleFontFamily="Fira Mono"
+        valueFontFamily="Fira Mono"
       />
       <VertexIcon />
       <EdgeIcon />

@@ -9,8 +9,15 @@ import React, {
 import styled from '@emotion/styled/macro';
 import isPropValid from '@emotion/is-prop-valid'
 import chroma from 'chroma-js';
+import Draggable from 'react-draggable';
 
 import { Button } from 'components/html/resets';
+
+const Wrapper = styled.div`
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
+`;
 
 const Trigger = styled(
   Button,
@@ -31,7 +38,7 @@ const Trigger = styled(
     borderRadius: '4px',
     boxSizing: 'border-box',
     cursor: 'pointer',
-    display: 'inline-block',
+    display: 'block',
     position: 'relative',
     textDecoration: 'none',
     transition: 'box-shadow 0.15s ease-in-out',
@@ -60,7 +67,10 @@ Trigger.defaultProps = {
 };
 
 const Panel = styled.div`
+  bottom: 100%;
+  cursor: move;
   font-size: 16px;
+  left: 0;
   line-height: 1.5;
   position: absolute;
   opacity: ${({ active }) => active ? 1 : 0};
@@ -71,33 +81,15 @@ const Panel = styled.div`
   padding: 1em;
   margin-bottom: 1em;
   border-radius: 4px;
-  cursor: default;
-  left: ${({ left }) => left}px;
-  top: ${({ top }) => top}px;
   box-shadow: 0 0 4px 0px rgba(0,0,0,0.6);
   transition: opacity 0.15s ease-in-out;
   ${({ active }) => !active ? '& * { visibility: hidden }' : ''}
 `;
 
-
 Panel.displayName = 'Panel';
 
-const ContentWrapper = styled.div`
-  display: flex;
-  pointer-events: none;
-`;
-
-ContentWrapper.displayName = 'ContentWrapper';
-
-const ValuesWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  pointer-events: none;
-`;
-
 const PanelHeader = styled.h3`
-  background-color: hsl(0,0%,50%);
+  background-color: hsl(0,0%,25%);
   border-radius: 4px;
   color: hsl(0,0%,75%);
   font-family: ${({ fontFamily }) => fontFamily};
@@ -111,7 +103,12 @@ const PanelHeader = styled.h3`
 
 PanelHeader.displayName = 'PanelHeader';
 
-ValuesWrapper.displayName = 'ValuesWrapper';
+const ContentWrapper = styled.div`
+  display: flex;
+  pointer-events: none;
+`;
+
+ContentWrapper.displayName = 'ContentWrapper';
 
 const cursor = `url("data:image/svg+xml;utf8,
   <svg xmlns='http://www.w3.org/2000/svg' height='19' width='19' viewBox='0 0 19 19'>
@@ -145,16 +142,46 @@ const SlideCanvas = styled.canvas`
 
 SlideCanvas.displayName = 'SlideCanvas';
 
-const Label = styled.label`
+const ValuesWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  font-size: 1em;
+  justify-content: flex-start;
+  line-height: 1.5;
+  pointer-events: none;
+`;
+
+ValuesWrapper.displayName = 'ValuesWrapper';
+
+const ValueLabel = styled.label`
+  display: flex;
   font-family: sans-serif;
-  font-size: 1.4em;
+  font-size: 1em;
   font-weight: bold;
+  margin-bottom: 1em;
   user-select: none;
 `;
 
-Label.displayName = 'Label';
+ValueLabel.displayName = 'ValueLabel';
+
+const ValueSpan = styled.span`
+  color: hsl(0,0%,25%);
+  font-family: ${({ fontFamily }) => fontFamily};
+  margin-right: 0.5em;
+`;
+
+ValueSpan.displayName = 'ValueSpan';
 
 const Input = styled.input`
+  border: 0;
+  border-radius: 4px;
+  box-shadow: 0 0 4px hsl(0,0%,25%) inset;
+  box-sizing: border-box;
+  cursor: text;
+  font-size: 1em;
+  line-height: 1.5;
+  padding: 0 0.5em;
+  width: 8em;
 `;
 
 Input.displayName = 'Input';
@@ -382,11 +409,7 @@ const ColorPicker = ({
   const [activeSaturation, setActiveSaturation] = useState(color.get('hsv.s'));
   const [activeValue, setActiveValue] = useState(color.get('hsv.v'));
   const [active, setActive] = useState(false);
-  const [panelLeft, setPanelLeft] = useState(null);
-  const [panelTop, setPanelTop] = useState(null);
   const [panelDragging, setPanelDragging] = useState(false);
-  const [panelClickCoordinates, setPanelClickCoordinates] = useState();
-
   /**
    * Toggles active/inactive for the colorpicker.
    */
@@ -439,18 +462,9 @@ const ColorPicker = ({
     };
   }, [active]);
 
-  const panelRef = useCallback(panel => {
-    if (panel !== null) {
-      const trigger = panel.previousElementSibling;
-      const triggerRect = trigger.getBoundingClientRect();
-      const panelRect = panel.getBoundingClientRect();
-      setPanelLeft(triggerRect.left);
-      setPanelTop(triggerRect.top - panelRect.height);
-    }
-  }, []);
 
   return (
-    <>
+    <Wrapper>
       <Trigger
         active={active}
         backgroundColor={activeColor.hex()}
@@ -458,65 +472,55 @@ const ColorPicker = ({
         ref={triggerRef}
         displayName="Trigger"
       />
-      <Panel
-        active={active}
-        onPointerDown={e => {
-          const rect = e.target.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          setPanelClickCoordinates({ x, y });
-        }}
-        onPointerUp={e => setPanelClickCoordinates(undefined)}
-        onPointerLeave={e => setPanelClickCoordinates(undefined)}
-        onPointerMove={e => {
-          if (panelClickCoordinates) {
-            const left = e.clientX - panelClickCoordinates.x;
-            const top = e.clientY - panelClickCoordinates.y;
-            setPanelLeft(left);
-            setPanelTop(top);
-          }
-        }}
-        left={panelLeft}
-        top={panelTop}
-        ref={panelRef}
+      <Draggable
+        enableUserSelectHack={false}
+        onStop={e => setPanelDragging(false)}
+        onStart={e => setPanelDragging(true)}
       >
-        <PanelHeader fontFamily={titleFontFamily}>{title}</PanelHeader>
-        <ContentWrapper>
-          <SaturationValueCanvas
-            width={padWidth}
-            height={padHeight}
-            activeHue={activeHue}
-            activeSaturation={activeSaturation}
-            activeValue={activeValue}
-            setActiveColor={setActiveColor}
-            setActiveSaturation={setActiveSaturation}
-            setActiveValue={setActiveValue}
-            onColorChange={onColorChange}
-          />
-          <HueCanvas
-            width={slideWidth}
-            height={slideHeight}
-            activeHue={activeHue}
-            activeSaturation={activeSaturation}
-            activeValue={activeValue}
-            setActiveColor={setActiveColor}
-            setActiveHue={setActiveHue}
-            onColorChange={onColorChange}
-          />
-          <ValuesWrapper>
-            <Label>
-              RGB:<Input type="text" value={`${activeColor.get('rgb.r')}/${activeColor.get('rgb.g')}/${activeColor.get('rgb.b')}`} readOnly disabled={active ? false : true}/>
-            </Label>
-            <Label>
-              HSV:<Input type="text" value={`${activeHue}/${activeSaturation.toFixed(3)}/${activeValue.toFixed(3)}`} readOnly  disabled={active ? false : true}/>
-            </Label>
-            <Label>
-              Hex:<Input type="text" value={activeColor.hex()} readOnly  disabled={active ? false : true}/>
-            </Label>
-          </ValuesWrapper>
-        </ContentWrapper>
-      </Panel>
-    </>
+        <Panel
+          active={active}
+        >
+          <PanelHeader fontFamily={titleFontFamily}>{title}</PanelHeader>
+          <ContentWrapper>
+            <SaturationValueCanvas
+              width={padWidth}
+              height={padHeight}
+              activeHue={activeHue}
+              activeSaturation={activeSaturation}
+              activeValue={activeValue}
+              setActiveColor={setActiveColor}
+              setActiveSaturation={setActiveSaturation}
+              setActiveValue={setActiveValue}
+              onColorChange={onColorChange}
+            />
+            <HueCanvas
+              width={slideWidth}
+              height={slideHeight}
+              activeHue={activeHue}
+              activeSaturation={activeSaturation}
+              activeValue={activeValue}
+              setActiveColor={setActiveColor}
+              setActiveHue={setActiveHue}
+              onColorChange={onColorChange}
+            />
+            <ValuesWrapper>
+              <ValueLabel>
+                <ValueSpan>rgb:</ValueSpan>
+                <Input type="text" value={`${activeColor.get('rgb.r')}/${activeColor.get('rgb.g')}/${activeColor.get('rgb.b')}`} disabled={active && !panelDragging ? false : true}/>
+              </ValueLabel>
+              <ValueLabel>
+                <ValueSpan>hsv:</ValueSpan>
+                <Input type="text" value={`${activeHue}/${activeSaturation.toFixed(3)}/${activeValue.toFixed(3)}`} readOnly  disabled={active && !panelDragging ? false : true}/>
+              </ValueLabel>
+              <ValueLabel>
+                <ValueSpan>hex:</ValueSpan>
+                <Input type="text" value={activeColor.hex().replace('#', '')} readOnly  disabled={active && !panelDragging ? false : true}/>
+              </ValueLabel>
+            </ValuesWrapper>
+          </ContentWrapper>
+        </Panel>
+      </Draggable>
+    </Wrapper>
   );
 };
 
@@ -528,6 +532,7 @@ ColorPicker.defaultProps = {
   slideHeight: 256,
   title: 'Color Picker',
   titleFontFamily: 'sans-serif',
+  valueFontFamily: 'sans-serif',
   onColorChange: ({ r, g, b }) => ({ r, g, b }),
 };
 
@@ -539,6 +544,7 @@ ColorPicker.propTypes = {
   slideHeight: PropTypes.number,
   title: PropTypes.string,
   titleFontFamily: PropTypes.string,
+  valueFontFamily: PropTypes.string,
   onColorChange: PropTypes.func,
 };
 

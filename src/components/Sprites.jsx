@@ -1,16 +1,9 @@
 // src/js/components/Sprites.js
-
 import React from 'react';
 import {v4 as uuid} from 'uuid';
 
 import ScaleNearestSprite from 'components/ScaleNearestSprite';
 import { useScreenContext } from 'contexts/ScreenContext';
-
-const mapStateToProps = (state, ownProps) => {
-    // const { width, height } = ownProps;
-    // return { ...state, width, height };
-    return state;
-};
 
 const Sprites = () => {
     const { sprites } = useScreenContext();

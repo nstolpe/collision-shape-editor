@@ -22,7 +22,7 @@ const Icon = styled(
   position: 'relative',
   transition: 'box-shadow 0.15s ease-in-out',
   verticalAlign: 'middle',
-  ['&:active']: {
+  '&:active': {
     boxShadow: '0 0 10px rgba(0,0,0,0.5) inset',
   }
 }));
