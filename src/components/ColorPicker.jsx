@@ -60,8 +60,9 @@ Trigger.defaultProps = {
 };
 
 const Panel = styled.div`
+  font-size: 16px;
+  line-height: 1.5;
   position: absolute;
-  display: flex;
   opacity: ${({ active }) => active ? 1 : 0};
   pointer-events: ${({ active }) => active ? 'auto' : 'none'};
   z-index: ${({ active }) => active ? 1000 : -1000};
@@ -71,8 +72,8 @@ const Panel = styled.div`
   margin-bottom: 1em;
   border-radius: 4px;
   cursor: default;
-  left: ${({ x }) => x}px;
-  top: ${({ y }) => y}px;
+  left: ${({ left }) => left}px;
+  top: ${({ top }) => top}px;
   box-shadow: 0 0 4px 0px rgba(0,0,0,0.6);
   transition: opacity 0.15s ease-in-out;
   ${({ active }) => !active ? '& * { visibility: hidden }' : ''}
@@ -81,11 +82,34 @@ const Panel = styled.div`
 
 Panel.displayName = 'Panel';
 
+const ContentWrapper = styled.div`
+  display: flex;
+  pointer-events: none;
+`;
+
+ContentWrapper.displayName = 'ContentWrapper';
+
 const ValuesWrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  pointer-events: none;
 `;
+
+const PanelHeader = styled.h3`
+  background-color: hsl(0,0%,50%);
+  border-radius: 4px;
+  color: hsl(0,0%,75%);
+  font-family: ${({ fontFamily }) => fontFamily};
+  font-size: 1.25em;
+  line-height: 1.2;
+  margin: 0 0 0.8em;
+  pointer-events: none;
+  text-align: center;
+  user-select: none;
+`;
+
+PanelHeader.displayName = 'PanelHeader';
 
 ValuesWrapper.displayName = 'ValuesWrapper';
 
@@ -339,7 +363,16 @@ const HueCanvas = ({ activeHue, activeSaturation, activeValue, setActiveColor, s
   );
 };
 
-const ColorPicker = ({ initialColor, padWidth, padHeight, slideWidth, slideHeight, onColorChange }) => {
+const ColorPicker = ({
+  initialColor,
+  padWidth,
+  padHeight,
+  slideWidth,
+  slideHeight,
+  title,
+  titleFontFamily,
+  onColorChange,
+}) => {
   // color is a number, make it a chroma instance
   const [activeColor, setActiveColor] = useState(chroma(initialColor));
   const color = chroma(initialColor);
@@ -347,8 +380,10 @@ const ColorPicker = ({ initialColor, padWidth, padHeight, slideWidth, slideHeigh
   const [activeSaturation, setActiveSaturation] = useState(color.get('hsv.s'));
   const [activeValue, setActiveValue] = useState(color.get('hsv.v'));
   const [active, setActive] = useState(false);
-  const [panelX, setPanelX] = useState(null);
-  const [panelY, setPanelY] = useState(null);
+  const [panelLeft, setPanelLeft] = useState(null);
+  const [panelTop, setPanelTop] = useState(null);
+  const [panelDragging, setPanelDragging] = useState(false);
+  const [panelClickCoordinates, setPanelClickCoordinates] = useState();
 
   /**
    * Toggles active/inactive for the colorpicker.
@@ -407,8 +442,8 @@ const ColorPicker = ({ initialColor, padWidth, padHeight, slideWidth, slideHeigh
       const trigger = panel.previousElementSibling;
       const triggerRect = trigger.getBoundingClientRect();
       const panelRect = panel.getBoundingClientRect();
-      setPanelX(triggerRect.left);
-      setPanelY(triggerRect.top - panelRect.height);
+      setPanelLeft(triggerRect.left);
+      setPanelTop(triggerRect.top - panelRect.height);
     }
   }, []);
 
@@ -423,44 +458,61 @@ const ColorPicker = ({ initialColor, padWidth, padHeight, slideWidth, slideHeigh
       />
       <Panel
         active={active}
-        onClick={event => event.stopPropagation()}
-        onPointerDown={event => event.stopPropagation()}
-        x={panelX}
-        y={panelY}
+        onPointerDown={e => {
+          const rect = e.target.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          setPanelClickCoordinates({ x, y });
+        }}
+        onPointerUp={e => setPanelClickCoordinates(undefined)}
+        onPointerLeave={e => setPanelClickCoordinates(undefined)}
+        onPointerMove={e => {
+          if (panelClickCoordinates) {
+            const left = e.clientX - panelClickCoordinates.x;
+            const top = e.clientY - panelClickCoordinates.y;
+            setPanelLeft(left);
+            setPanelTop(top);
+          }
+        }}
+        left={panelLeft}
+        top={panelTop}
         ref={panelRef}
       >
-        <SaturationValueCanvas
-          width={padWidth}
-          height={padHeight}
-          activeHue={activeHue}
-          activeSaturation={activeSaturation}
-          activeValue={activeValue}
-          setActiveColor={setActiveColor}
-          setActiveSaturation={setActiveSaturation}
-          setActiveValue={setActiveValue}
-          onColorChange={onColorChange}
-        />
-        <HueCanvas
-          width={slideWidth}
-          height={slideHeight}
-          activeHue={activeHue}
-          activeSaturation={activeSaturation}
-          activeValue={activeValue}
-          setActiveColor={setActiveColor}
-          setActiveHue={setActiveHue}
-          onColorChange={onColorChange}
-        />
-        <ValuesWrapper>
-          <Label>
-            RGB:<Input type="text" value={`${activeColor.get('rgb.r')}/${activeColor.get('rgb.g')}/${activeColor.get('rgb.b')}`} readOnly disabled={active ? false : true}/>
-          </Label>
-          <Label>
-            HSV:<Input type="text" value={`${activeHue}/${activeSaturation.toFixed(3)}/${activeValue.toFixed(3)}`} readOnly  disabled={active ? false : true}/>
-          </Label>
-          <Label>
-            Hex:<Input type="text" value={activeColor.hex()} readOnly  disabled={active ? false : true}/>
-          </Label>
-        </ValuesWrapper>
+        <PanelHeader fontFamily={titleFontFamily}>{title}</PanelHeader>
+        <ContentWrapper>
+          <SaturationValueCanvas
+            width={padWidth}
+            height={padHeight}
+            activeHue={activeHue}
+            activeSaturation={activeSaturation}
+            activeValue={activeValue}
+            setActiveColor={setActiveColor}
+            setActiveSaturation={setActiveSaturation}
+            setActiveValue={setActiveValue}
+            onColorChange={onColorChange}
+          />
+          <HueCanvas
+            width={slideWidth}
+            height={slideHeight}
+            activeHue={activeHue}
+            activeSaturation={activeSaturation}
+            activeValue={activeValue}
+            setActiveColor={setActiveColor}
+            setActiveHue={setActiveHue}
+            onColorChange={onColorChange}
+          />
+          <ValuesWrapper>
+            <Label>
+              RGB:<Input type="text" value={`${activeColor.get('rgb.r')}/${activeColor.get('rgb.g')}/${activeColor.get('rgb.b')}`} readOnly disabled={active ? false : true}/>
+            </Label>
+            <Label>
+              HSV:<Input type="text" value={`${activeHue}/${activeSaturation.toFixed(3)}/${activeValue.toFixed(3)}`} readOnly  disabled={active ? false : true}/>
+            </Label>
+            <Label>
+              Hex:<Input type="text" value={activeColor.hex()} readOnly  disabled={active ? false : true}/>
+            </Label>
+          </ValuesWrapper>
+        </ContentWrapper>
       </Panel>
     </>
   );
@@ -472,6 +524,8 @@ ColorPicker.defaultProps = {
   padHeight: 256,
   slideWidth: 48,
   slideHeight: 256,
+  title: 'Color Picker',
+  titleFontFamily: 'sans-serif',
   onColorChange: ({ r, g, b }) => ({ r, g, b }),
 };
 
@@ -481,6 +535,8 @@ ColorPicker.propTypes = {
   padHeight: PropTypes.number,
   slideWidth: PropTypes.number,
   slideHeight: PropTypes.number,
+  title: PropTypes.string,
+  titleFontFamily: PropTypes.string,
   onColorChange: PropTypes.func,
 };
 

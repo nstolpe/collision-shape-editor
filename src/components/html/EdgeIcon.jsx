@@ -2,40 +2,44 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled/macro';
+import isPropValid from '@emotion/is-prop-valid'
 
 import { Button } from 'components/html/resets';
 
-const Icon = styled(Button)`
-  height: ${({ height }) => height};
-  width: ${({ width }) => width};
-  background: hsl(0,0%,50%);
-  position: relative;
-  display: inline-block;
-  vertical-align: middle;
-  border-radius: 4px;
-  transition: box-shadow 0.15s ease-in-out;
-  cursor: pointer;
-
-  &:active,
-  &.active {
-    box-shadow: 0px 0px 10px rgba(0,0,0,0.5) inset;
+const Icon = styled(
+  Button,
+  {
+    shouldForwardProp: prop => isPropValid(prop) && prop !== 'height' && prop !== 'width'
   }
-`;
+)(({ active, height, width }) => ({
+  height,
+  width,
+  background: 'hsl(0,0%,50%)',
+  borderRadius: '4px',
+  boxShadow: active ? '0 0 10px rgba(0,0,0,0.5) inset' : 'none',
+  cursor: 'pointer',
+  display: 'inline-block',
+  position: 'relative',
+  transition: 'box-shadow 0.15s ease-in-out',
+  verticalAlign: 'middle',
+  ['&:active']: {
+    boxShadow: '0 0 10px rgba(0,0,0,0.5) inset',
+  }
+}));
 
 const Edges = styled.div`
   border-width: 2px;
   border-style: solid;
   border-top-color: #ff0000;
-  border-right-color: #ffffff;
-  border-bottom-color: #ffffff;
-  border-left-color: #ffffff;
+  border-right-color: ${({ active }) => active ? '#ffa500' : '#ffffff'};
+  border-bottom-color: ${({ active }) => active ? '#ffa500' : '#ffffff'};
+  border-left-color: ${({ active }) => active ? '#ffa500' : '#ffffff'};
   height: 50%;
   width: 50%;
   margin: auto;
   transform: rotate(45deg);
   transition: border-color 0.15s ease-in-out;
 
-  ${Icon}.active &,
   ${Icon}:active &,
   ${Icon}:focus &,
   ${Icon}:hover & {
@@ -46,15 +50,11 @@ const Edges = styled.div`
 `;
 
 const EdgeIcon = ({ active, height, width }) => {
-  const props = { height, width, type: 'button' };
-
-  if (active) {
-    props.className = 'active';
-  }
+  const iconProps = { active, height, width, type: 'button' };
 
   return (
-    <Icon {...props}>
-      <Edges />
+    <Icon {...iconProps}>
+      <Edges active={active} />
     </Icon>
   );
 };

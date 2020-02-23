@@ -2,40 +2,46 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled/macro';
+import isPropValid from '@emotion/is-prop-valid'
 
 import { Button } from 'components/html/resets';
 
-const Icon = styled(Button)`
-  height: ${({ height }) => height};
-  width: ${({ width }) => width};
-  background: hsl(0,0%,50%);
-  position: relative;
-  display: inline-block;
-  vertical-align: middle;
-  border-radius: 4px;
-  transition: box-shadow 0.15s ease-in-out;
-  cursor: pointer;
-
-  &:active,
-  &.active {
-    box-shadow: 0 0 10px rgba(0,0,0,0.5) inset;
+const Icon = styled(
+  Button,
+  {
+    shouldForwardProp: prop => isPropValid(prop) && prop !== 'height' && prop !== 'width'
   }
-`;
+)(({ active, height, width }) => ({
+  height,
+  width,
+  background: 'hsl(0,0%,50%)',
+  borderRadius: '4px',
+  boxShadow: active ? '0 0 10px rgba(0,0,0,0.5) inset' : 'none',
+  cursor: 'pointer',
+  display: 'inline-block',
+  position: 'relative',
+  transition: 'box-shadow 0.15s ease-in-out',
+  verticalAlign: 'middle',
+  ['&:active']: {
+    boxShadow: '0 0 10px rgba(0,0,0,0.5) inset',
+  }
+}));
 
 const Edge = styled.div`
   position: absolute;
-  background-color: #ffffff;
+  background-color: ${({ active }) => active ? '#ffa500' : '#ffffff'};
   box-sizing: border-box;
   display: flex;
   transition: background-color 0.15s ease-in-out;
 
-  ${Icon}.active &,
   ${Icon}:active &,
   ${Icon}:focus &,
   ${Icon}:hover & {
     background-color: #ffa500;
   }
 `;
+
+Edge.displayName = 'Edge';
 
 const End = styled(Edge)`
   right: calc(20% + 6px);
@@ -95,18 +101,14 @@ const Left = styled(Side)`
 `;
 
 const VertexIcon = ({ active, height, width }) => {
-  const props = { height, width, type: 'button' };
-
-  if (active) {
-    props.className = 'active';
-  }
+  const iconProps = { active, height, width, type: 'button' };
 
   return (
-    <Icon {...props}>
-       <Top />
-       <Right />
-       <Bottom />
-       <Left />
+    <Icon {...iconProps}>
+       <Top active={active} />
+       <Right active={active} />
+       <Bottom active={active} />
+       <Left active={active} />
     </Icon>
   );
 };

@@ -38,7 +38,12 @@ const Controls = ({ children }) => {
   return(
     <ControlWrapper>
       <FileLoader onLoad={onLoad} accept="image/*" multiple />
-      <ColorPicker initialColor={backgroundColor} onColorChange={onColorChange} />
+      <ColorPicker
+        initialColor={backgroundColor}
+        onColorChange={onColorChange}
+        title="background color"
+        titleFontFamily="Fira Mono"
+      />
       <VertexIcon />
       <EdgeIcon />
       {children}
