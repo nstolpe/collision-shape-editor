@@ -126,6 +126,7 @@ const PadCanvas = styled.canvas`
   height: ${({ height }) => `${height}px`};
   vertical-align: middle;
   cursor: ${({ dragging }) => dragging ? 'none' : cursor};
+  pointer-events: auto;
   touch-action: none;
 `;
 
@@ -138,6 +139,7 @@ const SlideCanvas = styled.canvas`
   vertical-align: middle;
   cursor: ${({ dragging }) => dragging ? 'none' : cursor};
   margin: ${({ width }) => `0 ${width * .25}px`};
+  pointer-events: auto;
   touch-action: none;
 `;
 

@@ -1,7 +1,6 @@
 // src/js/components/Sprites.js
 
 import React from 'react';
-import { connect } from 'react-redux';
 import {v4 as uuid} from 'uuid';
 
 import ScaleNearestSprite from 'components/ScaleNearestSprite';
@@ -34,5 +33,4 @@ const Sprites = () => {
     );
 };
 
-// export default connect(mapStateToProps, null, null, { context: ScreenContext })(Sprites);
 export default Sprites;
