@@ -1,21 +1,20 @@
 // components/Vertex.js
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import * as PIXI from 'pixi.js';
 
-import Circle from 'components/base/Circle';
+import Circle from 'components/pixi/base/Circle';
 import ScreenContext from 'contexts/ScreenContext';
 import { move, grab } from 'utils/cursors';
 
 import {
   deleteVertex,
   moveVertex,
-  startMoveVertex,
-  stopMoveVertex,
 } from 'actions/actions';
 import { useScreenContext } from 'contexts/ScreenContext';
 
 const Vertex = ({
+  active,
   hitArea,
   id,
   setCursor,
@@ -84,36 +83,28 @@ const Vertex = ({
     setMovingVertices(currentMovingVertices => currentMovingVertices.filter(activeVertex => activeVertex.id !== id));
   };
 
-  const pointermove = event => {
-    // console.log('pointermove primary',e.data.isPrimary)
-    const coordinates = event.data.getLocalPosition(event.currentTarget.parent);
-
-    if (movingVertices.find(vertex => vertex.id === event.currentTarget.id && vertex.identifier === event.data.identifier) && event.currentTarget.id === id) {
-     dispatch(moveVertex({ ...coordinates, id }));
-    }
-  };
-
   return (
     <Circle
       name={id}
       id={id}
-      interactive
+      interactive={active}
       buttonMode
       cursor={move}
       pointerdown={pointerdown}
       pointerup={pointerup}
       pointerupoutside={pointerupoutside}
-      pointermove={pointermove}
       hitArea={hitArea}
       x={x}
       y={y}
+      pivot={{x: 0, y: 0}}
       {...props}
     />
   );
 };
 
 Vertex.defaultProps = {
-  alpha: 0.8,
+  active: false,
+  alpha: 1,
   radius: 4.5,
   fill: 0xe62bdc,
   strokeColor: 0xffffff,
@@ -127,6 +118,7 @@ Vertex.propTypes = {
     PropTypes.number,
     PropTypes.string,
   ]),
+  active: PropTypes.bool,
   alpha: PropTypes.number,
   radius: PropTypes.number,
   fill: PropTypes.number,

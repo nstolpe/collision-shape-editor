@@ -5,10 +5,10 @@ import * as PIXI from 'pixi.js';
 import { Global } from '@emotion/core';
 
 import FiraMonoRegular from 'fonts/FiraMono/FiraMono-Regular.ttf';
-import AppWrapper from 'components/AppWrapper';
-import Controls from 'components/Controls';
+import AppWrapper from 'components/html/AppWrapper';
+import Controls from 'components/html/Controls';
 import FlexResizer from 'components/html/FlexResizer';
-import Screen from 'components/Screen';
+import Screen from 'components/pixi/Screen';
 import ScreenContext from 'contexts/ScreenContext';
 import RootStore from 'store/RootStore';
 

@@ -1,19 +1,19 @@
-// src/js/components/InteractiveViewport.js
+// src/js/components/pixi/InteractiveViewport.js
 import * as PIXI from 'pixi.js';
 import React, { useEffect, useContext, useRef, useState, Children, cloneElement } from 'react';
 import { usePixiApp } from 'react-pixi-fiber';
 
 import {
   addSprite,
-  addVertex,
   removeTextureSource,
   scaleUI,
 } from 'actions/actions';
+import Modes from 'constants/modes';
 import ScreenContext, { useScreenContext } from 'contexts/ScreenContext';
-import Viewport from 'components/base/Viewport';
-import Edges from 'components/Edges';
-import Sprites from 'components/Sprites';
-import Vertices from 'components/Vertices';
+import Viewport from 'components/pixi/base/Viewport';
+import Edges from 'components/pixi/Edges';
+import Sprites from 'components/pixi/Sprites';
+import Vertices from 'components/pixi/Vertices';
 import { grab, grabbing } from 'utils/cursors';
 
 /**
@@ -30,9 +30,8 @@ const InteractiveViewport = props => {
   const {
     dispatch,
     backgroundColor,
+    mode,
     textureSources,
-    screenWidth,
-    screenHeight,
     scale,
   } = useScreenContext();
   const [cursor, setCursor] = useState(grab);
@@ -46,7 +45,7 @@ const InteractiveViewport = props => {
   //     screenHeight,
   // } = props;
   // const context = useContext(ScreenContext);
-
+  renderer.plugins.interaction.moveWhenInside = true;
   useEffect(
     () => {
       textureSources.forEach(textureSource => {
@@ -62,8 +61,8 @@ const InteractiveViewport = props => {
           addSprite({
             name: textureSource.id,
             texture: resources[textureSource.id].texture,
-            x: screenWidth * 0.5,
-            y: screenHeight * 0.5,
+            x: props.screenWidth * 0.5,
+            y: props.screenHeight * 0.5,
             rotation: 0,
             scale: [1, 1],
             scaleMode: PIXI.SCALE_MODES.NEAREST,
@@ -71,11 +70,12 @@ const InteractiveViewport = props => {
         });
       });
     },
-    [textureSources, addSprite, loader, removeTextureSource, screenHeight, screenWidth]
+    [textureSources, addSprite, loader, removeTextureSource, props.screenHeight, props.screenWidth]
   );
 
   return (
     <Viewport
+      name="Interactive Viewport"
       ref={viewport}
       drag
       pinch={{ percent: 10 }}
@@ -86,15 +86,21 @@ const InteractiveViewport = props => {
       cursor={cursor}
       pointerdown={() => setCursor(grabbing)}
       pointerup={() => setCursor(grab)}
-      pointertap={e => {
-        const coordinates = e.data.getLocalPosition(e.currentTarget);
-        dispatch(addVertex(coordinates));
-      }}
       {...props}
     >
       <Sprites />
-      <Edges scale={scale} setCursor={setCursor} />
-      <Vertices scale={scale} setCursor={setCursor} />
+      <Edges
+        active={mode === Modes.EDGE}
+        scale={scale}
+        setCursor={setCursor}
+      />
+      <Vertices
+        active={mode === Modes.VERTEX}
+        width={props.screenWidth}
+        height={props.screenHeight}
+        scale={scale}
+        setCursor={setCursor}
+      />
     </Viewport>
   );
 };

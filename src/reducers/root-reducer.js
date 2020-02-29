@@ -7,6 +7,9 @@ import {
   MOVE_VERTEX,
   START_MOVE_VERTEX,
   STOP_MOVE_VERTEX,
+  SET_INTERACTION,
+  SET_MODE,
+  SET_TOOL,
   RESIZE,
   SCALE_UI,
   SET_BACKGROUND_COLOR,
@@ -16,11 +19,13 @@ import {
   REMOVE_TEXTURE_SOURCE,
   ADD_SPRITE,
 } from 'constants/action-types';
+import Interactions from 'constants/interactions';
 import Modes from 'constants/modes';
 import Tools from 'constants/tools';
 
 export const initialState = {
-  backgroundColor: 0x44fc03,
+  backgroundColor: 0xc1ddca,
+  interaction: Interactions.TRANSLATE,
   mode: Modes.VERTEX,
   tool: Tools.ADD,
   // width: 0,
@@ -84,6 +89,21 @@ const reducer = (state, action) => {
       return {
         ...state,
         movingVerticeIds: state.movingVerticeIds.filter(vid => vid !== data.id),
+      };
+    case SET_INTERACTION:
+      return {
+        ...state,
+        mode: data.interaction,
+      };
+    case SET_MODE:
+      return {
+        ...state,
+        mode: data.mode,
+      };
+    case SET_TOOL:
+      return {
+        ...state,
+        tool: data.tool,
       };
     case RESIZE:
       return {

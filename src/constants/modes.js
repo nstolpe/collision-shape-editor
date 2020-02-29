@@ -1,12 +1,11 @@
 // src/js/constants/modes.js
-
-export const LINE = 'LINE';
+export const EDGE = 'EDGE';
 export const SHAPE = 'SHAPE';
 export const SPRITE = 'SPRITE';
 export const VERTEX = 'VERTEX';
 
 export default {
-    LINE,
+    EDGE,
     SHAPE,
     SPRITE,
     VERTEX,

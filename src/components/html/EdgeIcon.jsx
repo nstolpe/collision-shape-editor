@@ -2,30 +2,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled/macro';
-import isPropValid from '@emotion/is-prop-valid'
 
-import { Button } from 'components/html/resets';
-
-const Icon = styled(
-  Button,
-  {
-    shouldForwardProp: prop => isPropValid(prop) && prop !== 'height' && prop !== 'width'
-  }
-)(({ active, height, width }) => ({
-  height,
-  width,
-  background: 'hsl(0,0%,50%)',
-  borderRadius: '4px',
-  boxShadow: active ? '0 0 10px rgba(0,0,0,0.5) inset' : 'none',
-  cursor: 'pointer',
-  display: 'inline-block',
-  position: 'relative',
-  transition: 'box-shadow 0.15s ease-in-out',
-  verticalAlign: 'middle',
-  '&:active': {
-    boxShadow: '0 0 10px rgba(0,0,0,0.5) inset',
-  }
-}));
+import Icon from 'components/html/Icon';
 
 const Edges = styled.div`
   border-width: 2px;
@@ -49,11 +27,11 @@ const Edges = styled.div`
   }
 `;
 
-const EdgeIcon = ({ active, height, width }) => {
-  const iconProps = { active, height, width, type: 'button' };
+const EdgeIcon = props => {
+  const { active } = props;
 
   return (
-    <Icon {...iconProps}>
+    <Icon {...props}>
       <Edges active={active} />
     </Icon>
   );

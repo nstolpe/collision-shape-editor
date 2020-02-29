@@ -6,6 +6,10 @@ export const MOVE_VERTEX = 'MOVE_VERTEX';
 export const START_MOVE_VERTEX = 'START_MOVE_VERTEX';
 export const STOP_MOVE_VERTEX = 'STOP_MOVE_VERTEX';
 
+export const SET_INTERACTION = 'SET_INTERACTION';
+export const SET_MODE = 'SET_MODE';
+export const SET_TOOL = 'SET_TOOL';
+
 export const RESIZE = 'RESIZE';
 export const SCALE_UI = 'SCALE_UI';
 

@@ -471,6 +471,7 @@ const ColorPicker = ({
         onClick={toggleActive}
         ref={triggerRef}
         displayName="Trigger"
+        title={title}
       />
       <Draggable
         enableUserSelectHack={false}
@@ -510,11 +511,11 @@ const ColorPicker = ({
               </ValueLabel>
               <ValueLabel>
                 <ValueSpan>hsv:</ValueSpan>
-                <Input type="text" value={`${activeHue}/${activeSaturation.toFixed(3)}/${activeValue.toFixed(3)}`} readOnly  disabled={active && !panelDragging ? false : true}/>
+                <Input type="text" value={`${activeHue}/${activeSaturation.toFixed(3)}/${activeValue.toFixed(3)}`} readOnly  disabled={active && !panelDragging ? false : true} />
               </ValueLabel>
               <ValueLabel>
                 <ValueSpan>hex:</ValueSpan>
-                <Input type="text" value={activeColor.hex().replace('#', '')} readOnly  disabled={active && !panelDragging ? false : true}/>
+                <Input type="text" value={activeColor.hex().replace('#', '')} readOnly  disabled={active && !panelDragging ? false : true} />
               </ValueLabel>
             </ValuesWrapper>
           </ContentWrapper>

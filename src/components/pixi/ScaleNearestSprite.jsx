@@ -1,4 +1,4 @@
-// src/js/components/ScaleNearestSprite.js
+// src/js/components/pixi/ScaleNearestSprite.js
 
 import * as PIXI from 'pixi.js';
 import React, {
