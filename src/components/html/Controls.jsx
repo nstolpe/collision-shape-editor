@@ -21,6 +21,7 @@ import SpriteIcon from 'components/html/SpriteIcon';
 import VertexIcon from 'components/html/VertexIcon';
 import Separator from 'components/html/Separator';
 import { useRootContext } from 'contexts/RootContext';
+import { property } from 'tools/utilities';
 
 const ControlWrapper = styled.div`
   background-color: hsl(0, 0%, 75%);
@@ -33,24 +34,24 @@ const ControlWrapper = styled.div`
 ControlWrapper.displayName = 'ControlWrapper';
 
 const getIconProps = (dispatch, mode, tool) => {
-  const addDisabled = !ModeTools[mode].includes(Tools.ADD);
-  const deleteDisabled = !ModeTools[mode].includes(Tools.DELETE);
-  const selectDisabled = !ModeTools[mode].includes(Tools.SELECT);
+  const addDisabled = !property(ModeTools, mode, []).includes(Tools.ADD);
+  const deleteDisabled = !property(ModeTools, mode, []).includes(Tools.DELETE);
+  const selectDisabled = !property(ModeTools, mode, []).includes(Tools.SELECT);
 
   return {
     edgeIconProps: {
         active: mode === Modes.EDGE,
-        onClick: () => dispatch(setMode(Modes.EDGE)),
+        onClick: () => dispatch(setMode(mode === Modes.EDGE ? Modes.ALL : Modes.EDGE)),
         title: 'edge',
     },
     spriteIconProps: {
         active: mode === Modes.SPRITE,
-        onClick: () => dispatch(setMode(Modes.SPRITE)),
+        onClick: () => dispatch(setMode(mode === Modes.SPRITE ? Modes.ALL : Modes.SPRITE)),
         title: 'sprite',
     },
     vertexIconProps: {
         active: mode === Modes.VERTEX,
-        onClick: () => dispatch(setMode(Modes.VERTEX)),
+        onClick: () => dispatch(setMode(mode === Modes.VERTEX ? Modes.ALL : Modes.VERTEX)),
         title: 'vertex',
     },
     minusIconProps: {

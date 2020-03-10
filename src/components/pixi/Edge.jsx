@@ -15,6 +15,7 @@ const Edge = ({
   thickness,
   x,
   y,
+  ...props
 }) => {
   const {
     dispatch,
@@ -63,6 +64,7 @@ const Edge = ({
       position={position}
       rotation={rotation}
       hitArea={new PIXI.Rectangle(0, -2, length, thickness + 4)}
+      {...props}
     />
   );
 };
