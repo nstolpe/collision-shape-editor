@@ -5,6 +5,7 @@ import {
   ADD_VERTEX,
   DELETE_VERTEX,
   MOVE_VERTEX,
+  MOVE_VERTICES,
   START_MOVE_VERTEX,
   STOP_MOVE_VERTEX,
   SET_INTERACTION,
@@ -27,7 +28,7 @@ export const initialState = {
   backgroundColor: 0xc1ddca,
   interaction: Interactions.TRANSLATE,
   mode: Modes.VERTEX,
-  tool: Tools.ADD,
+  tool: Tools.SELECT,
   // width: 0,
   // height: 0,
   resolution: window.devicePixelRatio,
@@ -39,18 +40,43 @@ export const initialState = {
   sprites: [],
   vertices: [
     {
-      x: 200,
-      y: 400,
+      x: 400,
+      y: 200,
       id: uuid(),
     },
     {
-      x: 223,
-      y: 456,
+      x: 600,
+      y: 200,
       id: uuid(),
     },
     {
-      x: 500,
-      y: 800,
+      x: 700,
+      y: 300,
+      id: uuid(),
+    },
+    {
+      x: 700,
+      y: 500,
+      id: uuid(),
+    },
+    {
+      x: 600,
+      y: 600,
+      id: uuid(),
+    },
+    {
+      x: 400,
+      y: 600,
+      id: uuid(),
+    },
+    {
+      x: 300,
+      y: 500,
+      id: uuid(),
+    },
+    {
+      x: 300,
+      y: 300,
       id: uuid(),
     },
   ],
@@ -89,6 +115,14 @@ const reducer = (state, action) => {
       return {
         ...state,
         movingVerticeIds: state.movingVerticeIds.filter(vid => vid !== data.id),
+      };
+    case MOVE_VERTICES:
+      return {
+        ...state,
+        vertices: state.vertices.map(
+          stateVertex =>
+            data.vertices.find(({ id }) => id === stateVertex.id) || stateVertex
+        ),
       };
     case SET_INTERACTION:
       return {
