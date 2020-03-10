@@ -8,12 +8,12 @@ import { useScreenContext } from 'contexts/ScreenContext';
 
 /**
  * Callback for Array.prototype.map that configures edges for each
- * set of vertices.
+ * set of vertices. Distances are scaled to counteract the inverse scaling later.
  */
-export const calculateEdge = (vertex1, idx, vertices) => {
+export const calculateScaledEdge = (idx, scale, vertex1, vertices) => {
   const vertex2 = vertices[(idx + 1) % vertices.length];
-  const dx = vertex2.x - vertex1.x;
-  const dy = vertex2.y - vertex1.y;
+  const dx = (vertex2.x - vertex1.x) * scale.x;
+  const dy = (vertex2.y - vertex1.y) * scale.y;
   const position = [
     (vertex2.x + vertex1.x) * 0.5,
     (vertex2.y + vertex1.y) * 0.5,
@@ -28,15 +28,26 @@ export const calculateEdge = (vertex1, idx, vertices) => {
   };
 };
 
-const Edges = ({ scale, setCursor }) => {
+const Edges = ({ scale, setCursor, ...restProps }) => {
   const { vertices } = useScreenContext();
-  const edges = vertices.map(calculateEdge);
+  const edges = vertices.map((vertex1, idx, vertices) => calculateScaledEdge(idx, scale, vertex1, vertices));
+  const scaleRatio = [
+    1 / scale.x,
+    1 / scale.y,
+  ];
 
   return (
-    <Container name='Edges'>
+    <Container name='Edges' {...restProps}>
       {edges.map((edge, key) => {
         const { vertex1: { x, y } } = edge;
-        const props = { ...edge, key, setCursor, x, y };
+        const props = {
+          ...edge,
+          key,
+          scale: scaleRatio,
+          setCursor,
+          x,
+          y,
+        };
 
         return <Edge {...props} />;
       })}
