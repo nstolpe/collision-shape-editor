@@ -5,6 +5,7 @@ export const DELETE_VERTEX = 'DELETE_VERTEX';
 export const MOVE_VERTEX = 'MOVE_VERTEX';
 export const START_MOVE_VERTEX = 'START_MOVE_VERTEX';
 export const STOP_MOVE_VERTEX = 'STOP_MOVE_VERTEX';
+export const MOVE_VERTICES = 'MOVE_VERTICES';
 
 export const SET_INTERACTION = 'SET_INTERACTION';
 export const SET_MODE = 'SET_MODE';

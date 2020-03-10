@@ -4,6 +4,7 @@ import {
   ADD_VERTEX,
   DELETE_VERTEX,
   MOVE_VERTEX,
+  MOVE_VERTICES,
   START_MOVE_VERTEX,
   STOP_MOVE_VERTEX,
   SET_INTERACTION,
@@ -29,9 +30,17 @@ export const deleteVertex = id => ({
   data: { id },
 });
 
-export const moveVertex = ({ x, y, id }) => ({
+export const moveVertex = ({ id, x, y }) => ({
   type: MOVE_VERTEX,
   data: { x, y, id },
+});
+
+/**
+ * @param {array} vertices
+ */
+export const moveVertices = vertices => ({
+  type: MOVE_VERTICES,
+  data: { vertices },
 });
 
 export const startMoveVertex = id => ({
