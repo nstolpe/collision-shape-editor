@@ -1,25 +1,48 @@
-// components/Vertex.js
+// components/pixi/Vertex.js
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as PIXI from 'pixi.js';
 
 import Circle from 'components/pixi/base/Circle';
 import ScreenContext from 'contexts/ScreenContext';
-import { move, grab } from 'utils/cursors';
-
+import {
+  CELL,
+  DEFAULT,
+  GRAB,
+  MOVE,
+  NONE,
+  NOT_ALLOWED,
+} from 'constants/cursors';
+import Tools from 'constants/tools';
 import {
   deleteVertex,
   moveVertex,
 } from 'actions/actions';
 import { useScreenContext } from 'contexts/ScreenContext';
 
+export const getCursor = tool => {
+  switch (tool) {
+    case Tools.ADD:
+      return CELL;
+    case Tools.DELETE:
+      return NOT_ALLOWED;
+    case Tools.SELECT:
+      return MOVE;
+    default:
+      return DEFAULT;
+  }
+};
+
 const Vertex = ({
   active,
+  activeFill,
+  fill,
   hitArea,
   id,
   setCursor,
-  setMovingVertices,
-  movingVertices,
+  setSelectedVertices,
+  selectedVertices,
+  tool,
   x,
   y,
   ...props
@@ -32,6 +55,7 @@ const Vertex = ({
 
   const pointerdown = event => {
     event.stopPropagation();
+    console.log('sdf')
     // console.log('pointerdown');
     // switch (true) {
     //     case altPressed && !ctrlPressed:
@@ -41,15 +65,20 @@ const Vertex = ({
     //         coordinates = event.data.getLocalPosition(event.currentTarget.parent);
     //         // dispatch(startMoveVertex(id));
     //         (true);
-    //         setMovingVertices(ids => [...ids, { id, coordinates, isPrimary: event.data.isPrimary, tye: event.data.pointerType }]);
+    //         setSelectedVertices(ids => [...ids, { id, coordinates, isPrimary: event.data.isPrimary, tye: event.data.pointerType }]);
     //         break;
     //     default:
     //         break;
     // }
-    setCursor(move);
-    if (!movingVertices.find(vertex => vertex.id === event.currentTarget.id && vertex.identifier === event.data.identifier) && event.currentTarget.id === id) {
+    setCursor(MOVE);
+    if (
+      !selectedVertices.find(vertex =>
+        vertex.id === event.currentTarget.id &&
+        vertex.identifier === event.data.identifier
+      ) && event.currentTarget.id === id
+    ) {
       const coordinates = event.data.getLocalPosition(event.currentTarget.parent);
-      setMovingVertices(
+      setSelectedVertices(
         ids => [...ids, { id, coordinates, identifier: event.data.identifier }]
       );
     }
@@ -69,30 +98,42 @@ const Vertex = ({
     const coordinates = event.data.getLocalPosition(event.currentTarget.parent);
     // dispatch(moveVertex({ ...coordinates, id }));
     // dispatch(stopMoveVertex(id));
-    setCursor(grab);
+    setCursor(GRAB);
 
-    if (movingVertices.find(vertex => vertex.id === event.currentTarget.id) && event.currentTarget.id === id) {
+    if (selectedVertices.find(vertex => vertex.id === event.currentTarget.id) && event.currentTarget.id === id) {
       dispatch(moveVertex({ ...coordinates, id }));
     }
 
-    setMovingVertices(currentMovingVertices => currentMovingVertices.filter(activeVertex => activeVertex.id !== id));
+    setSelectedVertices(currentselectedVertices => currentselectedVertices.filter(activeVertex => activeVertex.id !== id));
   };
 
   const pointerupoutside = event => {
     event.stopPropagation();
-    setMovingVertices(currentMovingVertices => currentMovingVertices.filter(activeVertex => activeVertex.id !== id));
+    setSelectedVertices(currentselectedVertices => currentselectedVertices.filter(activeVertex => activeVertex.id !== id));
   };
+
+  const eventLog = e => {
+    // e.stopPropagation();
+    console.log(e.type, e);
+  }
 
   return (
     <Circle
-      name={id}
-      id={id}
-      interactive={active}
+      name={`VERTEX__${id}`}
+      fill={selectedVertices.find(vertex => vertex.name === `VERTEX__${id}`) ? activeFill : fill}
+      interactive={true}
       buttonMode
-      cursor={move}
-      pointerdown={pointerdown}
-      pointerup={pointerup}
-      pointerupoutside={pointerupoutside}
+      cursor={getCursor(tool)}
+      // pointerdown={pointerdown}
+      // pointerup={pointerup}
+      // pointerupoutside={pointerupoutside}
+      pointercancel={eventLog}
+      pointerdown={eventLog}
+      // pointermove={eventLog}
+      pointerout={eventLog}
+      pointerover={eventLog}
+      pointerup={eventLog}
+      pointerupoutside={eventLog}
       hitArea={hitArea}
       x={x}
       y={y}
@@ -104,6 +145,7 @@ const Vertex = ({
 
 Vertex.defaultProps = {
   active: false,
+  activeFill: 0x17bafb,
   alpha: 1,
   radius: 4.5,
   fill: 0xe62bdc,
@@ -119,6 +161,7 @@ Vertex.propTypes = {
     PropTypes.string,
   ]),
   active: PropTypes.bool,
+  activeFill: PropTypes.number,
   alpha: PropTypes.number,
   radius: PropTypes.number,
   fill: PropTypes.number,
