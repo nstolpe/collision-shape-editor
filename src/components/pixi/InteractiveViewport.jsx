@@ -14,7 +14,7 @@ import Viewport from 'components/pixi/base/Viewport';
 import Edges from 'components/pixi/Edges';
 import Sprites from 'components/pixi/Sprites';
 import Vertices from 'components/pixi/Vertices';
-import { grab, grabbing } from 'utils/cursors';
+import { GRAB, GRABBING } from 'constants/cursors';
 
 /**
  * `pixi-viewport` component.
@@ -31,10 +31,11 @@ const InteractiveViewport = props => {
     dispatch,
     backgroundColor,
     mode,
+    tool,
     textureSources,
     scale,
   } = useScreenContext();
-  const [cursor, setCursor] = useState(grab);
+  const [cursor, setCursor] = useState(GRAB);
   // const {
   //     textureSources = [],
   //     backgroundColor,
@@ -77,25 +78,28 @@ const InteractiveViewport = props => {
     <Viewport
       name="Interactive Viewport"
       ref={viewport}
-      drag
+      drag={{ keyToPress: 'ControlLeft' }}
       pinch={{ percent: 10 }}
       wheel={{ percent: 0.05 }}
       onzoomed={({ viewport: { scale: { x, y } } }) => dispatch(scaleUI({ x, y }))}
       interaction={interaction}
       name={'InteractiveViewport'}
       cursor={cursor}
-      pointerdown={() => setCursor(grabbing)}
-      pointerup={() => setCursor(grab)}
+      pointerdown={() => setCursor(GRABBING)}
+      pointerup={() => setCursor(GRAB)}
       {...props}
     >
       <Sprites />
       <Edges
+        interactive={mode === Modes.EDGE}
+        interactiveChildren={mode === Modes.EDGE}
         active={mode === Modes.EDGE}
         scale={scale}
         setCursor={setCursor}
       />
       <Vertices
-        active={mode === Modes.VERTEX}
+        interactive={mode === Modes.VERTEX}
+        interactiveChildren={mode === Modes.VERTEX}
         width={props.screenWidth}
         height={props.screenHeight}
         scale={scale}

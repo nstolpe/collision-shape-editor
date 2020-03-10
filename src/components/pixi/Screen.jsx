@@ -7,7 +7,6 @@ import { Stage } from 'react-pixi-fiber';
 import InteractiveViewport from 'components/pixi/InteractiveViewport';
 import { useRootContext } from 'contexts/RootContext';
 import ScreenContext from 'contexts/ScreenContext';
-import Drawing from 'components/base/Drawing';
 
 const Screen = ({ children, width, height }) => {
   const state = useRootContext();
