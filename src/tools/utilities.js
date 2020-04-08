@@ -1,5 +1,16 @@
 // /src/js/tools/utilities.js
 
+export const propertyMap = (map, delimiter='.', asString=false) =>
+    asString ? (
+        typeof map === 'string' ? map :
+            Array.isArray(map) ? map.join(delimiter) :
+            String(map)
+    ) : (
+        typeof map === 'string' ? map.split(delimiter) :
+            Array.isArray(map) ? map :
+            []
+    );
+
 /**
  * Attempts to safely retrieve a nested property from a `source` object.
  * The `propString` determines the levels and names of properties, with the
@@ -23,8 +34,8 @@
  * @return {*}
  */
 export const property = (source, map, fallback, delimiter='.') => {
-    const keys = typeof map === 'string' ? map.split(delimiter) : Array.isArray(map) ? map : [];
-    return keys.length ? keys.reduce((obj, key) => obj && key in obj ? obj[key] : fallback, source) : fallback;
+    const keys = propertyMap(map, delimiter);
+    return keys.length ? keys.reduce((obj, key) => obj && key in Object(obj) ? obj[key] : fallback, source) : fallback;
 };
 
 /**
@@ -87,7 +98,10 @@ export const properties = (source, maps, delimiter='.') => {
                 keys = map;
                 break;
             case typeof map === 'object':
-                keys = property(map, 'map', '').split(map.delimiter || delimiter);
+                keys = propertyMap(
+                    property(map, 'map', []),
+                    property(map, 'delimiter', delimiter),
+                );
                 fallback = map.fallback;
                 break;
             default:
