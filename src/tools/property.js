@@ -96,7 +96,7 @@ export const property = (source, map, fallback, delimiter='.') => {
  * @return {*}
  */
 export const properties = (source, maps, fallback, delimiter='.') => (
-  maps.reduce((obj, map) => {
+  Array.prototype.reduce.call(maps, (obj, map) => {
     const keys = typeof map === 'string' ? map.split(delimiter) :
        Array.isArray(map) ? map :
        typeof map === 'object' ? propertyMap(

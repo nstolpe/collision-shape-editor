@@ -1,16 +1,7 @@
 import { properties, property, propertyMap, __RewireAPI__ } from 'tools/property';
 
-jest.mock('tools/property', () => {
-    const property = jest.requireActual('tools/property');
-
-    return {
-      ...property,
-      propertyMap: jest.fn(property.propertyMap),
-    };
-});
-
 describe('property.js --', () => {
-  describe('propertyMap', () => {
+  describe('`propertyMap()`', () => {
     const nonStandardMaps = [1, {}, null, undefined, NaN, () => {}];
 
     it('returns `map` when `map` is an array', () => {
@@ -45,7 +36,7 @@ describe('property.js --', () => {
     });
   });
 
-  describe('property', () => {
+  describe('`property()`', () => {
     it('will call `propertyMap` with `map` and `delimiter`', () => {
       const source = { a: { b: true } };
       const map = 'a//b';
@@ -57,117 +48,99 @@ describe('property.js --', () => {
       property(source, map, undefined, delimiter);
       expect(spy).toHaveBeenCalledWith(map, { delimiter });
     });
+
+    it('will return `fallback` when `map` is empty', () => {
+      const source = {};
+      const map = [];
+      const fallback = 'FALLBACK';
+      expect(property(source, map, fallback)).toEqual(fallback);
+    });
   });
 
-  it('will return `fallback` when `map` is empty', () => {
-    const source = {};
-    const map = [];
-    const fallback = 'FALLBACK';
-    expect(property(source, map, fallback)).toEqual(fallback);
-  });
-
-  describe('properties', () => {
-    it('will call `propertyMap` with `maps[n].map` and `maps[n].delimiter`', () => {
+  describe('`properties()`', () => {
+    describe('internal calls: `propertyMap`', () => {
       const source = { a: { b: true } };
       const map = 'a&b';
       const delimiter = '&';
-      const maps = [{ map, delimiter }];
+
       const spy = jest.fn(propertyMap);
 
-      __RewireAPI__.__Rewire__('propertyMap', spy);
+      beforeAll(() => {
+        __RewireAPI__.__Rewire__('propertyMap', spy);
+      });
 
-      properties(source, maps);
-      expect(spy).toHaveBeenCalledWith(map, { delimiter });
+      afterEach(() => {
+        spy.mockClear();
+      });
+
+      afterAll(() => {
+        __RewireAPI__.__ResetDependency__('propertyMap');
+      });
+
+      it('will call `propertyMap` with `maps[n].map` and `maps[n].delimiter`', () => {
+        properties(source, [{ map, delimiter }]);
+        expect(spy).toHaveBeenCalledWith(map, { delimiter });
+      });
+
+      it('will call `propertyMap` with `maps[n]` split by `delimiter` if `maps[n].map` and `delimiter` are strings', () => {
+        properties(source, [{ map }], undefined, delimiter);
+        expect(spy).toHaveBeenCalledWith(map, { delimiter });
+      });
+
+      it('will call `propertyMap` with an empty array if `maps[n].map` doesn\'t exist', () => {
+        properties(source, [{}], undefined, delimiter);
+        expect(spy).toHaveBeenCalledWith([], { delimiter });
+      });
     });
 
-    it('will call `propertyMap` with `maps[n]` split by `delimiter` if `maps[n].map` and `delimiter` are strings', () => {
+    describe('internal calls: `property`', () => {
       const source = { a: { b: true } };
-      const map = 'a%b';
+      const sourceEmpty = { a: {} };
+
+      const mapArray = ['a', 'b'];
+      const mapString = 'a%b';
+
       const delimiter = '%';
-      const maps = [{ map }];
-      const spy = jest.fn(propertyMap);
-
-      __RewireAPI__.__Rewire__('propertyMap', spy);
-
-      properties(source, maps, undefined, delimiter);
-      expect(spy).toHaveBeenCalledWith(map, { delimiter });
-    });
-
-    it('will call `propertyMap` with an empty array if `maps[n].map` doesn\'t exist', () => {
-      const source = { a: { b: true } };
-      const delimiter = '%';
-      const maps = [{}];
-      const spy = jest.fn(propertyMap);
-
-      __RewireAPI__.__Rewire__('propertyMap', spy);
-
-      properties(source, maps, undefined, delimiter);
-      expect(spy).toHaveBeenCalledWith([], { delimiter });
-    });
-
-    it('will call `property` with `maps[n]` split by `delimiter` if `maps[n].map` and `delimiter` are strings', () => {
-      const source = { a: { b: true } };
-      const map = 'a%b';
-      const delimiter = '%';
-      const maps = [map];
-      const spy = jest.fn(property);
-
-      __RewireAPI__.__Rewire__('property', spy);
-
-      properties(source, maps, undefined, delimiter);
-      expect(spy).toHaveBeenCalledWith(source, map.split(delimiter), undefined);
-    });
-
-    it('will call `property` with `maps[n].map` if `maps[n].map` is an array', () => {
-      const source = { a: { b: true } };
-      const map = ['a', 'b'];
-      const delimiter = '%';
-      const maps = [map];
-      const spy = jest.fn(property);
-
-      __RewireAPI__.__Rewire__('property', spy);
-
-      properties(source, maps);
-      expect(spy).toHaveBeenCalledWith(source, map, undefined);
-    });
-
-    it('will call `property` with `maps[n]` split by `maps[n].delimiter` if `maps[n].map` and `maps[n].delimiter` are strings', () => {
-      const source = { a: { b: true } };
-      const map = 'a%b';
-      const delimiter = '%';
-      const maps = [{ map, delimiter }];
-      const spy = jest.fn(property);
-
-      __RewireAPI__.__Rewire__('property', spy);
-
-      properties(source, maps);
-      expect(spy).toHaveBeenCalledWith(source, propertyMap(map, { delimiter }), undefined);
-    });
-
-    it('will call `property` with `maps[n].fallback` if `maps[n]` is an object and `maps[n].fallback` exists', () => {
-      const source = { a: {} };
-      const map = ['a', 'b'];
       const fallback = false;
-      const delimiter = '%';
-      const maps = [{ map, fallback, delimiter }];
+
       const spy = jest.fn(property);
 
-      __RewireAPI__.__Rewire__('property', spy);
+      beforeAll(() => {
+        __RewireAPI__.__Rewire__('property', spy);
+      });
 
-      properties(source, maps);
-      expect(spy).toHaveBeenCalledWith(source, map, fallback);
-    });
+      afterEach(() => {
+        spy.mockClear();
+      });
 
-    it('will not call `property` when `maps[n]` isn\'t a string, array or object', () => {
-      const source = { a: {} };
-      const map = undefined;
-      const maps = [map];
-      const spy = jest.fn(property);
+      afterAll(() => {
+        __RewireAPI__.__ResetDependency__('property');
+      });
 
-      __RewireAPI__.__Rewire__('property', spy);
+      it('will call `property` with `maps[n]` split by `delimiter` if `maps[n].map` and `delimiter` are strings', () => {
+        properties(source, [mapString], undefined, delimiter);
+        expect(spy).toHaveBeenCalledWith(source, mapString.split(delimiter), undefined);
+      });
 
-      properties(source, maps);
-      expect(spy).not.toHaveBeenCalled();
+      it('will call `property` with `maps[n].map` if `maps[n].map` is an array', () => {
+        properties(source, [mapArray]);
+        expect(spy).toHaveBeenCalledWith(source, mapArray, undefined);
+      });
+
+      it('will call `property` with `maps[n]` split by `maps[n].delimiter` if `maps[n].map` and `maps[n].delimiter` are strings', () => {
+        properties(source, [{ map: mapString, delimiter }]);
+        expect(spy).toHaveBeenCalledWith(source, propertyMap(mapString, { delimiter }), undefined);
+      });
+
+      it('will call `property` with `maps[n].fallback` if `maps[n]` is an object and `maps[n].fallback` exists', () => {
+        properties(sourceEmpty, [{ map: mapArray, fallback, delimiter }]);
+        expect(spy).toHaveBeenCalledWith(sourceEmpty, mapArray, fallback);
+      });
+
+      it('will not call `property` when `maps[n]` isn\'t a string, array or object', () => {
+        properties(source, [undefined]);
+        expect(spy).not.toHaveBeenCalled();
+      });
     });
   });
 });
