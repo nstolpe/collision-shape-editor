@@ -103,7 +103,7 @@ const usePointerInteraction = () => {
         break;
       case target.name && target.name.indexOf(VERTEX_PREFIX) === 0:
         // it's a vertex
-        handleVertexPointerDown(event, coordinates);
+        handlePointerDownVertex(event, coordinates);
         break;
       default:
         break;
@@ -119,7 +119,7 @@ const usePointerInteraction = () => {
       (result, pointer, index) => pointer.identifier === identifier ? [pointer, index] : result,
       []
     );
-   const pointerCoordinates = event.data.getLocalPosition(event.target.parent);
+    const pointerCoordinates = event.data.getLocalPosition(event.target.parent);
 
     if (!activePointer) {
       // no pointer is down
@@ -139,14 +139,14 @@ const usePointerInteraction = () => {
 
     switch (true) {
      case activePointer.target.name === 'VERTICES':
-       // it's this component
-       break;
+      // the active pointer's target is the vertices container.
+      break;
      case activePointer.target.name && activePointer.target.name.indexOf(VERTEX_PREFIX) === 0:
-       // it's a vertex
-        handleVertexPointerMove(event, identifier, pointerCoordinates);
-       break;
+      // the active pointer's cached target from pointerdown is a vertex.
+      handlePointerMoveVertex(event, identifier, pointerCoordinates);
+      break;
      default:
-       break;
+      break;
     }
   };
 
@@ -166,7 +166,7 @@ const usePointerInteraction = () => {
         break;
       case pointer.target.name && target.name.indexOf(VERTEX_PREFIX) === 0:
         // it's a vertex
-        handleVertexPointerUp(event, pointer.isDragging ? false : true);
+        handlePointerUpVertex(event, pointer.isDragging ? false : true);
         break;
       default:
         break;
@@ -176,32 +176,30 @@ const usePointerInteraction = () => {
     setActivePointers(currentActivePointers => currentActivePointers.filter(activePointer => activePointer.identifier !== identifier));
   };
 
-  const handleVertexPointerDown = (event, coordinates) => {
+  const handlePointerDownVertex = (event, coordinates) => {
+    const eventMaps = [
+      {
+        map: ['data', 'originalEvent', 'altKey'],
+        default: false,
+      },
+      {
+        map: ['data', 'originalEvent', 'ctrlKey'],
+        default: false,
+      },
+      {
+        map: ['data', 'originalEvent', 'shiftKey'],
+        default: false,
+      },
+      ['data', 'identifier'],
+      ['target', 'name'],
+    ];
     const {
       altKey,
       ctrlKey,
       shiftKey,
       identifier,
       name,
-    } = properties(
-      event,
-      [
-        {
-          map: 'data.originalEvent.altKey',
-          default: false,
-        },
-        {
-          map: 'data.originalEvent.ctrlKey',
-          default: false,
-        },
-        {
-          map: 'data.originalEvent.shiftKey',
-          default: false,
-        },
-        'data.identifier',
-        'target.name',
-      ]
-    );
+    } = properties(event, eventMaps);
 
     switch (true) {
       // case altKey && ctrlKey && shiftKey:
@@ -241,6 +239,7 @@ const usePointerInteraction = () => {
           case Tools.SELECT:
           default:
             updateDistances(identifier, coordinates);
+            console.log(event.data.identifier, event.target.name, event.data)
             queueSelectVertex(
               event.data.identifier,
               event.target.name,
@@ -250,9 +249,10 @@ const usePointerInteraction = () => {
     }
   };
 
-  const handleVertexPointerMove = (event, identifier, pointerCoordinates) => {
+  const handlePointerMoveVertex = (event, identifier, pointerCoordinates) => {
     const shiftKey = property(event, 'data.originalEvent.shiftKey', false);
     const identifierSelectedVertices = selectedVertices.filter(vertex => vertex.identifier === identifier);
+    event.stopPropagation();
 
     switch (true) {
       // case shiftKey:
@@ -268,7 +268,7 @@ const usePointerInteraction = () => {
         const isVertexSelected = !!selectedVertices.find(vertex => vertex.identifier === identifier && vertex.name === event.target.name);
         // get the vertex and index from select queue.
         const [queuedSelectedVertex, queuedSelectedVertexIndex] = selectedVertexQueue.reduce(
-          (result, vertex, index) => vertex.identifier === identifier && vertex.name === event.target.name ? [vertex, index] : result,
+          (result, vertex, index) => vertex.identifier === identifier ? [vertex, index] : result,
           []
         );
 
@@ -282,7 +282,7 @@ const usePointerInteraction = () => {
           );
         }
 
-        // add vertex to selection if it's in the queue and not selected
+        // if the vertex is in the queue, add it to the selection
         if (queuedSelectedVertex && !isVertexSelected) {
           if (pointerVertices.length) {
             setSelectedVertices([queuedSelectedVertex]);
@@ -298,7 +298,7 @@ const usePointerInteraction = () => {
     }
   };
 
-  const handleVertexPointerUp = event => {
+  const handlePointerUpVertex = event => {
     const shiftKey = property(event, 'data.originalEvent.shiftKey', false);
     const pointer = activePointers.find(activePointer => activePointer.identifier === property(event, 'data.identifier'));
 
