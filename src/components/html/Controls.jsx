@@ -21,7 +21,7 @@ import SpriteIcon from 'components/html/SpriteIcon';
 import VertexIcon from 'components/html/VertexIcon';
 import Separator from 'components/html/Separator';
 import { useRootContext } from 'contexts/RootContext';
-import { property } from 'tools/utilities';
+import { property } from 'tools/property';
 
 const ControlWrapper = styled.div`
   background-color: hsl(0, 0%, 75%);

@@ -1,5 +1,5 @@
 // src/hooks/hooks.js
-import { useEffect, useRef };
+import { useEffect, useRef } from 'React';
 
 export const usePrevious = value => {
   const ref = useRef();

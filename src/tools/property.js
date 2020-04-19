@@ -1,7 +1,14 @@
-// tools/utilities.js
+// tools/property.js
 
-export const propertyMap = (map, { delimiter='.', asString=false }={}) => {
-  return asString ? (
+/**
+ * Returns a property map string or array ('foo.bar.baz' or ['foo', 'bar', 'baz'])
+ *
+ * @param map {string}        The map
+ * @param delimiter {string}  The delimiter for the map, if the map is a string
+ * @param asString {boolean}  Should the returned map be an array or string
+ */
+export const propertyMap = (map, { delimiter='.', asString=false }={}) => (
+  asString ? (
     typeof map === 'string' ? map :
       Array.isArray(map) ? map.join(delimiter) :
       String(map)
@@ -9,8 +16,9 @@ export const propertyMap = (map, { delimiter='.', asString=false }={}) => {
     typeof map === 'string' ? map.split(delimiter) :
       Array.isArray(map) ? map :
       [map]
-  );
-}
+  )
+);
+
 /**
  * Attempts to safely retrieve a nested property from a `source` object.
  * The `propString` determines the levels and names of properties, with the

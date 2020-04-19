@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { moveVertices } from 'actions/actions';
 import Tools from 'constants/tools';
 import { useScreenContext } from 'contexts/ScreenContext';
-import { property, properties } from 'tools/utilities';
+import { property, properties } from 'tools/property';
 
 
 const VERTEX_PREFIX = 'VERTEX__';

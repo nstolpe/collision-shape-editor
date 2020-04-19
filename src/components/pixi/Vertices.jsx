@@ -13,7 +13,7 @@ import {
   stopMoveVertex,
 } from 'actions/actions';
 import Tools from 'constants/tools';
-import { property } from 'tools/utilities';
+import { property } from 'tools/property';
 import usePointerInteractions from 'hooks/usePointerInteractions';
 
 import Vertex from 'components/pixi/Vertex';
@@ -66,6 +66,7 @@ const Vertices = ({
       hitArea={hitArea}
       pointerdown={handlePointerDown}
       pointerup={handlePointerUp}
+      pointerupoutside={e => console.log('log outside', e)}
       pointermove={handlePointerMove}
       {...restProps}
     >

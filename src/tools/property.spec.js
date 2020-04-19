@@ -1,15 +1,15 @@
-import { properties, property, propertyMap, __RewireAPI__ } from 'tools/utilities';
+import { properties, property, propertyMap, __RewireAPI__ } from 'tools/property';
 
-jest.mock('tools/utilities', () => {
-    const utilities = jest.requireActual('tools/utilities');
+jest.mock('tools/property', () => {
+    const property = jest.requireActual('tools/property');
 
     return {
-      ...utilities,
-      propertyMap: jest.fn(utilities.propertyMap),
+      ...property,
+      propertyMap: jest.fn(property.propertyMap),
     };
 });
 
-describe('utilities.js --', () => {
+describe('property.js --', () => {
   describe('propertyMap', () => {
     const nonStandardMaps = [1, {}, null, undefined, NaN, () => {}];
 
