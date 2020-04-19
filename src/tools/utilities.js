@@ -1,16 +1,16 @@
-// /src/js/tools/utilities.js
+// tools/utilities.js
 
-export const propertyMap = (map, delimiter='.', asString=false) =>
-    asString ? (
-        typeof map === 'string' ? map :
-            Array.isArray(map) ? map.join(delimiter) :
-            String(map)
-    ) : (
-        typeof map === 'string' ? map.split(delimiter) :
-            Array.isArray(map) ? map :
-            []
-    );
-
+export const propertyMap = (map, { delimiter='.', asString=false }={}) => {
+  return asString ? (
+    typeof map === 'string' ? map :
+      Array.isArray(map) ? map.join(delimiter) :
+      String(map)
+  ) : (
+    typeof map === 'string' ? map.split(delimiter) :
+      Array.isArray(map) ? map :
+      [map]
+  );
+}
 /**
  * Attempts to safely retrieve a nested property from a `source` object.
  * The `propString` determines the levels and names of properties, with the
@@ -34,8 +34,11 @@ export const propertyMap = (map, delimiter='.', asString=false) =>
  * @return {*}
  */
 export const property = (source, map, fallback, delimiter='.') => {
-    const keys = propertyMap(map, delimiter);
-    return keys.length ? keys.reduce((obj, key) => obj && key in Object(obj) ? obj[key] : fallback, source) : fallback;
+  const keys = propertyMap(map, { delimiter });
+
+  return keys.length ? keys.reduce(
+    (obj, key) => obj && key in Object(obj) ? obj[key] : fallback, source
+  ) : fallback;
 };
 
 /**
@@ -84,37 +87,32 @@ export const property = (source, map, fallback, delimiter='.') => {
  * @param {string} delimiter    The delimiter of the keys in map if it's a string.
  * @return {*}
  */
-export const properties = (source, maps, delimiter='.') => {
-    return maps.reduce((obj, map) => {
-        let fallback;
-        let keys;
-        let lastKey;
+export const properties = (source, maps, fallback, delimiter='.') => (
+  maps.reduce((obj, map) => {
+    const keys = typeof map === 'string' ? map.split(delimiter) :
+       Array.isArray(map) ? map :
+       typeof map === 'object' ? propertyMap(
+         map.map || [],
+         { delimiter: map.delimiter || delimiter },
+       ) :
+       [];
 
-        switch (true) {
-            case typeof map === 'string':
-                keys = map.split(delimiter)
-                break;
-            case Array.isArray(map):
-                keys = map;
-                break;
-            case typeof map === 'object':
-                keys = propertyMap(
-                    property(map, 'map', []),
-                    property(map, 'delimiter', delimiter),
-                );
-                fallback = map.fallback;
-                break;
-            default:
-                keys = [];
-        }
+    if (keys.length) {
+      const lastKey = keys[keys.length - 1];
 
-        lastKey = keys[keys.length - 1];
+      obj[lastKey] = property(
+        source,
+        keys,
+        property(map, 'fallback', fallback),
+      );
+    }
 
-        obj[lastKey] = property(source, keys, fallback);
-        return obj;
-    }, {});
-};
+    return obj;
+  }, {})
+);
 
 export default {
-    property,
+  properties,
+  property,
+  propertyMap,
 };
