@@ -47,6 +47,8 @@ describe('property.js --', () => {
 
       property(source, map, undefined, delimiter);
       expect(spy).toHaveBeenCalledWith(map, { delimiter });
+
+      __RewireAPI__.__ResetDependency__('propertyMap');
     });
 
     it('will return `fallback` when `map` is empty', () => {
@@ -58,7 +60,7 @@ describe('property.js --', () => {
   });
 
   describe('`properties()`', () => {
-    describe('internal calls: `propertyMap`', () => {
+    describe('calls `propertyMap`', () => {
       const source = { a: { b: true } };
       const map = 'a&b';
       const delimiter = '&';
@@ -93,7 +95,7 @@ describe('property.js --', () => {
       });
     });
 
-    describe('internal calls: `property`', () => {
+    describe('calls `property`', () => {
       const source = { a: { b: true } };
       const sourceEmpty = { a: {} };
 
