@@ -13,6 +13,24 @@ import Draggable from 'react-draggable';
 
 import { Button } from 'components/html/resets';
 
+// from https://www.davedrinks.coffee/how-do-i-use-two-react-refs/
+// @TODO move this somewhere else, maybe it's own module.
+const mergeRefs = (...refs) => {
+  // do we need the filter?
+  const filteredRefs = refs.filter(Boolean);
+  if (!filteredRefs.length) return null;
+  if (filteredRefs.length === 1) return filteredRefs[0];
+  return inst => {
+    for (const ref of filteredRefs) {
+      if (typeof ref === 'function') {
+        ref(inst);
+      } else if (ref) {
+        ref.current = inst;
+      }
+    }
+  };
+};
+
 const Wrapper = styled.div`
   display: inline-block;
   position: relative;
@@ -67,10 +85,10 @@ Trigger.defaultProps = {
 };
 
 const Panel = styled.div`
-  bottom: 100%;
   cursor: move;
   font-size: 16px;
-  left: 0;
+  left: ${({ left }) => left}px;
+  top: ${({ top }) => top}px;
   line-height: 1.5;
   position: absolute;
   opacity: ${({ active }) => active ? 1 : 0};
@@ -409,6 +427,9 @@ const ColorPicker = ({
   const [activeSaturation, setActiveSaturation] = useState(color.get('hsv.s'));
   const [activeValue, setActiveValue] = useState(color.get('hsv.v'));
   const [active, setActive] = useState(false);
+  const [panelLeft, setPanelLeft] = useState(null);
+  const [panelTop, setPanelTop] = useState(null);
+  const [panelInteractionCoordinates, setPanelInteractionCoordinates] = useState();
   const [panelDragging, setPanelDragging] = useState(false);
   /**
    * Toggles active/inactive for the colorpicker.
@@ -462,7 +483,19 @@ const ColorPicker = ({
     };
   }, [active]);
 
+  const panelRef = useRef(null);
+  const positionPanelCallbackRef = useCallback(panel => {
+    if (panel !== null) {
+      const trigger = panel.previousElementSibling;
+      const triggerRect = trigger.getBoundingClientRect();
+      const panelRect = panel.getBoundingClientRect();
+      setPanelLeft(0);
+      setPanelTop(-panelRect.height);
+    }
+  }, []);
 
+  // @TODO break this out to be a better throttler
+  let last = Date.now();
   return (
     <Wrapper>
       <Trigger
@@ -473,54 +506,75 @@ const ColorPicker = ({
         displayName="Trigger"
         title={title}
       />
-      <Draggable
-        enableUserSelectHack={false}
-        onStop={e => setPanelDragging(false)}
-        onStart={e => setPanelDragging(true)}
+      <Panel
+        active={active}
+        onPointerDown={e => {
+           if (e.target === panelRef.current) {
+            console.log('foobar', 'inside')
+            console.log(e.target, e.currentTarget, e);
+            const x = e.clientX;
+            const y = e.clientY;
+            setPanelInteractionCoordinates({ x, y });
+           }
+        }}
+        onPointerUp={e => setPanelInteractionCoordinates(undefined)}
+        onPointerLeave={e => setPanelInteractionCoordinates(undefined)}
+        onPointerMove={e => {
+          // @TODO break this out to be a better throttler
+          const now = Date.now();
+          if (panelInteractionCoordinates && now - last > 100) {
+            last = now;
+            const leftDiff = e.clientX - panelInteractionCoordinates.x;
+            const topDiff = e.clientY - panelInteractionCoordinates.y;
+            console.log('moving foobar', panelLeft + leftDiff, panelTop + topDiff)
+            setPanelInteractionCoordinates({ x: e.clientX, y: e.clientY });
+            setPanelLeft(panelLeft => (panelLeft + leftDiff));
+            setPanelTop(panelTop => (panelTop + topDiff));
+          }
+        }}
+        left={panelLeft}
+        top={panelTop}
+        ref={mergeRefs(panelRef, positionPanelCallbackRef)}
       >
-        <Panel
-          active={active}
-        >
-          <PanelHeader fontFamily={titleFontFamily}>{title}</PanelHeader>
-          <ContentWrapper>
-            <SaturationValueCanvas
-              width={padWidth}
-              height={padHeight}
-              activeHue={activeHue}
-              activeSaturation={activeSaturation}
-              activeValue={activeValue}
-              setActiveColor={setActiveColor}
-              setActiveSaturation={setActiveSaturation}
-              setActiveValue={setActiveValue}
-              onColorChange={onColorChange}
-            />
-            <HueCanvas
-              width={slideWidth}
-              height={slideHeight}
-              activeHue={activeHue}
-              activeSaturation={activeSaturation}
-              activeValue={activeValue}
-              setActiveColor={setActiveColor}
-              setActiveHue={setActiveHue}
-              onColorChange={onColorChange}
-            />
-            <ValuesWrapper>
-              <ValueLabel>
-                <ValueSpan>rgb:</ValueSpan>
-                <Input type="text" value={`${activeColor.get('rgb.r')}/${activeColor.get('rgb.g')}/${activeColor.get('rgb.b')}`} disabled={active && !panelDragging ? false : true}/>
-              </ValueLabel>
-              <ValueLabel>
-                <ValueSpan>hsv:</ValueSpan>
-                <Input type="text" value={`${activeHue}/${activeSaturation.toFixed(3)}/${activeValue.toFixed(3)}`} readOnly  disabled={active && !panelDragging ? false : true} />
-              </ValueLabel>
-              <ValueLabel>
-                <ValueSpan>hex:</ValueSpan>
-                <Input type="text" value={activeColor.hex().replace('#', '')} readOnly  disabled={active && !panelDragging ? false : true} />
-              </ValueLabel>
-            </ValuesWrapper>
-          </ContentWrapper>
-        </Panel>
-      </Draggable>
+        <PanelHeader fontFamily={titleFontFamily}>{title}</PanelHeader>
+        <ContentWrapper>
+          <SaturationValueCanvas
+            width={padWidth}
+            height={padHeight}
+            activeHue={activeHue}
+            activeSaturation={activeSaturation}
+            activeValue={activeValue}
+            setActiveColor={setActiveColor}
+            setActiveSaturation={setActiveSaturation}
+            setActiveValue={setActiveValue}
+            onColorChange={onColorChange}
+          />
+          <HueCanvas
+            width={slideWidth}
+            height={slideHeight}
+            activeHue={activeHue}
+            activeSaturation={activeSaturation}
+            activeValue={activeValue}
+            setActiveColor={setActiveColor}
+            setActiveHue={setActiveHue}
+            onColorChange={onColorChange}
+          />
+          <ValuesWrapper>
+            <ValueLabel>
+              <ValueSpan>rgb:</ValueSpan>
+              <Input type="text" value={`${activeColor.get('rgb.r')}/${activeColor.get('rgb.g')}/${activeColor.get('rgb.b')}`} disabled={active && !panelDragging ? false : true}/>
+            </ValueLabel>
+            <ValueLabel>
+              <ValueSpan>hsv:</ValueSpan>
+              <Input type="text" value={`${activeHue}/${activeSaturation.toFixed(3)}/${activeValue.toFixed(3)}`} readOnly  disabled={active && !panelDragging ? false : true} />
+            </ValueLabel>
+            <ValueLabel>
+              <ValueSpan>hex:</ValueSpan>
+              <Input type="text" value={activeColor.hex().replace('#', '')} readOnly  disabled={active && !panelDragging ? false : true} />
+            </ValueLabel>
+          </ValuesWrapper>
+        </ContentWrapper>
+      </Panel>
     </Wrapper>
   );
 };
