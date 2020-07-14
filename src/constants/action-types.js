@@ -1,5 +1,7 @@
 // src/js/constants/action-types.js
 
+export const SET_ROOT_CONTAINER = 'SET_ROOT_CONTAINER';
+
 export const ADD_VERTEX = 'ADD_VERTEX';
 export const DELETE_VERTEX = 'DELETE_VERTEX';
 export const MOVE_VERTEX = 'MOVE_VERTEX';

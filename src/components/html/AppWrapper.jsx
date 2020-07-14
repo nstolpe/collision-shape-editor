@@ -1,6 +1,9 @@
 // src/js/components/AppWrapper.js
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from '@emotion/styled';
+
+import { setRootContainer } from 'actions/actions';
+import { useRootContext } from 'contexts/RootContext';
 
 const Wrapper = styled.div`
     display: flex;
@@ -11,6 +14,15 @@ const Wrapper = styled.div`
     line-height: 1.5rem;
 `;
 
-const AppWrapper = ({ children }) => <Wrapper>{children}</Wrapper>;
+const AppWrapper = ({ children }) => {
+  const { dispatch } = useRootContext();
+  const rootContainerRef = useCallback(wrapper => {
+    if (wrapper !== null) {
+      dispatch(setRootContainer(wrapper));
+    }
+  }, []);
+
+  return <Wrapper ref={rootContainerRef}>{children}</Wrapper>;
+};
 
 export default AppWrapper;

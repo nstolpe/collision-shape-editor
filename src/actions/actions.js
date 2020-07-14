@@ -1,6 +1,7 @@
 // src/js/actions/action.js
 
 import {
+  SET_ROOT_CONTAINER,
   ADD_VERTEX,
   DELETE_VERTEX,
   MOVE_VERTEX,
@@ -19,6 +20,11 @@ import {
   REMOVE_TEXTURE_SOURCE,
   ADD_SPRITE,
 } from 'constants/action-types';
+
+export const setRootContainer = container => ({
+  type: SET_ROOT_CONTAINER,
+  data: { container },
+});
 
 export const addVertex = ({ x, y }) => ({
   type: ADD_VERTEX,

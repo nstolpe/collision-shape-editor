@@ -2,6 +2,7 @@
 
 import {v4 as uuid} from 'uuid';
 import {
+    SET_ROOT_CONTAINER,
     ADD_VERTEX,
     DELETE_VERTEX,
     MOVE_VERTEX,
@@ -54,6 +55,7 @@ const initialState = {
     ctrlPressed: false,
     altPressed: false,
     testContainerPosition: { x: 0, y: 0 },
+    rootContainer: null,
 };
 
 const rootReducer = (state=initialState, action) => {
@@ -124,6 +126,10 @@ const rootReducer = (state=initialState, action) => {
             return {
                 ...state,
                 sprites: [ ...state.sprites, { ...data.sprite } ],
+            };
+        case SET_ROOT_CONTAINER:
+            return {
+                ...state,
             };
         default:
             console.log(`undefined action: ${action.type}`, action);
