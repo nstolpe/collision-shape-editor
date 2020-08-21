@@ -1,4 +1,4 @@
-// src/js/contexts/ScreenContext.js
+// src/js/contexts/RootContext.js
 import { createContext, useContext } from 'react';
 
 const RootContext = createContext();

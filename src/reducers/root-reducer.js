@@ -2,6 +2,7 @@
 import {v4 as uuid} from 'uuid';
 
 import {
+  SET_ROOT_CONTAINER,
   ADD_VERTEX,
   DELETE_VERTEX,
   MOVE_VERTEX,
@@ -84,13 +85,18 @@ export const initialState = {
   scale: { x: 1, y: 1 },
   ctrlPressed: false,
   altPressed: false,
-  testContainerPosition: { x: 0, y: 0 },
+  rootContainer: null,
 };
 
 const reducer = (state, action) => {
   const { data, type } = action;
 
   switch (type) {
+    case SET_ROOT_CONTAINER:
+      return {
+        ...state,
+        rootContainer: data.container,
+      };
     case ADD_VERTEX:
       return {
         ...state,

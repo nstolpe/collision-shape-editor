@@ -11,7 +11,7 @@ import {
   addTextureSource,
   setBackgroundColor,
 } from 'actions/actions';
-import ColorPicker from 'components/html/ColorPicker';
+import ColorPicker from 'components/html/color-picker/components/ColorPicker';
 import FileLoader from 'components/html/FileLoader';
 import EdgeIcon from 'components/html/EdgeIcon';
 import PlusIcon from 'components/html/PlusIcon';
@@ -81,6 +81,7 @@ const Controls = ({ children }) => {
     dispatch,
     mode,
     tool,
+    rootContainer,
   } = useRootContext();
 
   const onColorChange =({ r, g, b }) => {
@@ -110,10 +111,10 @@ const Controls = ({ children }) => {
         title="load sprites"
       />
       <ColorPicker
+        modalContainerElement={rootContainer}
         title="background color"
         initialColor={backgroundColor}
         onColorChange={onColorChange}
-        title="background color"
         titleFontFamily="Fira Mono"
         valueFontFamily="Fira Mono"
       />
