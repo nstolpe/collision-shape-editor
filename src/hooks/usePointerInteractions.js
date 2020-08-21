@@ -1,13 +1,27 @@
 // hooks/usePointerInteractions.js
-import { useState } from 'react';
+import { useReducer, useState } from 'react';
 
 import { moveVertices } from 'actions/actions';
 import Tools from 'constants/tools';
 import { useScreenContext } from 'contexts/ScreenContext';
 import { property, properties } from 'tools/property';
-
+import { VERTEX } from 'constants/type-prefixes';
 
 const VERTEX_PREFIX = 'VERTEX__';
+
+const initialState = {
+  pointers: [],
+  selectedVertices: [],
+  selectedVerticesQueue: [],
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case '':
+    default:
+      console.log(action.type);
+  }
+};
 
 const usePointerInteraction = () => {
    const {
@@ -16,10 +30,10 @@ const usePointerInteraction = () => {
      vertices,
    } = useScreenContext();
   // pointers currently interacting with the component.
-  // pointer = { coordinates: { x: number, y: number }, isDragging: boolean, identifier: number, target: PIXI.DisplayObject, }
+  // pointer = { coordinates: { x: number, y: number }, identifier: number, target: PIXI.DisplayObject, }
   const [activePointers, setActivePointers] = useState([]);
-  // queued selected vertices = { identifier: number, name: string, distance: { x: number, y: number} }
-  const [selectedVertexQueue, setSelectedVerticesQueue] = useState([]);
+  // queued selected vertices = { name: string, distance: { x: number, y: number} }
+  const [selectedVerticesQueue, setSelectedVerticesQueue] = useState([]);
   // vertices that have been selected by a pointer. same structure as queued selected vertices
   const [selectedVertices, setSelectedVertices] = useState([]);
 
@@ -29,19 +43,32 @@ const usePointerInteraction = () => {
    **************************************************************************************/
 
   /**
-   * Adds a vertex to `selectedVertexQueue` storing `name` and `identifier`.
-   * @param {number} identifier  The `pointerId` attribute of a poitner event.
+   * Adds a vertex to `selectedVerticesQueue` storing `name` and `identifier`.
    * @param {number} name        The `name` attribute of of a PIXI.DisplayObject.
    */
-  const queueSelectVertex = (identifier, name, distance) => setSelectedVerticesQueue(
+  const queueSelectVertex = (name, distance) => setSelectedVerticesQueue(
     currentQueuedSelectedVertices => [
-      ...currentQueuedSelectedVertices.filter(current => current.identifier !== identifier),
-      { identifier, name, distance }
+      ...currentQueuedSelectedVertices,
+      { name, distance }
     ]
   );
 
+  const addSelectedVertex = (name, distance) => {
+    setSelectedVertices(
+      currentSelectedVertices => [...currentSelectedVertices, { name, distance }]
+    );
+  };
+
+  const removeSelectedVertex = name => {
+    const index = selectedVertices.findIndex(vertex => name === vertex.name);
+
+    setSelectedVertices(currentSelectedVertices =>
+      [...currentSelectedVertices.slice(0, index), ...currentSelectedVertices.slice(index + 1)]
+    );
+  };
+
   const toggleSelectVertex = (identifier, name, distance) => {
-    const vertexIndex = selectedVertices.findIndex(vertex => identifier === vertex.identifier && name === vertex.name);
+    const vertexIndex = selectedVertices.findIndex(vertex => name === vertex.name);
     if (vertexIndex >= 0) {
       // the vertex was found, so it's selected. deselect it.
       setSelectedVertices(currentSelectedVertices =>
@@ -49,7 +76,7 @@ const usePointerInteraction = () => {
       );
     } else {
       // the vertex wasn't found, so it's not selected. select it.
-      setSelectedVertices(currentSelectedVertices => ([...currentSelectedVertices, { identifier, name, distance }]));
+      setSelectedVertices(currentSelectedVertices => ([...currentSelectedVertices, { name, distance }]));
     }
   };
 
@@ -70,13 +97,9 @@ const usePointerInteraction = () => {
   const updateDistances = (identifier, coordinates) => (
     setSelectedVertices(currentSelectedVertices => (
       currentSelectedVertices.map(vertex => {
-        if (vertex.identifier === identifier) {
-          const { x, y } = vertices.find(v => v.id === vertex.name.replace(VERTEX_PREFIX, ''));
-          const distance = getDistance({ x, y }, coordinates);
-          return { ...vertex, distance };
-        }
-
-        return { ...vertex };
+        const { x, y } = vertices.find(v => v.id === vertex.name.replace(VERTEX_PREFIX, ''));
+        const distance = getDistance({ x, y }, coordinates);
+        return { ...vertex, distance };
       })
     ))
   );
@@ -95,7 +118,7 @@ const usePointerInteraction = () => {
     } = event;
     const coordinates = event.data.getLocalPosition(parent);
     // the pointer that just touched down is now active.
-    setActivePointers(currentActivePointers => [...currentActivePointers, { coordinates, identifier, isDragging: false, target }]);
+    setActivePointers(currentActivePointers => [...currentActivePointers, { coordinates, identifier, target }]);
 
     switch (true) {
       case target.name === 'VERTICES':
@@ -132,18 +155,18 @@ const usePointerInteraction = () => {
       {
         ...activePointer,
         coordinates: pointerCoordinates,
-        isDragging: true,
       },
       ...currentActivePointers.slice(activePointerIndex + 1),
     ]);
 
     switch (true) {
+     // case event.target.name === 'VERTICES':
      case activePointer.target.name === 'VERTICES':
       // the active pointer's target is the vertices container.
       break;
      case activePointer.target.name && activePointer.target.name.indexOf(VERTEX_PREFIX) === 0:
       // the active pointer's cached target from pointerdown is a vertex.
-      handlePointerMoveVertex(event, identifier, pointerCoordinates);
+      handlePointerMoveVertex(event, activePointer, pointerCoordinates);
       break;
      default:
       break;
@@ -159,14 +182,15 @@ const usePointerInteraction = () => {
       target,
     } = event;
     const pointer = activePointers.find(activePointer => activePointer.identifier === identifier);
+    const name = property(pointer, 'target.name');
 
     switch (true) {
-      case pointer.target.name === 'VERTICES':
+      case name === 'VERTICES':
         // it's this component
         break;
-      case pointer.target.name && target.name.indexOf(VERTEX_PREFIX) === 0:
+      case !!name && `${target.name}`.indexOf(VERTEX_PREFIX) === 0:
         // it's a vertex
-        handlePointerUpVertex(event, pointer.isDragging ? false : true);
+        handlePointerUpVertex(event);
         break;
       default:
         break;
@@ -201,6 +225,8 @@ const usePointerInteraction = () => {
       name,
     } = properties(event, eventMaps);
 
+    updateDistances(identifier, coordinates);
+
     switch (true) {
       // case altKey && ctrlKey && shiftKey:
       //   break;
@@ -222,12 +248,18 @@ const usePointerInteraction = () => {
           //   break;
           case Tools.SELECT:
           default:
-            updateDistances(identifier, coordinates);
-            toggleSelectVertex(
-              identifier,
-              name,
-              getDistance(coordinates, event.target.position)
-            );
+            const isVertexSelected = !!selectedVertices.find(vertex => vertex.name === event.target.name);
+
+            if (isVertexSelected) {
+              removeSelectedVertex(event.target.name);
+              setActivePointers(currentActivePointers =>
+                currentActivePointers.filter(
+                  activePointer => activePointer.identifier !== identifier
+                )
+              );
+            } else {
+              addSelectedVertex(event.target.name, getDistance(coordinates, event.target.position))
+            }
         }
         break;
       default:
@@ -238,10 +270,7 @@ const usePointerInteraction = () => {
           //   break;
           case Tools.SELECT:
           default:
-            updateDistances(identifier, coordinates);
-            console.log(event.data.identifier, event.target.name, event.data)
             queueSelectVertex(
-              event.data.identifier,
               event.target.name,
               getDistance(coordinates, event.target.position)
             );
@@ -249,42 +278,39 @@ const usePointerInteraction = () => {
     }
   };
 
-  const handlePointerMoveVertex = (event, identifier, pointerCoordinates) => {
+  const handlePointerMoveVertex = (event, activePointer, pointerCoordinates) => {
     const shiftKey = property(event, 'data.originalEvent.shiftKey', false);
-    const identifierSelectedVertices = selectedVertices.filter(vertex => vertex.identifier === identifier);
     event.stopPropagation();
 
     switch (true) {
       // case shiftKey:
       //   break;
       default:
-        const updatedVertices = identifierSelectedVertices.map(({ distance, name }) => ({
+        const updatedVertices = selectedVertices.map(({ distance, name }) => ({
           id: name.replace(VERTEX_PREFIX, ''),
           x: pointerCoordinates.x + distance.x,
           y: pointerCoordinates.y + distance.y,
         }));
-        const pointerVertices = selectedVertices.filter(vertex => vertex.identifier === identifier);
         // is the vertex already selected?
-        const isVertexSelected = !!selectedVertices.find(vertex => vertex.identifier === identifier && vertex.name === event.target.name);
+        const isVertexSelected = !!selectedVertices.find(vertex => vertex.name === event.target.name);
         // get the vertex and index from select queue.
-        const [queuedSelectedVertex, queuedSelectedVertexIndex] = selectedVertexQueue.reduce(
-          (result, vertex, index) => vertex.identifier === identifier ? [vertex, index] : result,
+        const [queuedSelectedVertex, queuedSelectedVertexIndex] = selectedVerticesQueue.reduce(
+          (result, vertex, index) => vertex.name === activePointer.target.name ? [vertex, index] : result,
           []
         );
 
         // remove the vertex from the select queue.
         if (queuedSelectedVertexIndex || queuedSelectedVertexIndex === 0) {
           setSelectedVerticesQueue(
-            currentQueuedSelectedVertices => [
-              ...currentQueuedSelectedVertices.slice(0, queuedSelectedVertexIndex),
-              ...currentQueuedSelectedVertices.slice(queuedSelectedVertexIndex + 1),
-            ]
+            currentQueuedSelectedVertices => currentQueuedSelectedVertices.filter(
+              (vertex, index) => index !== queuedSelectedVertexIndex
+            )
           );
         }
 
-        // if the vertex is in the queue, add it to the selection
+        // if the vertex is in the queue and isn't already selected, add it to the selection
         if (queuedSelectedVertex && !isVertexSelected) {
-          if (pointerVertices.length) {
+          if (selectedVertices.length) {
             setSelectedVertices([queuedSelectedVertex]);
           } else {
             setSelectedVertices(currentSelectedVertices => [...currentSelectedVertices, queuedSelectedVertex]);
@@ -307,8 +333,8 @@ const usePointerInteraction = () => {
         break
       default:
         // find this vertex in the selection queue from a pointerdown
-        const [queuedSelectedVertex, queuedSelectedVertexIndex] = selectedVertexQueue.reduce(
-          (result, vertex, index) => vertex.identifier === event.data.identifier && vertex.name === event.target.name ? [vertex, index] : result,
+        const [queuedSelectedVertex, queuedSelectedVertexIndex] = selectedVerticesQueue.reduce(
+          (result, vertex, index) => vertex.name === event.target.name ? [vertex, index] : result,
           []
         );
 
@@ -317,10 +343,13 @@ const usePointerInteraction = () => {
           setSelectedVertices([queuedSelectedVertex]);
           // remove the vertex from the queue
           setSelectedVerticesQueue(
-            currentQueuedSelectedVertices => [
-              ...currentQueuedSelectedVertices.slice(0, queuedSelectedVertexIndex),
-              ...currentQueuedSelectedVertices.slice(queuedSelectedVertexIndex + 1),
-            ]
+            currentQueuedSelectedVertices => currentQueuedSelectedVertices.filter(
+              (vertex, index) => index !== queuedSelectedVertexIndex
+            )
+            // currentQueuedSelectedVertices => [
+            //   ...currentQueuedSelectedVertices.slice(0, queuedSelectedVertexIndex),
+            //   ...currentQueuedSelectedVertices.slice(queuedSelectedVertexIndex + 1),
+            // ]
           );
         }
     }
