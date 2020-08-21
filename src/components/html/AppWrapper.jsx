@@ -20,7 +20,7 @@ const AppWrapper = ({ children }) => {
     if (wrapper !== null) {
       dispatch(setRootContainer(wrapper));
     }
-  }, []);
+  }, [dispatch]);
 
   return <Wrapper ref={rootContainerRef}>{children}</Wrapper>;
 };
