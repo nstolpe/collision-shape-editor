@@ -11,7 +11,6 @@ import {
   addTextureSource,
   setBackgroundColor,
 } from 'actions/actions';
-import ColorPicker from 'components/html/color-picker/components/ColorPicker';
 import FileLoader from 'components/html/FileLoader';
 import EdgeIcon from 'components/html/EdgeIcon';
 import PlusIcon from 'components/html/PlusIcon';
@@ -22,6 +21,7 @@ import VertexIcon from 'components/html/VertexIcon';
 import Separator from 'components/html/Separator';
 import { useRootContext } from 'contexts/RootContext';
 import { property } from 'tools/property';
+import ColorPicker from 'color-picker';
 
 const ControlWrapper = styled.div`
   background-color: hsl(0, 0%, 75%);
