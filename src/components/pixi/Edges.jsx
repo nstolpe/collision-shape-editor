@@ -4,7 +4,8 @@ import PropTypes from 'prop-types';
 import { Container } from 'react-pixi-fiber';
 
 import Edge from 'components/pixi/Edge';
-import { useScreenContext } from 'contexts/ScreenContext';
+import ScreenContext from 'contexts/ScreenContext';
+import withSelector from 'components/hoc/withSelector';
 
 /**
  * Callback for Array.prototype.map that configures edges for each
@@ -28,8 +29,9 @@ export const calculateScaledEdge = (idx, scale, vertex1, vertices) => {
   };
 };
 
-const Edges = ({ scale, setCursor, ...restProps }) => {
-  const { vertices } = useScreenContext();
+const selector = ({ vertices }) => ({ vertices });
+
+const Edges = ({ scale, setCursor, vertices, ...restProps }) => {
   const edges = vertices.map((vertex1, idx, vertices) => calculateScaledEdge(idx, scale, vertex1, vertices));
   const scaleRatio = [
     1 / scale.x,
@@ -68,4 +70,4 @@ Edges.defaultProps = {
   setCursor: () => {},
 };
 
-export default Edges;
+export default withSelector(ScreenContext, selector)(Edges);

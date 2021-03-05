@@ -20,7 +20,7 @@ import SelectIcon from 'components/html/SelectIcon';
 import SpriteIcon from 'components/html/SpriteIcon';
 import VertexIcon from 'components/html/VertexIcon';
 import Separator from 'components/html/Separator';
-import RootContext, { useRootContext } from 'contexts/RootContext';
+import RootContext from 'contexts/RootContext';
 import { property } from 'tools/property';
 import ColorPicker from 'color-picker';
 
@@ -89,20 +89,6 @@ const selector = ({
   tool,
   rootContainer,
 });
-
-const comparator = (props, oldProps) => {
-  const entries = Object.entries(props);
-
-  for (let i = 0, l = entries.length; i < l; i ++) {
-    const [key, value] = entries[i];
-
-    if (value !== oldProps[key]) {
-      return false;
-    }
-  }
-
-  return true;
-};
 
 const Controls = ({
   backgroundColor,

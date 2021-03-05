@@ -19,7 +19,7 @@ const useCustomCompareMemo = (value, comparator) => {
   const ref = useRef(value);
 
   if (!comparator(value, ref.current)) {
-    console.log('update', value, ref.current)
+    // console.log('update', value, ref.current)
     ref.current = value;
   }
 

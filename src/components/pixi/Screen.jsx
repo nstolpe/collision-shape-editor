@@ -4,9 +4,9 @@ import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 import { Stage } from 'react-pixi-fiber';
 
-import InteractiveViewport from 'components/pixi/InteractiveViewport';
 import { useRootContext } from 'contexts/RootContext';
 import ScreenContext from 'contexts/ScreenContext';
+import InteractiveViewport from 'components/pixi/InteractiveViewport';
 
 const Screen = ({ children, width, height }) => {
   const state = useRootContext();

@@ -18,7 +18,17 @@ import {
   deleteVertex,
   moveVertex,
 } from 'actions/actions';
-import { useScreenContext } from 'contexts/ScreenContext';
+import withSelector from 'components/hoc/withSelector';
+
+const selector = ({
+  altPressed,
+  ctrlPressed,
+  dispatch,
+}) => ({
+  altPressed,
+  ctrlPressed,
+  dispatch,
+});
 
 export const getCursor = tool => {
   switch (tool) {
@@ -34,6 +44,9 @@ export const getCursor = tool => {
 };
 
 const Vertex = ({
+  altPressed,
+  ctrlPressed,
+  dispatch,
   active,
   activeFill,
   fill,
@@ -47,12 +60,6 @@ const Vertex = ({
   y,
   ...props
 }) => {
-  const {
-    altPressed,
-    ctrlPressed,
-    dispatch,
-  } = useScreenContext();
-
   const pointerdown = event => {
     event.stopPropagation();
     console.log('sdf')
@@ -170,4 +177,4 @@ Vertex.propTypes = {
   strokeAlignment: PropTypes.number,
 };
 
-export default Vertex;
+export default withSelector(ScreenContext, selector)(Vertex);

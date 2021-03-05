@@ -4,9 +4,13 @@ import PropTypes from 'prop-types';
 import * as PIXI from 'pixi.js';
 
 import Rectangle from 'components/pixi/base/Rectangle';
-import { useScreenContext } from 'contexts/ScreenContext';
+import ScreenContext from 'contexts/ScreenContext';
+import withSelector from 'components/hoc/withSelector';
+
+const selector = ({ dispatch }) => ({ dispatch });
 
 const Edge = ({
+  dispatch,
   fill,
   length,
   position,
@@ -17,9 +21,6 @@ const Edge = ({
   y,
   ...props
 }) => {
-  const {
-    dispatch,
-  } = useScreenContext();
   const [currentPosition, setCurrentPosition] = useState([x, y]);
   const [lastPosition, setLastPosition] = useState([x, y]);
 
@@ -85,4 +86,4 @@ Edge.defaultProps = {
   thickness: 1,
 };
 
-export default Edge;
+export default withSelector(ScreenContext, selector)(Edge);

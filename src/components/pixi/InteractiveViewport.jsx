@@ -9,24 +9,34 @@ import {
   scaleUI,
 } from 'actions/actions';
 import Modes from 'constants/modes';
-import ScreenContext, { useScreenContext } from 'contexts/ScreenContext';
+import ScreenContext from 'contexts/ScreenContext';
+import withSelector from 'components/hoc/withSelector';
 import Viewport from 'components/pixi/base/Viewport';
 import Edges from 'components/pixi/Edges';
 import Sprites from 'components/pixi/Sprites';
 import Vertices from 'components/pixi/Vertices';
 import { GRAB, GRABBING } from 'constants/cursors';
 
+const selector = ({
+  dispatch,
+  backgroundColor,
+  mode,
+  tool,
+  textureSources,
+  scale,
+}) => ({
+  dispatch,
+  backgroundColor,
+  mode,
+  tool,
+  textureSources,
+  scale,
+});
+
 /**
  * `pixi-viewport` component.
  */
 const InteractiveViewport = props => {
-  const {
-    children,
-    ...restProps
-  } = props;
-  const viewport = useRef(null);
-  const { loader, renderer } = usePixiApp();
-  const { plugins: { interaction } } = renderer;
   const {
     dispatch,
     backgroundColor,
@@ -34,7 +44,12 @@ const InteractiveViewport = props => {
     tool,
     textureSources,
     scale,
-  } = useScreenContext();
+    children,
+    ...restProps
+  } = props;
+  const viewport = useRef(null);
+  const { loader, renderer } = usePixiApp();
+  const { plugins: { interaction } } = renderer;
   const [cursor, setCursor] = useState(GRAB);
   // const {
   //     textureSources = [],
@@ -108,4 +123,4 @@ const InteractiveViewport = props => {
   );
 };
 
-export default InteractiveViewport;
+export default withSelector(ScreenContext, selector)(InteractiveViewport);
