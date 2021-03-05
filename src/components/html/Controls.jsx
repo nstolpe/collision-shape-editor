@@ -11,6 +11,7 @@ import {
   addTextureSource,
   setBackgroundColor,
 } from 'actions/actions';
+import withSelector from 'components/hoc/withSelector';
 import FileLoader from 'components/html/FileLoader';
 import EdgeIcon from 'components/html/EdgeIcon';
 import PlusIcon from 'components/html/PlusIcon';
@@ -19,7 +20,7 @@ import SelectIcon from 'components/html/SelectIcon';
 import SpriteIcon from 'components/html/SpriteIcon';
 import VertexIcon from 'components/html/VertexIcon';
 import Separator from 'components/html/Separator';
-import { useRootContext } from 'contexts/RootContext';
+import RootContext, { useRootContext } from 'contexts/RootContext';
 import { property } from 'tools/property';
 import ColorPicker from 'color-picker';
 
@@ -75,21 +76,49 @@ const getIconProps = (dispatch, mode, tool) => {
   };
 };
 
-const Controls = ({ children }) => {
-  const {
-    backgroundColor,
-    dispatch,
-    mode,
-    tool,
-    rootContainer,
-  } = useRootContext();
+const selector = ({
+  backgroundColor,
+  dispatch,
+  mode,
+  tool,
+  rootContainer,
+}) => ({
+  backgroundColor,
+  dispatch,
+  mode,
+  tool,
+  rootContainer,
+});
 
+const comparator = (props, oldProps) => {
+  const entries = Object.entries(props);
+
+  for (let i = 0, l = entries.length; i < l; i ++) {
+    const [key, value] = entries[i];
+
+    if (value !== oldProps[key]) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+const Controls = ({
+  backgroundColor,
+  children,
+  dispatch,
+  mode,
+  rootContainer,
+  tool,
+}) => {
   const onColorChange =({ r, g, b }) => {
     const color = chroma(r, g, b);
     dispatch(setBackgroundColor(parseInt(color.hex().replace('#', ''), 16)));
   };
 
   const onLoad = (name, data) => {
+    console.log('load image');
     dispatch(addTextureSource(name, data));
   };
 
@@ -131,4 +160,4 @@ const Controls = ({ children }) => {
   );
 };
 
-export default Controls;
+export default withSelector(RootContext, selector)(Controls);
