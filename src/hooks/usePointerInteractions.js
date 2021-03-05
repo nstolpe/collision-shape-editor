@@ -346,10 +346,6 @@ const usePointerInteraction = () => {
             currentQueuedSelectedVertices => currentQueuedSelectedVertices.filter(
               (vertex, index) => index !== queuedSelectedVertexIndex
             )
-            // currentQueuedSelectedVertices => [
-            //   ...currentQueuedSelectedVertices.slice(0, queuedSelectedVertexIndex),
-            //   ...currentQueuedSelectedVertices.slice(queuedSelectedVertexIndex + 1),
-            // ]
           );
         }
     }

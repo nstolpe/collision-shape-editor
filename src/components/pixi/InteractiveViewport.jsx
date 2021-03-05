@@ -46,7 +46,7 @@ const InteractiveViewport = props => {
   //     screenHeight,
   // } = props;
   // const context = useContext(ScreenContext);
-  renderer.plugins.interaction.moveWhenInside = true;
+  // renderer.plugins.interaction.moveWhenInside = true;
   useEffect(
     () => {
       textureSources.forEach(textureSource => {
@@ -54,7 +54,7 @@ const InteractiveViewport = props => {
           loader.add(textureSource.id, textureSource.data);
           removeTextureSource(textureSource);
         } else {
-                    // notify that load didn't happen
+          // notify that load didn't happen
         }
       });
       loader.load((loader, resources) => {
@@ -93,7 +93,6 @@ const InteractiveViewport = props => {
       <Edges
         interactive={mode === Modes.EDGE}
         interactiveChildren={mode === Modes.EDGE}
-        active={mode === Modes.EDGE}
         scale={scale}
         setCursor={setCursor}
       />

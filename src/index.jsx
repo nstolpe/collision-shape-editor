@@ -27,7 +27,7 @@ const appContainer = document.getElementById('root');
 PIXI.useDeprecated();
 
 window.__PIXI_INSPECTOR_GLOBAL_HOOK__ &&
-  window.__PIXI_INSPECTOR_GLOBAL_HOOK__.register({ PIXI: PIXI });
+window.__PIXI_INSPECTOR_GLOBAL_HOOK__.register({ PIXI: PIXI });
 // end workaround
 
 render(

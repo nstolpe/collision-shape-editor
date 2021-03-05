@@ -34,6 +34,10 @@ const Screen = ({ children, width, height }) => {
   });
   return (
     <Stage
+      onContextMenu={e => {
+        console.log(e.type);
+        e.preventDefault();
+      }}
       options={
         {
           width,
