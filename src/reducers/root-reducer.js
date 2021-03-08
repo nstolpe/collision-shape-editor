@@ -1,5 +1,5 @@
 // src/reducers/root-reducer.js
-import {v4 as uuid} from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import {
   SET_ROOT_CONTAINER,
