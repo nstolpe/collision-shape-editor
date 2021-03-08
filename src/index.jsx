@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import * as PIXI from 'pixi.js';
 // import { createGlobalStyle } from 'styled-components/macro';
-import { Global } from '@emotion/core';
+import { Global } from '@emotion/react';
 
 import FiraMonoRegular from 'fonts/FiraMono/FiraMono-Regular.ttf';
 import AppWrapper from 'components/html/AppWrapper';
@@ -24,7 +24,7 @@ const appContainer = document.getElementById('root');
 // `;
 
 // workaround for pixi to work with dev tools
-PIXI.useDeprecated();
+// PIXI.useDeprecated();
 
 window.__PIXI_INSPECTOR_GLOBAL_HOOK__ &&
 window.__PIXI_INSPECTOR_GLOBAL_HOOK__.register({ PIXI: PIXI });

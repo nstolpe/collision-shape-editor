@@ -22,7 +22,8 @@ import VertexIcon from 'components/html/VertexIcon';
 import Separator from 'components/html/Separator';
 import RootContext from 'contexts/RootContext';
 import { property } from 'tools/property';
-import ColorPicker from 'color-picker';
+// import ColorPicker from 'color-picker/dist/index.js';
+import ColorPicker from 'components/html/color-picker/components/ColorPicker';
 
 const ControlWrapper = styled.div`
   background-color: hsl(0, 0%, 75%);
