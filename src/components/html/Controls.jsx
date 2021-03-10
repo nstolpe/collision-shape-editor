@@ -4,8 +4,8 @@ import styled from '@emotion/styled';
 import chroma from 'chroma-js';
 
 import { setMode, setTool } from 'actions/actions';
-import Modes from 'constants/modes';
-import Tools from 'constants/tools';
+import * as Modes from 'constants/modes';
+import * as Tools from 'constants/tools';
 import ModeTools from 'constants/mode-tools';
 import {
   addTextureSource,

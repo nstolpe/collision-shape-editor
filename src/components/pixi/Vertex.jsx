@@ -13,7 +13,7 @@ import {
   NONE,
   NOT_ALLOWED,
 } from 'constants/cursors';
-import Tools from 'constants/tools';
+import * as Tools from 'constants/tools';
 import {
   deleteVertex,
   moveVertex,

@@ -118,9 +118,3 @@ export const properties = (source, maps, fallback, delimiter='.') => (
     return obj;
   }, {})
 );
-
-export default {
-  properties,
-  property,
-  propertyMap,
-};

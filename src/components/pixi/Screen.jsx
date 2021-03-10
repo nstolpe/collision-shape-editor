@@ -1,5 +1,4 @@
 // src/js/components/pixi/Screen.js
-import * as PIXI from "pixi.js";
 import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 import { Stage } from 'react-pixi-fiber';
@@ -12,7 +11,7 @@ const Screen = ({ children, width, height }) => {
   const state = useRootContext();
 
   useEffect(() => {
-    document.addEventListener('keydown', ({ key, keyCode }) => {
+    const onKeyDown = ({ key, keyCode }) => {
       if (key === 'Control' || keyCode === 17) {
         console.log('control pressed');
       } else if (key === 'Alt' || keyCode === 18) {
@@ -20,9 +19,9 @@ const Screen = ({ children, width, height }) => {
       } else if (key === 'Shift' || keyCode === 16) {
         console.log('shift pressed');
       }
-    });
+    };
 
-    document.addEventListener('keyup', ({ key, keyCode }) => {
+    const onKeyUp = ({ key, keyCode }) => {
       if (key === 'Control' || keyCode === 17) {
         console.log('control released');
       } else if (key === 'Alt' || keyCode === 18) {
@@ -30,8 +29,17 @@ const Screen = ({ children, width, height }) => {
       } else if (key === 'Shift' || keyCode === 16) {
         console.log('shift released');
       }
-    });
-  });
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keyup', onKeyUp);
+
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('keyup', onKeyUp);
+    };
+  }, []);
+
   return (
     <Stage
       onContextMenu={e => {

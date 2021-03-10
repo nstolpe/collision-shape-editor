@@ -2,7 +2,7 @@
 import { useReducer, useState } from 'react';
 
 import { moveVertices } from 'actions/actions';
-import Tools from 'constants/tools';
+import * as Tools from 'constants/tools';
 import { useScreenContext } from 'contexts/ScreenContext';
 import { property, properties } from 'tools/property';
 import { VERTEX } from 'constants/type-prefixes';
@@ -81,17 +81,17 @@ const usePointerInteraction = () => {
   };
 
   const getDistance = (pointA, pointB) => {
-      const { x: aX, y: aY } = Array.isArray(pointA) ? { x: pointA[0], y: pointA[1] } :
-          typeof pointA === 'object' ? pointA :
-          { x:0, y: 0 };
-      const { x: bX, y: bY } = Array.isArray(pointB) ? { x: pointB[0], y: pointB[1] } :
-          typeof pointB === 'object' ? pointB :
-          { x:0, y: 0 };
+    const { x: aX, y: aY } = Array.isArray(pointA) ? { x: pointA[0], y: pointA[1] } :
+        typeof pointA === 'object' ? pointA :
+        { x:0, y: 0 };
+    const { x: bX, y: bY } = Array.isArray(pointB) ? { x: pointB[0], y: pointB[1] } :
+        typeof pointB === 'object' ? pointB :
+        { x:0, y: 0 };
 
-      return {
-        x: aX - bX,
-        y: aY - bY,
-      };
+    return {
+      x: aX - bX,
+      y: aY - bY,
+    };
   };
 
   const updateDistances = (identifier, coordinates) => (

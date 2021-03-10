@@ -4,11 +4,3 @@ export const EDGE = 'EDGE';
 export const SHAPE = 'SHAPE';
 export const SPRITE = 'SPRITE';
 export const VERTEX = 'VERTEX';
-
-export default {
-    ALL,
-    EDGE,
-    SHAPE,
-    SPRITE,
-    VERTEX,
-};

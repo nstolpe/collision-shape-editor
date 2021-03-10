@@ -7,7 +7,7 @@ const prefixes = Object.assign(Object.create(null), {
   VERTEX,
 });
 
-const prefix = (key, value, delimiter='__') => `${prefixes[key]}${delimiter}${value}`;
+export const prefix = (key, value, delimiter = '__') => `${prefixes[key]}${delimiter}${value}`;
 
 export const PFXR = (prefix, delimiter = '__') => {
   return {
@@ -15,10 +15,4 @@ export const PFXR = (prefix, delimiter = '__') => {
     add: value => `${prefix}${delimiter}${value}`,
     remove: value => String(value).replace(new RegExp(`^${value}`), ''),
   };
-};
-
-export default {
-  VERTEX,
-  EDGE,
-  prefix,
 };

@@ -1,6 +1,10 @@
 // src/js/components/pixi/InteractiveViewport.js
 import * as PIXI from 'pixi.js';
-import React, { useEffect, useContext, useRef, useState, Children, cloneElement } from 'react';
+import React, {
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { usePixiApp } from 'react-pixi-fiber';
 
 import {
@@ -8,7 +12,7 @@ import {
   removeTextureSource,
   scaleUI,
 } from 'actions/actions';
-import Modes from 'constants/modes';
+import * as Modes from 'constants/modes';
 import ScreenContext from 'contexts/ScreenContext';
 import withSelector from 'components/hoc/withSelector';
 import Viewport from 'components/pixi/base/Viewport';
@@ -45,6 +49,8 @@ const InteractiveViewport = props => {
     textureSources,
     scale,
     children,
+    screenHeight,
+    screenWidth,
     ...restProps
   } = props;
   const viewport = useRef(null);
@@ -52,13 +58,7 @@ const InteractiveViewport = props => {
   const { plugins: { interaction } } = renderer;
   const [cursor, setCursor] = useState(GRAB);
   // const {
-  //     textureSources = [],
-  //     backgroundColor,
-  //     removeTextureSource,
-  //     // app: { loader, renderer },
-  //     addSprite,
-  //     screenWidth,
-  //     screenHeight,
+  //   textureSources = [],
   // } = props;
   // const context = useContext(ScreenContext);
   // renderer.plugins.interaction.moveWhenInside = true;
@@ -77,8 +77,8 @@ const InteractiveViewport = props => {
           addSprite({
             name: textureSource.id,
             texture: resources[textureSource.id].texture,
-            x: props.screenWidth * 0.5,
-            y: props.screenHeight * 0.5,
+            x: screenWidth * 0.5,
+            y: screenHeight * 0.5,
             rotation: 0,
             scale: [1, 1],
             scaleMode: PIXI.SCALE_MODES.NEAREST,
@@ -86,7 +86,12 @@ const InteractiveViewport = props => {
         });
       });
     },
-    [textureSources, addSprite, loader, removeTextureSource, props.screenHeight, props.screenWidth]
+    [
+      textureSources,
+      loader,
+      screenHeight,
+      screenWidth
+    ]
   );
 
   return (
@@ -98,11 +103,12 @@ const InteractiveViewport = props => {
       wheel={{ percent: 0.05 }}
       onzoomed={({ viewport: { scale: { x, y } } }) => dispatch(scaleUI({ x, y }))}
       interaction={interaction}
-      name={'InteractiveViewport'}
       cursor={cursor}
       pointerdown={() => setCursor(GRABBING)}
       pointerup={() => setCursor(GRAB)}
-      {...props}
+      screenHeight={screenHeight}
+      screenWidth={screenWidth}
+      {...restProps}
     >
       <Sprites />
       <Edges
@@ -114,8 +120,8 @@ const InteractiveViewport = props => {
       <Vertices
         interactive={mode === Modes.VERTEX}
         interactiveChildren={mode === Modes.VERTEX}
-        width={props.screenWidth}
-        height={props.screenHeight}
+        width={screenWidth}
+        height={screenHeight}
         scale={scale}
         setCursor={setCursor}
       />

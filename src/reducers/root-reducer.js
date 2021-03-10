@@ -21,9 +21,9 @@ import {
   REMOVE_TEXTURE_SOURCE,
   ADD_SPRITE,
 } from 'constants/action-types';
-import Interactions from 'constants/interactions';
-import Modes from 'constants/modes';
-import Tools from 'constants/tools';
+import * as Interactions from 'constants/interactions';
+import * as Modes from 'constants/modes';
+import * as Tools from 'constants/tools';
 
 export const initialState = {
   backgroundColor: 0xc1ddca,

@@ -1,9 +1,8 @@
 // src/js/components/html/Separator.js
-import React from 'react';
 import styled from '@emotion/styled/macro';
 
 const Separator = styled.div`
-  background: hsla(0,0%,50%,1);
+  background: hsla(0, 0%, 50%, 1);
   display: inline-block;
   position: relative;
   width: 2px;
@@ -16,7 +15,7 @@ const Separator = styled.div`
     position: absolute;
     width: 2px;
     height: 15%;
-    background: hsl(0,0%,50%);
+    background: hsl(0, 0%, 50%);
   }
 
   &:before {

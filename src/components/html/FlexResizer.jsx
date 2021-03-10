@@ -5,15 +5,14 @@ import React, {
   useState,
 } from 'react';
 import styled from '@emotion/styled';
-// import styled from 'styled-components/macro';
 
-const FlexResizer = styled.div`
+const FlexWrapper = styled.div`
   flex: 1;
   overflow: hidden;
 `;
 
 // resizes on window.resize, stores width and height, sends them as props to children.
-export default ({ children }) => {
+const FlexResizer = ({ children }) => {
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
   const flexResizer = useRef(null);
@@ -40,8 +39,10 @@ export default ({ children }) => {
   }, []);
 
   return (
-    <FlexResizer ref={flexResizer}>{
+    <FlexWrapper ref={flexResizer}>{
       React.Children.map(children, child => React.cloneElement(child, { width, height }))
-    }</FlexResizer>
+    }</FlexWrapper>
   );
 };
+
+export default FlexResizer;
