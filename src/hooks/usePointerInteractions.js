@@ -1,10 +1,11 @@
 // hooks/usePointerInteractions.js
-import { useReducer, useState } from 'react';
+import { useState } from 'react';
 
 import { moveVertices } from 'actions/actions';
 import * as Tools from 'constants/tools';
 import { useScreenContext } from 'contexts/ScreenContext';
 import { property, properties } from 'tools/property';
+import { translation } from 'tools/math';
 import { VERTEX } from 'constants/type-prefixes';
 
 const VERTEX_PREFIX = 'VERTEX__';
@@ -66,25 +67,11 @@ const usePointerInteraction = () => {
     }
   };
 
-  const getDistance = (pointA, pointB) => {
-    const { x: aX, y: aY } = Array.isArray(pointA) ? { x: pointA[0], y: pointA[1] } :
-        typeof pointA === 'object' ? pointA :
-        { x:0, y: 0 };
-    const { x: bX, y: bY } = Array.isArray(pointB) ? { x: pointB[0], y: pointB[1] } :
-        typeof pointB === 'object' ? pointB :
-        { x:0, y: 0 };
-
-    return {
-      x: aX - bX,
-      y: aY - bY,
-    };
-  };
-
-  const updateDistances = (identifier, coordinates) => (
+  const updateTranslations = (identifier, coordinates) => (
     setSelectedVertices(currentSelectedVertices => (
       currentSelectedVertices.map(vertex => {
         const { x, y } = vertices.find(v => v.id === vertex.name.replace(VERTEX_PREFIX, ''));
-        const distance = getDistance({ x, y }, coordinates);
+        const distance = translation({ x, y }, coordinates);
         return { ...vertex, distance };
       })
     ))
@@ -211,7 +198,7 @@ const usePointerInteraction = () => {
       name,
     } = properties(event, eventMaps);
 
-    updateDistances(identifier, coordinates);
+    updateTranslations(identifier, coordinates);
 
     switch (true) {
       // case altKey && ctrlKey && shiftKey:
@@ -244,7 +231,7 @@ const usePointerInteraction = () => {
                 )
               );
             } else {
-              addSelectedVertex(event.target.name, getDistance(coordinates, event.target.position))
+              addSelectedVertex(event.target.name, translation(coordinates, event.target.position))
             }
         }
         break;
@@ -258,7 +245,7 @@ const usePointerInteraction = () => {
           default:
             queueSelectVertex(
               event.target.name,
-              getDistance(coordinates, event.target.position)
+              translation(coordinates, event.target.position)
             );
         }
     }

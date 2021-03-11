@@ -21,20 +21,7 @@ import Vertex from 'components/pixi/Vertex';
 
 const VERTEX_PREFIX = 'VERTEX__';
 
-const getDistance = (pointA, pointB) => {
-  const { x: aX, y: aY } = Array.isArray(pointA) ? { x: pointA[0], y: pointA[1] } :
-    typeof pointA === 'object' ? pointA :
-    { x:0, y: 0 };
-  const { x: bX, y: bY } = Array.isArray(pointB) ? { x: pointB[0], y: pointB[1] } :
-    typeof pointB === 'object' ? pointB :
-    { x:0, y: 0 };
-
-  return {
-    x: aX - bX,
-    y: aY - bY,
-  };
-};
-
+// const mapVertex = ()
 const selector = ({
   altPressed,
   ctrlPressed,
@@ -55,7 +42,6 @@ const Vertices = ({
   dispatch,
   tool,
   vertices,
-  active,
   height,
   width,
   scale,
@@ -81,14 +67,13 @@ const Vertices = ({
       pointermove={handlePointerMove}
       {...restProps}
     >
-      {vertices.map((vertex, idx) => {
+      {vertices.map(vertex => {
         const { x, y, id } = vertex;
         const scaleRatio = [
           1 / scale.x,
           1 / scale.y,
         ];
         const props = {
-          active,
           altPressed,
           ctrlPressed,
           id,
