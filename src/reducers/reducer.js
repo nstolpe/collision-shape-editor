@@ -1,5 +1,5 @@
 // src/js/reducers/reducer.js
-
+// Deprecated, reference only.
 import { v4 as uuid } from 'uuid';
 import {
     SET_ROOT_CONTAINER,

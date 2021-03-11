@@ -9,7 +9,6 @@ import AppWrapper from 'components/html/AppWrapper';
 import Controls from 'components/html/Controls';
 import FlexResizer from 'components/html/FlexResizer';
 import Screen from 'components/pixi/Screen';
-import ScreenContext from 'contexts/ScreenContext';
 import RootStore from 'store/RootStore';
 
 const appContainer = document.getElementById('root');
@@ -24,8 +23,6 @@ const appContainer = document.getElementById('root');
 // `;
 
 // workaround for pixi to work with dev tools
-// PIXI.useDeprecated();
-
 window.__PIXI_INSPECTOR_GLOBAL_HOOK__ &&
 window.__PIXI_INSPECTOR_GLOBAL_HOOK__.register({ PIXI: PIXI });
 // end workaround
@@ -45,7 +42,7 @@ render(
     />
     <AppWrapper>
       <FlexResizer>
-        <Screen context={ScreenContext} />
+        <Screen />
       </FlexResizer>
       <Controls />
     </AppWrapper>

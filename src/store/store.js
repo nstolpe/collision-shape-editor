@@ -1,5 +1,5 @@
 // src/js/store/store.js
-
+// deprecated. @TODO remove.
 import { createStore } from "redux";
 import rootReducer from "reducers/reducer";
 

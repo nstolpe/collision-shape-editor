@@ -57,6 +57,13 @@ const InteractiveViewport = props => {
   const { loader, renderer } = usePixiApp();
   const { plugins: { interaction } } = renderer;
   const [cursor, setCursor] = useState(GRAB);
+  const onPointerDown = () => setCursor(GRABBING);
+  const onPointerUp = () => setCursor(GRAB);
+  const onZoomed = ({
+    viewport: {
+      scale: { x, y },
+    },
+  }) => dispatch(scaleUI({ x, y }));
   // const {
   //   textureSources = [],
   // } = props;
@@ -101,11 +108,11 @@ const InteractiveViewport = props => {
       drag={{ keyToPress: 'ControlLeft' }}
       pinch={{ percent: 10 }}
       wheel={{ percent: 0.05 }}
-      onzoomed={({ viewport: { scale: { x, y } } }) => dispatch(scaleUI({ x, y }))}
+      onzoomed={onZoomed}
       interaction={interaction}
       cursor={cursor}
-      pointerdown={() => setCursor(GRABBING)}
-      pointerup={() => setCursor(GRAB)}
+      pointerdown={onPointerDown}
+      pointerup={onPointerUp}
       screenHeight={screenHeight}
       screenWidth={screenWidth}
       {...restProps}
