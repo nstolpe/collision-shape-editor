@@ -9,20 +9,6 @@ import { VERTEX } from 'constants/type-prefixes';
 
 const VERTEX_PREFIX = 'VERTEX__';
 
-const initialState = {
-  pointers: [],
-  selectedVertices: [],
-  selectedVerticesQueue: [],
-};
-
-const reducer = (state, action) => {
-  switch (action.type) {
-    case '':
-    default:
-      console.log(action.type);
-  }
-};
-
 const usePointerInteraction = () => {
    const {
      dispatch,
