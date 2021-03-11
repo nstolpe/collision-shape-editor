@@ -26,7 +26,7 @@ import * as Modes from 'constants/modes';
 import * as Tools from 'constants/tools';
 
 export const initialState = {
-  backgroundColor: 0xc1ddca,
+  backgroundColor: 0x19f750,
   interaction: Interactions.TRANSLATE,
   mode: Modes.VERTEX,
   tool: Tools.SELECT,
