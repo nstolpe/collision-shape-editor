@@ -1,6 +1,8 @@
-// srs/constants/type-prefixes.js
+// src/constants/type-prefixes.js
+
 export const VERTEX = 'VERTEX';
 export const EDGE = 'EDGE';
+export const SPRITE = 'SPRITE';
 
 const prefixes = Object.assign(Object.create(null), {
   EDGE,

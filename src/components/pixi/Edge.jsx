@@ -1,89 +1,62 @@
 // src/components/pixi/Edge.jsx
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as PIXI from 'pixi.js';
 
 import Rectangle from 'components/pixi/base/Rectangle';
-import ScreenContext from 'contexts/ScreenContext';
-import withSelector from 'components/hoc/withSelector';
-
-const selector = ({ dispatch }) => ({ dispatch });
 
 const Edge = ({
-  dispatch,
+  activeFill,
   fill,
+  id,
   length,
-  position,
   rotation,
-  setCursor,
+  scale,
+  selected,
   thickness,
   x,
   y,
-  ...props
 }) => {
-  const [currentPosition, setCurrentPosition] = useState([x, y]);
-  const [lastPosition, setLastPosition] = useState([x, y]);
+  const [pivot, setPivot] = useState([0, thickness * 0.5]);
+  const [hitArea, setHitArea] = useState(new PIXI.Rectangle(0, -2, length, thickness + 4));
 
-//   const pointerdown = event => {
-//     setCursor(move);
-//     if (!movingVertices.find(vertex => vertex.id === event.currentTarget.id && vertex.identifier === event.data.identifier) && event.currentTarget.id === id) {
-//       const coordinates = event.data.getLocalPosition(event.currentTarget.parent);
-//       setMovingVertices(
-//         ids => [...ids, { id, coordinates, identifier: event.data.identifier }]
-//       );
-//     }
-//   };
-//
-//   const pointerup = event => {
-//     event.stopPropagation();
-//     const coordinates = event.data.getLocalPosition(event.currentTarget.parent);
-//     setCursor(grab);
-//
-//     if (movingVertices.find(vertex => vertex.id === event.currentTarget.id) && event.currentTarget.id === id) {
-//       dispatch(moveVertex({ ...coordinates, id }));
-//     }
-//
-//     setMovingVertices(currentMovingVertices => currentMovingVertices.filter(activeVertex => activeVertex.id !== id));
-//   };
-//
-//   const pointerupoutside = event => {
-//     event.stopPropagation();
-//     setMovingVertices(currentMovingVertices => currentMovingVertices.filter(activeVertex => activeVertex.id !== id));
-//   };
+  useEffect(() => {
+    setPivot([0, thickness * 0.5]);
+    setHitArea(new PIXI.Rectangle(0, -2, length, thickness + 4));
+  }, [length, thickness]);
 
   return (
     <Rectangle
-      fill={fill}
-      interactive
       cursor='move'
-      pointerdown={e => console.log(e)}
+      fill={selected ? activeFill : fill}
+      height={thickness}
+      hitArea={hitArea}
+      interactive
+      name={id}
+      pivot={pivot}
+      rotation={rotation}
+      scale={scale}
+      width={length}
       x={x}
       y={y}
-      pivot={[length * 0.5, thickness * 0.5]}
-      width={length}
-      height={thickness}
-      position={position}
-      rotation={rotation}
-      hitArea={new PIXI.Rectangle(0, -2, length, thickness + 4)}
-      {...props}
     />
   );
 };
 
 Edge.propTypes = {
+  activeFill: PropTypes.number,
   fill: PropTypes.number,
   length: PropTypes.number.isRequired,
   rotation: PropTypes.number.isRequired,
+  selected: PropTypes.bool,
   thickness: PropTypes.number,
-  setCursor: PropTypes.func,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
 };
 
 Edge.defaultProps = {
+  activeFill: 0x17bafb,
   fill: 0xff3e82,
-  setCursor: () => {},
+  selected: false,
   thickness: 1,
 };
 
-export default withSelector(ScreenContext, selector)(Edge);
+export default Edge;

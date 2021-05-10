@@ -1,93 +1,72 @@
-// components/pixi/pixi/Vertices.js
-import React, { useCallback, useRef, useState } from 'react';
-import * as PIXI from 'pixi.js';
+// components/pixi/pixi/Geometry.js
 import PropTypes from 'prop-types';
-import { Container } from 'react-pixi-fiber';
+import React, {
+  useEffect,
+  useState,
+} from 'react';
 
-import {
-  addVertex,
-  deleteVertex,
-  moveVertex,
-  moveVertices,
-  startMoveVertex,
-  stopMoveVertex,
-} from 'actions/actions';
-import Tools from 'constants/tools';
-import { property } from 'tools/property';
-import ScreenContext from 'contexts/ScreenContext';
-import usePointerInteractions from 'hooks/usePointerInteractions';
 import withSelector from 'components/hoc/withSelector';
+import Edge from 'components/pixi/Edge';
 import Vertex from 'components/pixi/Vertex';
+import { EDGE, VERTEX } from 'constants/prefixes';
+import { SELECT } from 'constants/tools';
+import ScreenContext from 'contexts/ScreenContext';
+import { addPrefix } from 'tools/prefix';
 
-const VERTEX_PREFIX = 'VERTEX__';
-
-// const mapVertex = ()
-const selector = ({
-  altPressed,
-  ctrlPressed,
-  dispatch,
-  tool,
-  vertices,
-}) => ({
-  altPressed,
-  ctrlPressed,
-  dispatch,
-  tool,
-  vertices,
-});
+const selector = ({ tool }) => ({ tool });
 
 const Vertices = ({
-  altPressed,
-  ctrlPressed,
-  dispatch,
+  scale,
+  selectedVertices,
   tool,
   vertices,
-  height,
-  width,
-  scale,
-  setCursor,
-  ...restProps
 }) => {
-  const {
-    handlePointerDown,
-    handlePointerMove,
-    handlePointerUp,
-    selectedVertices,
-  } = usePointerInteractions();
+  const [inverseScale, setInverseScale] = useState([
+    1 / scale.x,
+    1 / scale.y,
+  ]);
 
-  const hitArea = new PIXI.Rectangle(0, 0, width, height);
+  useEffect(() => {
+    setInverseScale([1 / scale.x, 1 / scale.y])
+  }, [scale.x, scale.y]);
 
-  return(
-    <Container
-      name='VERTICES'
-      hitArea={hitArea}
-      pointerdown={handlePointerDown}
-      pointerup={handlePointerUp}
-      pointerupoutside={e => console.log('log outside', e)}
-      pointermove={handlePointerMove}
-      {...restProps}
-    >
-      {vertices.map(vertex => {
-        const { x, y, id } = vertex;
-        const scaleRatio = [
-          1 / scale.x,
-          1 / scale.y,
-        ];
-        const props = {
-          altPressed,
-          ctrlPressed,
-          id,
-          scale: scaleRatio,
-          setCursor,
-          selectedVertices,
-          tool,
-          x,
-          y,
-        };
-        return <Vertex key={id} { ...props } />;
-      })}
-    </Container>
-  );
+  return vertices.reduce((result, vertex1, idx) => {
+    const { x, y, id } = vertex1;
+    const vertex2 = vertices[(idx + 1) % vertices.length];
+    const vertexId = addPrefix(id, VERTEX);
+    const edgeId = addPrefix(`${vertex1.id}__${vertex2.id}`, EDGE);
+    const dx = (vertex2.x - vertex1.x) * scale.x;
+    const dy = (vertex2.y - vertex1.y) * scale.y;
+
+    const vertexProps = {
+      id: vertexId,
+      key: vertexId,
+      scale: inverseScale,
+      selected: selectedVertices.hasOwnProperty(vertexId),
+      tool,
+      x,
+      y,
+    };
+
+    const edgeProps = {
+      id: edgeId,
+      key: edgeId,
+      length: Math.sqrt(dx ** 2 + dy ** 2), //Math.hypot(dx, dy),
+      rotation: Math.atan2(dy, dx),
+      scale: inverseScale,
+      selected: selectedVertices.hasOwnProperty(vertexId) && selectedVertices.hasOwnProperty(addPrefix(vertex2.id, VERTEX)),
+      x: vertex1.x,
+      y: vertex1.y,
+    };
+    if (edgeProps.length > 1555) {
+      console.log(edgeProps.length, edgeId, idx);
+    }
+
+    result[0].push(<Edge { ...edgeProps } />);
+    result[1].push(<Vertex { ...vertexProps } />);
+
+    return result;
+  }, [[], []]);
 };
 
 Vertices.propTypes = {
@@ -95,16 +74,25 @@ Vertices.propTypes = {
     x: PropTypes.number,
     y: PropTypes.number,
   }),
-  setCursor: PropTypes.func,
-  height: PropTypes.number,
-  width: PropTypes.number,
+  selectedVertices: PropTypes.objectOf(PropTypes.shape({
+    x: PropTypes.number,
+    y: PropTypes.number,
+  })),
+  vertices: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.string,
+    ]),
+    x: PropTypes.number,
+    y: PropTypes.number,
+  })),
 };
 
 Vertices.defaultProps = {
   scale: { x: 1, y: 1 },
-  setCursor: () => {},
-  height: 0,
-  width: 0,
+  selectedVertices: {},
+  tool: SELECT,
+  vertices: [],
 };
 
 export default withSelector(ScreenContext, selector)(Vertices);

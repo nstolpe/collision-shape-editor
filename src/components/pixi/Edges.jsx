@@ -21,7 +21,7 @@ export const calculateScaledEdge = (idx, scale, vertex1, vertices) => {
   ];
 
   return {
-    length: Math.sqrt((dx * dx) + (dy * dy)),
+    length: Math.hypot(dx, dy),
     position,
     rotation: Math.atan2(dy, dx),
     vertex1,
