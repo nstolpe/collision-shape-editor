@@ -23,6 +23,7 @@
     "@emotion/styled": "11.1.5",
     "chroma-js": "^2.1.0",
     "color-picker": "git+ssh://git@github.com/nstolpe/color-picker#0.0.5",
+    "pixi-layers": "^0.3.1",
     "pixi-viewport": "4.21.1",
     "pixi.js": "6.0.0",
     "prop-types": "^15.7.2",

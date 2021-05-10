@@ -8966,6 +8966,11 @@ pirates@^4.0.1:
   dependencies:
     node-modules-regexp "^1.0.0"
 
+pixi-layers@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/pixi-layers/-/pixi-layers-0.3.1.tgz#44457e14dad7b341a48b7b92c8bb3bb9c88d3338"
+  integrity sha512-sLqkg4xnlKKjKceTgyNEvb2Fh7A1OmbsZRTHVnnsqMmhkVLVUgRNZX6ZflTne0pgGOal6EXp1bmns4geXZsY7A==
+
 pixi-viewport@4.21.1:
   version "4.21.1"
   resolved "https://registry.yarnpkg.com/pixi-viewport/-/pixi-viewport-4.21.1.tgz#f5eaf71fc1bbb100532ead7f0ea65c2d0d310216"
