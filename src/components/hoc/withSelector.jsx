@@ -67,7 +67,7 @@ const withSelector = (
 ) => WrappedComponent => {
   const WrapperComponent = props => {
     const ctx = selector(useContext(context));
-    const mergedProps = useCustomCompareMemo({ ...props, ...ctx }, comparator);
+    const mergedProps = { ...useCustomCompareMemo(ctx, comparator), ...props };
 
     return useMemo(
       () => <WrappedComponent {...mergedProps} />,
