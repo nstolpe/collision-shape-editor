@@ -7,22 +7,33 @@
  * @param delimiter {string}  The delimiter for the map, if the map is a string
  * @param asString {boolean}  Should the returned map be an array or string
  */
-export const propertyMap = (map, { delimiter='.', asString=false }={}) => (
-  asString ? (
-    typeof map === 'string' ? map :
-      Array.isArray(map) ? map.join(delimiter) :
-      String(map)
-  ) : (
-    typeof map === 'string' ? map.split(delimiter) :
-      Array.isArray(map) ? map :
-      [map]
-  )
-);
+export const propertyMap = (map, { delimiter='.', asString=false }={}) => {
+  if (asString) {
+    switch (true) {
+      case typeof map === 'string':
+        return map;
+      case Array.isArray(map):
+        return map.join(delimiter);
+      default:
+        return String(map);
+    }
+  } else {
+    switch (true) {
+      case typeof map === 'string':
+        return map.split(delimiter);
+      case Array.isArray(map):
+        return map;
+      default:
+        return [map];
+    }
+  }
+};
 
 /**
  * Attempts to safely retrieve a nested property from a `source` object.
- * The `propString` determines the levels and names of properties, with the
- * names/levels delineatd by a period.
+ * The `map` argument is a `delimiter` separated string or an array. The
+ * segments in either are sequentially more specific properties nested in
+ * `source`.
  * ex: The desired target object is `bar`, the parent/source object is foo
  *   var foo = {
  *     baz: {
@@ -43,9 +54,8 @@ export const propertyMap = (map, { delimiter='.', asString=false }={}) => (
  */
 export const property = (source, map, fallback, delimiter='.') => {
   const keys = propertyMap(map, { delimiter });
-
   return keys.length ? keys.reduce(
-    (obj, key) => obj && key in Object(obj) ? obj[key] : fallback, source
+    (obj, key) => obj && Object.hasOwnProperty.call(obj, key) ? obj[key] : fallback, source
   ) : fallback;
 };
 
@@ -91,19 +101,27 @@ export const property = (source, map, fallback, delimiter='.') => {
  *     }
  *
  * @param {object} source       The source object.
- * @param {(string|Array)} map  The map of keys to the final object
+ * @param {Array}  maps         An array of property maps.
  * @param {string} delimiter    The delimiter of the keys in map if it's a string.
  * @return {*}
  */
-export const properties = (source, maps, fallback, delimiter='.') => (
-  Array.prototype.reduce.call(maps, (obj, map) => {
-    const keys = typeof map === 'string' ? map.split(delimiter) :
-       Array.isArray(map) ? map :
-       typeof map === 'object' ? propertyMap(
-         map.map || [],
-         { delimiter: map.delimiter || delimiter },
-       ) :
-       [];
+export const properties = (source, maps, fallback, delimiter='.') => {
+  return Array.prototype.reduce.call(maps, (obj, map) => {
+    let keys;
+
+    switch (true) {
+      case typeof map === 'string':
+        keys = map.split(delimiter);
+        break;
+      case Array.isArray(map):
+        keys = map;
+        break;
+      case typeof map === 'object':
+        keys = propertyMap(map.map ?? [], { delimiter: map.delimiter ?? delimiter });
+        break;
+      default:
+        keys = [String(map).split(delimiter)];
+    }
 
     if (keys.length) {
       const lastKey = keys[keys.length - 1];
@@ -111,10 +129,13 @@ export const properties = (source, maps, fallback, delimiter='.') => (
       obj[lastKey] = property(
         source,
         keys,
-        property(map, 'fallback', fallback),
+        map?.fallback ?? fallback
       );
     }
 
     return obj;
   }, {})
-);
+};
+window.propertyMap = propertyMap;
+window.property = property;
+window.properties = properties;
