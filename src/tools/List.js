@@ -522,7 +522,5 @@ const List = function(...values) {
 };
 
 List.prototype = ListPrototype;
-window.List = List;
-window.createList = createList;
-window.createArrayAccessList = createArrayAccessList;
+
 export default List;

@@ -25,9 +25,52 @@ import * as Interactions from 'constants/interactions';
 import * as Modes from 'constants/modes';
 import * as Tools from 'constants/tools';
 
+const vertices = [
+  {
+    x: 400,
+    y: 200,
+    id: uuid(),
+  },
+  {
+    x: 600,
+    y: 200,
+    id: uuid(),
+  },
+  {
+    x: 700,
+    y: 300,
+    id: uuid(),
+  },
+  {
+    x: 700,
+    y: 500,
+    id: uuid(),
+  },
+  {
+    x: 600,
+    y: 600,
+    id: uuid(),
+  },
+  {
+    x: 400,
+    y: 600,
+    id: uuid(),
+  },
+  {
+    x: 300,
+    y: 500,
+    id: uuid(),
+  },
+  {
+    x: 300,
+    y: 300,
+    id: uuid(),
+  },
+];
+
 export const initialState = {
   backgroundColor: 0x19f750,
-  interaction: Interactions.TRANSLATE,
+  // interaction: Interactions.TRANSLATE,
   mode: Modes.VERTEX,
   tool: Tools.SELECT,
   // width: 0,
@@ -39,48 +82,7 @@ export const initialState = {
   },
   textureSources: [],
   sprites: [],
-  vertices: [
-    {
-      x: 400,
-      y: 200,
-      id: uuid(),
-    },
-    {
-      x: 600,
-      y: 200,
-      id: uuid(),
-    },
-    {
-      x: 700,
-      y: 300,
-      id: uuid(),
-    },
-    {
-      x: 700,
-      y: 500,
-      id: uuid(),
-    },
-    {
-      x: 600,
-      y: 600,
-      id: uuid(),
-    },
-    {
-      x: 400,
-      y: 600,
-      id: uuid(),
-    },
-    {
-      x: 300,
-      y: 500,
-      id: uuid(),
-    },
-    {
-      x: 300,
-      y: 300,
-      id: uuid(),
-    },
-  ],
+  vertices: vertices,
   movingVerticeIds: [],
   scale: { x: 1, y: 1 },
   ctrlPressed: false,
