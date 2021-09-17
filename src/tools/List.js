@@ -13,15 +13,41 @@ export const uniqueKey = (keys) => {
 const Keys = new WeakMap();
 const KeyedValues = new WeakMap();
 
-export const getKeyedValues = key => KeyedValues.get(key) ?? KeyedValues.set(key, Object.create(null)).get(key);
+export const getValues = key => KeyedValues.get(key) ?? KeyedValues.set(key, Object.create(null)).get(key);
 export const getKeys = key => Keys.get(key) ?? Keys.set(key, []).get(key);
+
+const merge = (a, b) => {
+  const length = Math.max(a.length, b.length);
+  const keys = [];
+
+  for (let i = 0; i < length; i++) {
+    keys[i] = b[i] ?? a[i];
+  }
+  return keys;
+};
+
+const assign = (...sources) => {
+  const maxSourceLength = Math.max(...sources.map(source => source?.length ?? 0));
+  const sourcesLength = sources?.length ?? 0;
+  const baseSource = sources?.[0] ?? [];
+
+  for (let i = 1; i < sourcesLength; i++) {
+    const currentSource = sources?.[i] ?? [];
+
+    for (let ii = 0; ii < maxSourceLength; ii++) {
+      baseSource[ii] = currentSource[ii] ?? baseSource[ii];
+    }
+  }
+
+  return baseSource;
+};
 
 const ListPrototype = Object.create({}, {
   // Array methods/properties
   concat: {
     value: function() {
-      const { values } = this;
-      return new List(...values.concat(...arguments));
+      const { keys, values } = this;
+      return new List(values.concat(...arguments), keys);
     },
   },
   // copyWithin: {
@@ -31,8 +57,7 @@ const ListPrototype = Object.create({}, {
   // },
   every: {
     value: function(callback) {
-      const { values } = this;
-      const keys = getKeys(this);
+      const { keys, values } = this;
 
       return keys.every((key, index) => {
         const value = values[index];
@@ -43,14 +68,15 @@ const ListPrototype = Object.create({}, {
   },
   fill: {
     value: function(value, start, end) {
-      const keys = getKeys(this);
-      const keyedValues = getKeyedValues(this);
+      const { keys } = this;
+      const instanceValues = getValues(this);
+
       start = start ?? 0;
       end = end ?? keys.length;
 
       keys.forEach((key, index) => {
         if (index >= start && index < end) {
-          keyedValues[key] = value;
+          instanceValues[key] = value;
         }
       });
 
@@ -59,33 +85,31 @@ const ListPrototype = Object.create({}, {
   },
   filter: {
     value: function(callback) {
-      const keyedValues = getKeyedValues(this);
-      const keys = getKeys(this);
+      const { keys, values } = this;
+
       const filteredKeys = keys.filter((key, index) => {
-        const value = keyedValues[key];
-        return callback(value, index, key, this.values);
+        const value = values[index];
+        return callback(value, index, key, values);
       });
 
-      return new List(...filteredKeys.map(key => keyedValues[key]));
+      return new List(filteredKeys.map((key, index) => this.key(key)), filteredKeys);
     },
   },
   find: {
     value: function(callback) {
-      const { values } = this;
-      const keys = getKeys(this);
+      const { keys, values } = this;
 
       const key = keys.find((currentKey, index) => {
         const value = values[index];
         return callback(value, index, currentKey, values);
       });
 
-      return getKeyedValues(this)[key];
+      return getValues(this)[key];
     },
   },
   findIndex: {
     value: function(callback) {
-      const { values } = this;
-      const keys = getKeys(this);
+      const { keys, values } = this;
 
       return keys.findIndex((currentKey, idx) => {
         const value = values[idx];
@@ -95,8 +119,7 @@ const ListPrototype = Object.create({}, {
   },
   forEach: {
     value: function(callback) {
-      const { values } = this;
-      const keys = getKeys(this);
+      const { keys, values } = this;
 
       keys.forEach((key, index) => {
         const value = values[index];
@@ -111,27 +134,15 @@ const ListPrototype = Object.create({}, {
   },
   indexOf: {
     value: function(value) {
-      const keyedValues = getKeyedValues(this);
-      const keys = getKeys(this);
-      const [key] = Object.entries(keyedValues).find(([, currentValue]) => currentValue === value) || [];
+      const { values } = this;
 
-      return keys.indexOf(key);
+      return values.indexOf(value);
     },
   },
   lastIndexOf: {
     value: function(value) {
-      const keyedValues = getKeyedValues(this);
-      const keys = getKeys(this);
-      const index = Object.entries(keyedValues).reduce((highestIndex, [key, currentValue]) => {
-        if (currentValue === value) {
-          const currentIndex = keys.indexOf(key)
-          return currentIndex;
-        }
-
-        return highestIndex;
-      }, -1);
-
-      return index;
+      const { values } = this;
+      return values.lastIndexOf(value);
     },
   },
   length: {
@@ -140,47 +151,50 @@ const ListPrototype = Object.create({}, {
     },
   },
   map: {
-    value: function(callback) {
-      const { values } = this;
-      const keys = getKeys(this);
+    /**
+     * Takes `keys` optional arg so `List` can accept an arg for them
+     */
+    value: function(callback, keys=[]) {
+      const { keys: instanceKeys, values: instanceValues } = this;
 
       return new List(
-        ...keys.map((key, index) => {
-          const value = values[index];
+        instanceKeys.map((instanceKey, index) => {
+          const value = instanceValues[index];
 
-          return callback(value, index, key, values);
-        })
+          return callback(value, index, instanceKey, instanceValues);
+        }),
+        assign(instanceKeys, keys)
       );
     },
   },
   pop: {
     value: function() {
-      const keyedValues = getKeyedValues(this);
-      const keys = getKeys(this);
-      const key = keys.pop();
-      const value = keyedValues[key];
+      const instanceValues = getValues(this);
+      const instanceKeys = getKeys(this);
+      const key = instanceKeys.pop();
+      const value = instanceValues[key];
 
-      delete keyedValues[key];
+      delete instanceValues[key];
 
       return value;
     },
   },
   push: {
-    value: function(value) {
-      const keyedValues = getKeyedValues(this);
-      const keys = getKeys(this);
-      const key = uuid();
+    /* @TODO let it take a key too*/
+    value: function(value, key) {
+      const instanceValues = getValues(this);
+      const instanceKeys = getKeys(this);
+      const actualKey = key ?? uuid();
+      const index = instanceKeys.push(actualKey);
 
-      keys.push(key);
-      keyedValues[key] = value;
+      instanceValues[actualKey] = value;
 
-      return key;
+      return index;
     },
   },
   reduce: {
     value: function(callback, accumulator) {
-      const { values } = this;
-      const keys = getKeys(this);
+      const { keys, values } = this;
 
       return keys.reduce((currentAccumulator, key, index) => {
         const value = values[index];
@@ -191,7 +205,7 @@ const ListPrototype = Object.create({}, {
   reduceRight: {
     value: function(callback, accumulator) {
       const values = this.values.reverse();
-      const keys = [...getKeys(this)].reverse();
+      const keys = this.keys.reverse();
 
       return keys.reduce((currentAccumulator, key, index) => {
         const value = values[index];
@@ -206,60 +220,62 @@ const ListPrototype = Object.create({}, {
   },
   shift: {
     value: function() {
-      const keyedValues = getKeyedValues(this);
-      const keys = getKeys(this);
-      const key = keys.shift();
-      const value = keyedValues[key];
+      const instanceValues = getValues(this);
+      const instanceKeys = getKeys(this);
+      const key = instanceKeys.shift();
+      const value = instanceValues[key];
 
-      delete keyedValues[key];
+      delete instanceValues[key];
 
       return value;
     },
   },
   slice: {
     value: function(start, end) {
-      const { values } = this;
-      return new List(...values.slice(start, end));
+      const { keys, values } = this;
+      /* @TODO persist keys */
+      return new List(values.slice(start, end), keys.slice(start, end));
     },
   },
   some: {
     value: function(callback) {
-      const { values } = this;
-      const keys = getKeys(this);
+      const { keys, values } = this;
 
       return keys.some((key, index) => {
         const value = values[index];
-
         return callback(value, index, key, [...values]);
       });
     },
   },
   sort: {
+    /* @TODO sort needs to persist, so keys need to be sorted too */
     value: function(comparator) {
       const { values } = this;
-      const keys = getKeys(this);
+      const instanceKeys = getKeys(this);
 
       return values.sort(comparator);
     },
   },
   splice: {
+    /* @TODO handle optional keys */
     value: function(start, deleteCount, ...values) {
-      const keys = getKeys(this);
-      const keyedValues = getKeyedValues(this);
+      const instanceKeys = getKeys(this);
+      const instanceValues = getValues(this);
 
       const newKeys = values.map((value, index) => {
-        const key = uniqueKey(keys);
-        keyedValues[key] = value;
+        const key = uniqueKey(instanceKeys);
+        instanceValues[key] = value;
 
         return key;
       });
 
-      return keys
+      /* @TODO return a new List with spliced keys too */
+      return instanceKeys
         .splice(start, deleteCount, ...newKeys)
         .map(key => {
-          const value = keyedValues[key];
+          const value = instanceValues[key];
 
-          delete keyedValues[key];
+          delete instanceValues[key];
 
           return value;
         });
@@ -267,12 +283,12 @@ const ListPrototype = Object.create({}, {
   },
   unshift: {
     value: function(value) {
-      const keyedValues = getKeyedValues(this);
-      const keys = getKeys(this);
+      const instanceValues = getValues(this);
+      const instanceKeys = getKeys(this);
       const key = uniqueKey(this);
 
-      keys.unshift(key);
-      keyedValues[key] = value;
+      instanceKeys.unshift(key);
+      instanceValues[key] = value;
 
       return this.length;
     },
@@ -305,9 +321,9 @@ const ListPrototype = Object.create({}, {
    */
   deleteByValue: {
     value: function(value) {
-      const keys = getKeys(this);
-      const keyedValues = getKeyedValues(this);
-      const [key] = Object.entries(keyedValues).find(([,currentValue]) => currentValue === value);
+      const instanceKeys = getKeys(this);
+      const instanceValues = getValues(this);
+      const [key] = Object.entries(instanceValues).find(([,currentValue]) => currentValue === value);
 
       return this.deleteByKey(key);
     },
@@ -317,10 +333,11 @@ const ListPrototype = Object.create({}, {
      * iterator of sequential [index, key, value] arrays.
      */
     value: function*() {
-      const keys = getKeys(this);
-      const keyedValues = getKeyedValues(this);
+      const { keys, values } = this;
+      // const instanceKeys = getKeys(this);
+      // const instanceValues = getValues(this);
       const data = keys.map((key, index) => {
-        const value = keyedValues[key];
+        const value = values[index];
         return [index, key, value];
       });
       let index = 0;
@@ -351,15 +368,15 @@ const ListPrototype = Object.create({}, {
     writable: false,
     configurable: true,
     value: function () {
-      const keys = getKeys(this);
-      const keyedValues = getKeyedValues(this);
+      const instanceKeys = getKeys(this);
+      const instanceValues = getValues(this);
       let idx = 0;
 
       return {
         next: function () {
           return {
-            value: keyedValues[keys[idx++]],
-            done: (idx > keys.length)
+            value: instanceValues[instanceKeys[idx++]],
+            done: (idx > instanceKeys.length)
           };
         }
       };
@@ -370,14 +387,13 @@ const ListPrototype = Object.create({}, {
       return this.values.toString();
     },
   },
-  /* @TODO handle with proxy */
+  /**
+   * Gets a value by its index.
+   */
   index: {
     value: function(index) {
-      const keys = getKeys(this);
-      const keyedValues = getKeyedValues(this);
-      const key = keys[index];
-
-      return keyedValues[key];
+      const { values } = this;
+      return values[index];
     },
   },
   /* @TODO handle with proxy too: list[<key>] */
@@ -385,9 +401,8 @@ const ListPrototype = Object.create({}, {
   // Do not remove in favor of proxy, both should exist
   key: {
     value: function(key) {
-      const keyedValues = getKeyedValues(this);
-
-      return keyedValues[key];
+      const instanceValues = getValues(this);
+      return instanceValues[key];
     }
   },
   insert: {
@@ -399,12 +414,25 @@ const ListPrototype = Object.create({}, {
      * @param {any}     value  The value to be stored in the list
      * @param {number}  index  The index to store the value
      * @return {string} key    The key to access the value as a property instead of array index
+     *
+     * @TODO probably should check for duplicate keys.
      */
-    value: function(value, index) {
-      const keyedValues = getKeyedValues(this);
-      this.splice(index, 0, value);
+    value: function(value, index, key) {
+      const instanceValues = getValues(this);
+      const instanceKeys = getKeys(this);
 
-      return Object.entries(keyedValues).reduce(
+      key = key ?? uniqueKey(instanceKeys)
+
+      // should this be cheking the index/key combination? or maybe index/key/value?
+      // or should any combination overwrite what's there?
+      if (instanceValues.hasOwnProperty(key)) {
+        throw new Error(`key ${key} already exists`)
+      }
+
+      instanceValues[key] = value;
+      instanceKeys.splice(index, 0, key);
+
+      return Object.entries(instanceValues).reduce(
         (result, [currentKey, currentValue], currentIndex) => value === currentValue ? currentKey : result
       );
     },
@@ -414,39 +442,19 @@ const ListPrototype = Object.create({}, {
    * Removes all values and keysfrom List and replaces them with new ones.
    */
   init: {
-    value: function (...values) {
-      const keys = getKeys(this);
-      const keyedValues = getKeyedValues(this);
-      keys.forEach(key => delete keyedValues[key]);
-      keys.length = 0;
+    value: function (values, keys) {
+      const instanceKeys = getKeys(this);
+      const instanceValues = getValues(this);
 
-      // handle a single source array or iterator
-      if (
-        values.length === 1 &&
-        typeof values[0] !== 'string' &&
-        (
-          Array.isArray(values[0]) ||
-          Array.from(values[0] ??
-          ''
-        ).length
-      )) {
-        const newValues = Array.from(values[0]);
-        keys.splice(0, 0, ...newValues.map(() => uuid()));
+      // clear out existing keys and values
+      instanceKeys.forEach(key => delete instanceValues[key]);
+      instanceKeys.length = 0;
 
-        newValues.forEach((value, index) => {
-          const key = keys[index];
-          keyedValues[key] = value;
-        });
-      // handle the rest
-      } else {
-        const newValues = Array.from(values);
-        keys.splice(0, 0, ...newValues.map(() => uuid()));
-
-        newValues.forEach((value, index) => {
-          const key = keys[index];
-          keyedValues[key] = value;
-        });
-      }
+      values.forEach((value, index) => {
+        const key = keys?.[index] ?? uuid();
+        instanceKeys.push(key);
+        instanceValues[key] = value;
+      });
 
       return this.values;
     },
@@ -455,16 +463,11 @@ const ListPrototype = Object.create({}, {
 
 export const arrayAccessHandler = {
   get: function(target, prop) {
-//     if (Number.isInteger(+prop?.toString()) && prop >= 0 && prop <= Number.MAX_SAFE_INTEGER) {
-//         return Reflect.get(target, 'values', target)[prop];
-//     }
-//
-//     return Reflect.get(target, prop, target);
      switch (true) {
-       // without bind, functions were being called with the proxy as `this`
+       // without bind, functions will be called with the proxy as `this`
        case typeof target[prop] === 'function':
          return target[prop].bind(target);
-       // String or Number ('10' or 10) that's 0 or greater
+       // String or Number ('10' or 10) that's 0 or greater. handle like this was an array
        case Number.isInteger(+prop?.toString()) && prop >= 0 && prop <= Number.MAX_SAFE_INTEGER:
          return target.values[prop];
        default:
@@ -473,15 +476,15 @@ export const arrayAccessHandler = {
   },
   set: (target, prop, value) => {
     if (Number.isInteger(+prop?.toString()) && prop >= 0 && prop <= Number.MAX_SAFE_INTEGER) {
-      const keys = getKeys(target);
-      const keyedValues = getKeyedValues(target);
+      const instanceKeys = getKeys(target);
+      const instanceValues = getValues(target);
 
-      if (keys.hasOwnProperty(prop)) {
-        keyedValues[keys[prop]] = value;
+      if (instanceKeys.hasOwnProperty(prop)) {
+        instanceValues[instanceKeys[prop]] = value;
       } else {
-        const key = uniqueKey(keys);
-        keys[prop] = key;
-        keyedValues[key] = value;
+        const key = uniqueKey(instanceKeys);
+        instanceKeys[prop] = key;
+        instanceValues[key] = value;
       }
 
       return true;
@@ -494,9 +497,9 @@ export const arrayAccessHandler = {
 /**
  * Factory
  */
-export const createList = (...values) => {
+export const createList = (values, keys) => {
   const instance = Object.create(ListPrototype);
-  instance.init(values);
+  instance.init(values, keys);
 
   return instance;
 };
@@ -504,9 +507,9 @@ export const createList = (...values) => {
 /**
  * Factory for Proxy's that allow array access
  */
-export const createArrayAccessList = (...values) => {
+export const createArrayAccessList = (values, keys) => {
   const instance = Object.create(ListPrototype);
-  instance.init(values);
+  instance.init(values, keys);
 
   return new Proxy(instance, arrayAccessHandler);
 };
@@ -514,13 +517,15 @@ export const createArrayAccessList = (...values) => {
 /**
  * Constructor
  */
-const List = function(...values) {
+const List = function(values, keys) {
   if (!new.target) {
-    return new List(...values);
+    return new List(values, keys);
   }
-  this.init(values);
+  this.init(values, keys);
 };
 
 List.prototype = ListPrototype;
-
+window.List = List;
+window.createList = createList;
+window.createArrayAccessList = createArrayAccessList;
 export default List;
