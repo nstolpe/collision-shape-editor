@@ -16,6 +16,10 @@ import {
   SET_BACKGROUND_COLOR,
   SET_ALT_PRESSED,
   SET_CTRL_PRESSED,
+  SET_SHIFT_PRESSED,
+  SET_SELECT_OVERLAY_ENABLED,
+  SET_SELECT_OVERLAY_POSITION,
+  SET_SELECT_OVERLAY_DIMENSIONS,
   ADD_TEXTURE_SOURCE,
   REMOVE_TEXTURE_SOURCE,
   ADD_SPRITE,
@@ -25,6 +29,27 @@ export const setRootContainer = container => ({
   type: SET_ROOT_CONTAINER,
   data: { container },
 });
+
+export const setOverlayEnabled = enabled => {
+  return {
+    type: SET_SELECT_OVERLAY_ENABLED,
+    data: enabled,
+  }
+};
+
+export const setOverlayPosition = ({ x, y }) => {
+  return {
+    type: SET_SELECT_OVERLAY_POSITION,
+    data: { x, y },
+  }
+};
+
+export const setOverlayDimensions = ({ x, y }) => {
+  return {
+    type: SET_SELECT_OVERLAY_DIMENSIONS,
+    data: { x, y },
+  }
+};
 
 export const addVertex = ({ x, y }) => ({
   type: ADD_VERTEX,
@@ -96,6 +121,11 @@ export const setAltPressed = pressed => ({
 
 export const setCtrlPressed = pressed => ({
   type: SET_CTRL_PRESSED,
+  data: { pressed },
+});
+
+export const setShiftPressed = pressed => ({
+  type: SET_SHIFT_PRESSED,
   data: { pressed },
 });
 

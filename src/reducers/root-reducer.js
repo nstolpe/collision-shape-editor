@@ -17,6 +17,10 @@ import {
   SET_BACKGROUND_COLOR,
   SET_ALT_PRESSED,
   SET_CTRL_PRESSED,
+  SET_SHIFT_PRESSED,
+  SET_SELECT_OVERLAY_ENABLED,
+  SET_SELECT_OVERLAY_POSITION,
+  SET_SELECT_OVERLAY_DIMENSIONS,
   ADD_TEXTURE_SOURCE,
   REMOVE_TEXTURE_SOURCE,
   ADD_SPRITE,
@@ -24,6 +28,7 @@ import {
 import * as Interactions from 'constants/interactions';
 import * as Modes from 'constants/modes';
 import * as Tools from 'constants/tools';
+import List from 'tools/List';
 
 const vertices = [
   {
@@ -82,12 +87,21 @@ export const initialState = {
   },
   textureSources: [],
   sprites: [],
-  vertices: vertices,
+  vertices: List(vertices),
+  // vertices: vertices,
   movingVerticeIds: [],
   scale: { x: 1, y: 1 },
-  ctrlPressed: false,
   altPressed: false,
+  ctrlPressed: false,
+  shiftPressed: false,
   rootContainer: null,
+  selectOverlay: {
+    enabled: false,
+    height: 0,
+    width: 0,
+    x: 0,
+    y: 0,
+  },
 };
 
 const reducer = (state, action) => {
@@ -99,10 +113,33 @@ const reducer = (state, action) => {
         ...state,
         rootContainer: data.container,
       };
-    case ADD_VERTEX:
+    case SET_SELECT_OVERLAY_ENABLED:
       return {
         ...state,
-        vertices: [...state.vertices, { x: data.x, y: data.y, id: uuid() }],
+        selectOverlay: { ...state.selectOverlay, enabled: data }
+      };
+      break;
+    case SET_SELECT_OVERLAY_POSITION:
+      return {
+        ...state,
+        selectOverlay: { ...state.selectOverlay, ...data }
+      };
+      break;
+    case SET_SELECT_OVERLAY_DIMENSIONS:
+      return {
+        ...state,
+        selectOverlay: {
+          ...state.selectOverlay,
+          height: data.y - state.selectOverlay.y,
+          width: data.x - state.selectOverlay.x,
+        }
+      };
+      break;
+    case ADD_VERTEX:
+      console.log(ADD_VERTEX)
+      return {
+        ...state,
+        vertices: List([...state.vertices, { x: data.x, y: data.y, id: uuid() }]),
       };
     case DELETE_VERTEX:
       return {
@@ -125,11 +162,16 @@ const reducer = (state, action) => {
         movingVerticeIds: state.movingVerticeIds.filter(vid => vid !== data.id),
       };
     case MOVE_VERTICES:
+      let p = state.vertices.map(
+        (vertexX, index, id) => data.vertices.find(vertexY => vertexY.id === id) || vertexX,
+        state.vertices.keys
+      );
       return {
         ...state,
         vertices: state.vertices.map(
-          stateVertex =>
-            data.vertices.find(({ id }) => id === stateVertex.id) || stateVertex
+          (vertexX, index, key) =>
+            data.vertices.find(({ id }) => id === key) || vertexX,
+          state.vertices.keys
         ),
       };
     case SET_INTERACTION:
@@ -171,6 +213,11 @@ const reducer = (state, action) => {
       return {
         ...state,
         ctrlPressed: data.pressed,
+      };
+    case SET_SHIFT_PRESSED:
+      return {
+        ...state,
+        shiftPressed: data.pressed,
       };
     case ADD_TEXTURE_SOURCE:
       return {
