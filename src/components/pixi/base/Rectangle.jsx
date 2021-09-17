@@ -28,9 +28,16 @@ export const draw = (instance, oldProps, newProps) => {
   } = oldProps || {};
 
   instance.lineStyle(strokeWidth, strokeColor, strokeAlpha, strokeAlignment);
-  instance.beginFill(fill);
+
+  if (fill != null) {
+    instance.beginFill(fill);
+  }
+
   instance.drawRect(0, 0, width, height);
-  instance.endFill();
+
+  if (fill != null) {
+    instance.endFill();
+  }
 
   return [oldPropsRest, newPropsRest];
 };
