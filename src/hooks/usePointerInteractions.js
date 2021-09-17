@@ -1,7 +1,12 @@
 // hooks/usePointerInteractions.js
 import { useState } from 'react';
 
-import { moveVertices } from 'actions/actions';
+import {
+  setOverlayEnabled,
+  setOverlayDimensions,
+  setOverlayPosition,
+  moveVertices
+} from 'actions/actions';
 import * as Tools from 'constants/tools';
 import { translation } from 'tools/math';
 import {
@@ -11,10 +16,35 @@ import {
 } from 'tools/prefix';
 import { EDGE, VERTEX } from 'constants/prefixes';
 
-const usePointerInteraction = (dispatch, tool, vertices) => {
+const findViewportParent = child => {
+  let viewport = null;
+
+  while (!viewport && child != null) {
+    if (child && child.name == 'VIEWPORT') {
+      viewport = child;
+      child = null;
+    }
+
+    if (child && child.parent) {
+      if (child.parent.name === 'VIEWPORT') {
+        viewport = child.parent;
+        child = null;
+      } else {
+        child = child.parent;
+      }
+    } else {
+      child = null;
+    }
+  }
+
+  return viewport;
+};
+const usePointerInteraction = (dispatch, tool, vertices, scale) => {
   // pointers currently interacting with the component.
   // pointer = { coordinates: { x: number, y: number }, identifier: number, target: PIXI.DisplayObject, }
   const [activePointers, setActivePointers] = useState([]);
+  // `true` indicates that a `pointerdown` even just removed whatever it's target was. clear on pointerup
+  const [justRemoved, setJustRemoved] = useState(false);
   // queued selected vertices = { name: string, distance: { x: number, y: number} }
   // const [queuedVertices, setQueuedVertices] = useState([]);
   // vertices that have been selected by a pointer. same structure as queued selected vertices
@@ -24,6 +54,8 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
 
   /**************************************************************************************
    * utility functions                                                                  *
+   * at least some of these can be moved out of the hook, and accept `vertices` or      *
+   * `currentSelectedVertices` ass additional arguments.                                *
    **************************************************************************************/
 
   /**
@@ -74,6 +106,13 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
 
   const isVertexSelected = ({ name }) => !!selectedVertices.find(vertex => vertex.name === name);
 
+  /**
+   *  Returns `true` if all vertices in `checkVertices` are selected (`vertex.name`
+   *  is present in `selectedVertices`). Otherwise returns `false`.
+   *
+   * @param {Object[]} checkVertices  An array of vertices
+   * @returns {bool}
+   */
   const areAllVerticesSelected = checkVertices => {
     for (let vertex of checkVertices) {
       const { name } = vertex;
@@ -85,34 +124,21 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
     return true;
   };
 
-  const areVerticesSelected = checkVertices => {
-    const selected = [];
+  /**
+   * Returns subset of `checkVertices` that also exist in `selectedVertices`.
+   *
+   * @param {Object[]} checkVertices  An array of vertex objects
+   * @returns {Object[]}  An array of vertex objects
+   */
+  const areVerticesSelected = checkVertices => checkVertices.reduce((areSelected, vertex) => {
+    const { name } = vertex;
 
-    for (let i = 0, l = checkVertices.length; i < l; i++) {
-      const vertex = checkVertices[i];
-      const { name } = vertex;
-
-      if (selectedVertices.hasOwnProperty(name)) {
-        selected.push(vertex);
-      }
+    if (selectedVertices.hasOwnProperty(name)) {
+      areSelected.push(vertex);
     }
 
-    return selected;
-  };
-
-  /* @TODO remove this once certain it's not needed */
-  // const toggleSelectVertex = (identifier, name, distance) => {
-  //   const vertexIndex = selectedVertices.findIndex(vertex => name === vertex.name);
-  //   if (vertexIndex >= 0) {
-  //     // the vertex was found, so it's selected. deselect it.
-  //     setSelectedVertices(currentSelectedVertices =>
-  //       [...currentSelectedVertices.slice(0, vertexIndex), ...currentSelectedVertices.slice(vertexIndex + 1)]
-  //     );
-  //   } else {
-  //     // the vertex wasn't found, so it's not selected. select it.
-  //     setSelectedVertices(currentSelectedVertices => ([...currentSelectedVertices, { name, distance }]));
-  //   }
-  // };
+    return areSelected;
+  }, []);
 
   /**
    * Updates positions of all selected vertices relative to the passed coordinates.
@@ -123,7 +149,8 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
   const updateTranslations = coordinates => {
     setSelectedVertices(currentSelectedVertices => {
       Object.keys(currentSelectedVertices).forEach(name => {
-        const { x, y } = vertices.find(vertex => vertex.id === removePrefix(name, VERTEX));
+        const { x, y } = vertices.key(removePrefix(name, VERTEX));
+        // const { x, y } = vertices.find(vertex => vertex.id === removePrefix(name, VERTEX));
         const distance = translation({ x, y }, coordinates);
         currentSelectedVertices[name] = distance;
       });
@@ -140,17 +167,23 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
    */
   const handlePointerDown = event => {
     const {
-      currentTarget: parent,
       data: { identifier },
       target,
     } = event;
-    const coordinates = event.data.getLocalPosition(parent);
+    const viewport = findViewportParent(event.target);
+
+    if (!viewport) {
+      return;
+    }
+
+    const coordinates = event.data.getLocalPosition(viewport);
     // the pointer that just touched down is now active.
     setActivePointers(currentActivePointers => [...currentActivePointers, { coordinates, identifier, target }]);
 
     switch (true) {
-      case target.name === 'VERTICES':
-        // it's this component
+      case target.name === 'VIEWPORT':
+        // main container viewport
+        handlePointerDownViewport(event, coordinates);
         break;
       case hasPrefix(target.name, VERTEX):
         // it's a vertex
@@ -176,10 +209,7 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
 
     const {
       data: { identifier } = {},
-      target: { parent } = {},
     } = event;
-    // const identifier = event?.data?.identifier;
-    // const parent = event?.target?.parent;
     const pointerIndex = activePointers.findIndex(pointer => pointer.identifier === identifier);
     const pointer = activePointers[pointerIndex];
 
@@ -187,7 +217,13 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
       return;
     }
 
-    const pointerCoordinates = event.data.getLocalPosition(parent);
+    const viewport = findViewportParent(event.target);
+
+    if (!viewport) {
+      return;
+    }
+
+    const pointerCoordinates = event.data.getLocalPosition(viewport);
 
     // update pointerCoordinates of the active pointer.
     setActivePointers(currentActivePointers => [
@@ -200,19 +236,22 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
     ]);
 
     switch (true) {
-     case pointer?.target?.name === 'VERTICES':
-      // the active pointer's target is the vertices container.
-      break;
-     case hasPrefix(pointer?.target?.name, VERTEX):
-      // the active pointer's cached target from pointerdown is a vertex.
-      handlePointerMoveVertex(event, pointer, pointerCoordinates);
-      break;
-     case hasPrefix(pointer?.target?.name, EDGE):
-      // the active pointer's cached target from pointerdown is an edge.
-      handlePointerMoveEdge(event, pointer, pointerCoordinates);
-      break;
-     default:
-      break;
+      case pointer?.target?.name === 'VIEWPORT':
+        // main container viewport
+        // using global (viewport?) coordinates. size is right, position is wrong.
+        // handlePointerMoveViewport(event, pointer, { x: event.data.global.x, y: event.data.global.y });
+        handlePointerMoveViewport(event, pointer, pointerCoordinates);
+        break;
+      case hasPrefix(pointer?.target?.name, VERTEX):
+        // the active pointer's cached target from pointerdown is a vertex.
+        handlePointerMoveVertex(event, pointer, pointerCoordinates);
+        break;
+      case hasPrefix(pointer?.target?.name, EDGE):
+        // the active pointer's cached target from pointerdown is an edge.
+        handlePointerMoveEdge(event, pointer, pointerCoordinates);
+        break;
+      default:
+        break;
     }
   };
 
@@ -238,7 +277,9 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
     } = pointer;
 
     switch (true) {
-      case name === 'VERTICES':
+      case name === 'VIEWPORT':
+        // main container viewport
+        handlePointerUpViewport(event);
         break;
       case hasPrefix(name, VERTEX):
         handlePointerUpVertex(event);
@@ -254,7 +295,18 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
     setActivePointers(
       currentActivePointers => currentActivePointers.filter(activePointer => activePointer.identifier !== identifier)
     );
+
+    setJustRemoved(false);
   };
+
+  const handlePointerDownViewport = (event, coordinates) => {
+    const { x, y } = coordinates;
+    const height = 0;
+    const width = 0;
+
+    dispatch(setOverlayPosition({ x, y }));
+    dispatch(setOverlayEnabled(true));
+  }
 
   const handlePointerDownVertex = (event, coordinates) => {
     const {
@@ -296,6 +348,7 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
 
             if (isVertexSelected) {
               removeSelectedVertex(event.target.name);
+              setJustRemoved(true);
             } else {
               addSelectedVertex(event.target.name, translation(coordinates, event.target.position))
             }
@@ -335,12 +388,15 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
 
     switch (tool) {
       case Tools.SELECT:
-        // const vertex2 = vertices[(idx + 1) % vertices.length];
         const vertexIds = removePrefix(name, EDGE).split('__');
-        const edgeVertices = vertices.reduce((newVertices, { id, x, y }) => {
-          if (vertexIds.includes(id)) {
+        const targetEdgeVertices = vertexIds.reduce((newVertices, key) => {
+          const value = vertices.key(key);
+
+          if (value) {
+            const { x, y } = value;
+
             newVertices.push({
-              name: addPrefix(id, VERTEX),
+              name: addPrefix(key, VERTEX),
               distance: translation({ x, y }, coordinates),
             });
           }
@@ -350,16 +406,17 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
 
         switch (true) {
           case shiftKey:
-            const selected = areVerticesSelected(edgeVertices);
+            const selected = areVerticesSelected(targetEdgeVertices);
 
-            if (areAllVerticesSelected(edgeVertices)) {
+            if (areAllVerticesSelected(targetEdgeVertices)) {
               console.log('edgeDown all selected')
+              setJustRemoved(true);
               removeSelectedVertices(vertexIds.map(name => addPrefix(name, VERTEX)));
             } else {
               console.log('edgeDown not all selected')
-              addSelectedVertices(edgeVertices);
+              addSelectedVertices(targetEdgeVertices);
             }
-            // const addVertices = edgeVertices.reduce((acc, vertex) => {
+            // const addVertices = targetEdgeVertices.reduce((acc, vertex) => {
             //   if (selected[vertex.name]) {
             //     acc.push(vertex);
             //   }
@@ -374,7 +431,7 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
               !selectedVertices.hasOwnProperty(addPrefix(vertexIds[0], VERTEX)) ||
               !selectedVertices.hasOwnProperty(addPrefix(vertexIds[1], VERTEX))
             ) {
-              setSelectedVertices(edgeVertices.reduce((vertices, { distance, name }) => {
+              setSelectedVertices(targetEdgeVertices.reduce((vertices, { distance, name }) => {
                 vertices[name] = distance;
                 return vertices;
               }, {}));
@@ -384,6 +441,12 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
       default:
         // nothing
     }
+  };
+
+  const handlePointerMoveViewport = (event, activePointer, pointerCoordinates) => {
+    const { x, y } = pointerCoordinates;
+
+    dispatch(setOverlayDimensions({ x, y }));
   };
 
   const handlePointerMoveVertex = (event, activePointer, pointerCoordinates) => {
@@ -399,7 +462,7 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
       // case shiftKey:
       //   break;
       default:
-        if (Object.keys(selectedVertices).length) {
+        if (Object.keys(selectedVertices).length && !justRemoved) {
           const updatedVertices = [];
 
           for (const name in selectedVertices) {
@@ -409,6 +472,8 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
               id: removePrefix(name, VERTEX),
               x: pointerCoordinates.x + distance.x,
               y: pointerCoordinates.y + distance.y,
+              // x: pointerCoordinates.x + distance.x,
+              // y: pointerCoordinates.y + distance.y,
             });
           }
 
@@ -416,7 +481,7 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
         }
     }
 
-    event.stopPropagation();
+    // event.stopPropagation();
   };
 
   const handlePointerMoveEdge = (event, pointer, coordinates) => {
@@ -428,7 +493,7 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
       } = {},
     } = event;
 
-    if (Object.keys(selectedVertices).length) {
+    if (Object.keys(selectedVertices).length && !justRemoved) {
       const updatedVertices = [];
 
       for (const name in selectedVertices) {
@@ -444,7 +509,13 @@ const usePointerInteraction = (dispatch, tool, vertices) => {
       dispatch(moveVertices(updatedVertices));
     }
 
-    event.stopPropagation();
+    // event.stopPropagation();
+  };
+
+  const handlePointerUpViewport = () => {
+    dispatch(setOverlayEnabled(false));
+    dispatch(setOverlayPosition({ x: 0, y: 0 }));
+    dispatch(setOverlayDimensions({ x: 0, y: 0 }));
   };
 
   const handlePointerUpVertex = event => {
