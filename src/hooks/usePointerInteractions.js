@@ -2,20 +2,84 @@
 import { useState } from 'react';
 
 import {
-  setOverlayEnabled,
-  setOverlayDimensions,
-  setOverlayPosition,
+  setSelectOverlayEnabled,
+  setSelectOverlayDimensions,
+  setSelectOverlayPosition,
+  setSelectOverlay,
   moveVertices
 } from 'actions/actions';
 import * as Tools from 'constants/tools';
-import { translation } from 'tools/math';
+import ScreenContext from 'contexts/ScreenContext';
+import { translation, withinAABB } from 'tools/math';
 import {
   addPrefix,
   hasPrefix,
   removePrefix,
 } from 'tools/prefix';
 import { EDGE, VERTEX } from 'constants/prefixes';
+import useSelector from 'hooks/useSelector';
+import selectOverlayComparator from 'comparators/select-overlay';
 
+const selector = ({
+  dispatch,
+  mode,
+  selectOverlay,
+  tool,
+  vertices,
+  uiOptions: {
+    vertexRadius,
+  },
+  ...restProps
+}) => ({
+  dispatch,
+  mode,
+  selectOverlay,
+  tool,
+  vertices,
+  vertexRadius,
+});
+
+const comparator = ({
+  selectOverlay,
+  vertices,
+  ...restProps
+}, {
+  selectOverlay: oldSelectOverlay,
+  vertices: oldVertices,
+  ...restOldProps
+}) => {
+
+  if (!selectOverlayComparator(selectOverlay, oldSelectOverlay)) {
+    return false;
+  }
+
+  for (let i = 0, l = vertices?.length; i < l; i++) {
+    const vertex = vertices.index(i);
+    const oldVertex = oldVertices.index(i);
+
+    if (
+      vertex.name !== oldVertex.name ||
+      vertex.x !== oldVertex.x ||
+      vertex.y !== oldVertex.y
+    ) {
+      return false;
+    }
+  }
+
+  for (let key of Object.keys(restProps)) {
+    if (restProps[key] !== restOldProps[key]) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Finds and returns the parent of a Pixi component
+ * that has the `name` equal to the `VIEWPORT` constant.
+ * Or returns `null`.
+ */
 const findViewportParent = child => {
   let viewport = null;
 
@@ -39,7 +103,8 @@ const findViewportParent = child => {
 
   return viewport;
 };
-const usePointerInteraction = (dispatch, tool, vertices, scale) => {
+
+const usePointerInteraction = () => {
   // pointers currently interacting with the component.
   // pointer = { coordinates: { x: number, y: number }, identifier: number, target: PIXI.DisplayObject, }
   const [activePointers, setActivePointers] = useState([]);
@@ -50,8 +115,14 @@ const usePointerInteraction = (dispatch, tool, vertices, scale) => {
   // vertices that have been selected by a pointer. same structure as queued selected vertices
   const [selectedVertices, setSelectedVertices] = useState({});
   const [selectedEdges, setSelectedEdges] = useState({});
-
-
+  const {
+   dispatch,
+   mode,
+   selectOverlay,
+   tool,
+   vertices,
+   vertexRadius,
+  } = useSelector(ScreenContext, selector, comparator);
   /**************************************************************************************
    * utility functions                                                                  *
    * at least some of these can be moved out of the hook, and accept `vertices` or      *
@@ -83,7 +154,6 @@ const usePointerInteraction = (dispatch, tool, vertices, scale) => {
   const addSelectedVertices = newVertices => setSelectedVertices(
     currentSelectedVertices => {
       newVertices.forEach(({ distance, name }) => currentSelectedVertices[name] = distance);
-      console.log('currentSelectedVertices',currentSelectedVertices)
       return currentSelectedVertices;
     }
   );
@@ -177,6 +247,7 @@ const usePointerInteraction = (dispatch, tool, vertices, scale) => {
     }
 
     const coordinates = event.data.getLocalPosition(viewport);
+
     // the pointer that just touched down is now active.
     setActivePointers(currentActivePointers => [...currentActivePointers, { coordinates, identifier, target }]);
 
@@ -186,10 +257,11 @@ const usePointerInteraction = (dispatch, tool, vertices, scale) => {
         handlePointerDownViewport(event, coordinates);
         break;
       case hasPrefix(target.name, VERTEX):
-        // it's a vertex
+        // vertex
         handlePointerDownVertex(event, coordinates);
         break;
       case hasPrefix(target.name, EDGE):
+        // edge
         handlePointerDownEdge(event, coordinates);
         break;
       default:
@@ -300,12 +372,21 @@ const usePointerInteraction = (dispatch, tool, vertices, scale) => {
   };
 
   const handlePointerDownViewport = (event, coordinates) => {
+    const {
+      data: {
+        originalEvent: {
+          ctrlKey = false,
+        } = {},
+      } = {},
+    } = event;
     const { x, y } = coordinates;
     const height = 0;
     const width = 0;
 
-    dispatch(setOverlayPosition({ x, y }));
-    dispatch(setOverlayEnabled(true));
+    if (tool === Tools.SELECT && !ctrlKey) {
+      dispatch(setSelectOverlayPosition({ x, y }));
+      dispatch(setSelectOverlayEnabled(true));
+    }
   }
 
   const handlePointerDownVertex = (event, coordinates) => {
@@ -365,7 +446,7 @@ const usePointerInteraction = (dispatch, tool, vertices, scale) => {
             const isVertexSelected = selectedVertices.hasOwnProperty(event.target.name);
 
             if (!isVertexSelected) {
-              setSelectedVertices({ [event.target.name]: translation(coordinates, event.target.position)});
+              setSelectedVertices({ [event.target.name]: translation(coordinates, event.target.position)} );
             }
         }
     }
@@ -445,8 +526,16 @@ const usePointerInteraction = (dispatch, tool, vertices, scale) => {
 
   const handlePointerMoveViewport = (event, activePointer, pointerCoordinates) => {
     const { x, y } = pointerCoordinates;
-
-    dispatch(setOverlayDimensions({ x, y }));
+    switch (tool) {
+      case Tools.SELECT:
+        dispatch(setSelectOverlayDimensions({
+          width: x - selectOverlay.x,
+          height: y - selectOverlay.y,
+        }));
+        break;
+      default:
+        break
+    }
   };
 
   const handlePointerMoveVertex = (event, activePointer, pointerCoordinates) => {
@@ -513,9 +602,42 @@ const usePointerInteraction = (dispatch, tool, vertices, scale) => {
   };
 
   const handlePointerUpViewport = () => {
-    dispatch(setOverlayEnabled(false));
-    dispatch(setOverlayPosition({ x: 0, y: 0 }));
-    dispatch(setOverlayDimensions({ x: 0, y: 0 }));
+    if (selectOverlay.enabled) {
+      const targetVertices = vertices.filter(({ x, y }) =>
+        withinAABB(
+          { x, y },
+          { x: selectOverlay.x, y: selectOverlay.y },
+          {
+            x: selectOverlay.x + selectOverlay.width,
+            y: selectOverlay.y + selectOverlay.height,
+          },
+          vertexRadius
+        )
+      );
+
+      setSelectedVertices(
+        targetVertices.reduce(
+          (
+            newSelectedVertices,
+            { x, y },
+            idx,
+            key
+          ) => {
+            newSelectedVertices[addPrefix(key, VERTEX)] = { x: 0, y: 0 };
+            return newSelectedVertices;
+          },
+          {}
+        )
+      );
+
+      dispatch(setSelectOverlay({
+        enabled: false,
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+      }));
+    }
   };
 
   const handlePointerUpVertex = event => {
