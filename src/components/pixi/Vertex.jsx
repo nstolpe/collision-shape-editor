@@ -3,6 +3,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import * as PIXI from 'pixi.js';
 
+import restComparator from 'comparators/rest';
+import scaleComparator from 'comparators/scale';
 import Circle from 'components/pixi/base/Circle';
 import {
   CELL,
@@ -25,7 +27,7 @@ export const getCursor = tool => {
   }
 };
 
-const Vertex = ({
+const Vertex = React.forwardRef(({
   activeFill,
   alpha,
   fill,
@@ -40,7 +42,7 @@ const Vertex = ({
   tool,
   x,
   y,
-}) => (
+}, ref) => (
   <Circle
     alpha={alpha}
     buttonMode
@@ -52,6 +54,7 @@ const Vertex = ({
     name={id}
     pivot={[0, 0]}
     radius={radius}
+    ref={ref}
     scale={scale}
     x={x}
     y={y}
@@ -59,7 +62,7 @@ const Vertex = ({
     strokeColor={strokeColor}
     strokeWidth={strokeWidth}
   />
-);
+));
 
 Vertex.defaultProps = {
   activeFill: 0x17bafb,
@@ -67,10 +70,11 @@ Vertex.defaultProps = {
   fill: 0xe62bdc,
   hitArea: new PIXI.Circle(0, 0, 5.5),
   id: 'ID',
-  radius: 4.5,
+  radius: 6.5,
   scale: [1,1],
   selected: false,
-  strokeAlignment: 1,
+  // @TODO disable/remove this prop, so the radius is never changed by stroke.
+  strokeAlignment: 0,
   strokeColor: 0xffffff,
   strokeWidth: 2,
   tool: Tools.SELECT,
@@ -88,6 +92,7 @@ Vertex.propTypes = {
     PropTypes.string,
   ]),
   radius: PropTypes.number,
+  // @TODO get rid of this flexibility. `scale` can be an object: { x, y }
   scale: PropTypes.oneOfType([
     PropTypes.number,
     (props, propName, componentName) => {
@@ -118,21 +123,18 @@ Vertex.propTypes = {
 };
 
 const comparator = ({ scale, ...restProps}, { scale: oldScale, ...restOldProps }) => {
-  if (
-    (scale?.x ?? scale?.[0] ?? scale) !== (oldScale?.x ?? oldScale?.[0] ?? oldScale) ||
-    (scale?.y ?? scale?.[1] ?? scale) !== (oldScale?.y ?? oldScale?.[1] ?? oldScale)
-  ) {
+  // @TODO maybe scale can be required to conform to { x. y }, and drop array ans scalar.
+  const scaleX = scale?.x ?? scale?.[0] ?? scale;
+  const scaleY = scale?.y ?? scale?.[1] ?? scale;
+  const oldScaleX = oldScale?.x ?? oldScale?.[0] ?? oldScale;
+  const oldScaleY = oldScale?.y ?? oldScale?.[1] ?? oldScale;
+
+  if (!scaleComparator({ scale: { x: scaleX, y: scaleY } }, { scale: { x: oldScaleX, y: oldScaleY } })) {
     return false;
   }
 
-  const keys = Object.keys(restProps);
-
-  for (let i = 0, l = keys.length; i < l; i++) {
-    const key = keys[i];
-
-    if (restProps[key] !== restOldProps[key]) {
-      return false;
-    }
+  if (!restComparator(restProps, restOldProps)) {
+    return false;
   }
 
   return true;

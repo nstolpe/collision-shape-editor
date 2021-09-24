@@ -1,3 +1,4 @@
+// src/js/hooks/useCustomCompareMemo.js
 import { useRef } from 'react';
 
 /**

@@ -1,11 +1,11 @@
 // src/components/pixi/Edge.jsx
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as PIXI from 'pixi.js';
 
 import Rectangle from 'components/pixi/base/Rectangle';
 
-const Edge = ({
+const Edge = React.forwardRef(({
   activeFill,
   fill,
   id,
@@ -16,7 +16,7 @@ const Edge = ({
   thickness,
   x,
   y,
-}) => {
+}, ref) => {
   const [pivot, setPivot] = useState([0, thickness * 0.5]);
   const [hitArea, setHitArea] = useState(new PIXI.Rectangle(0, -2, length, thickness + 4));
 
@@ -34,6 +34,7 @@ const Edge = ({
       interactive
       name={id}
       pivot={pivot}
+      ref={ref}
       rotation={rotation}
       scale={scale}
       width={length}
@@ -41,7 +42,7 @@ const Edge = ({
       y={y}
     />
   );
-};
+});
 
 Edge.propTypes = {
   activeFill: PropTypes.number,
