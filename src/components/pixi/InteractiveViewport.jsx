@@ -1,12 +1,6 @@
 // src/js/components/pixi/InteractiveViewport.js
 import * as PIXI from 'pixi.js';
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePixiApp } from 'react-pixi-fiber';
 
 import {
@@ -17,24 +11,18 @@ import {
   setCtrlPressed,
   setShiftPressed,
 } from 'actions/actions';
+import scaleComparator from 'comparators/scale';
 import withSelector from 'components/hoc/withSelector';
 import Geometry from 'components/pixi/Geometry';
 import Rectangle from 'components/pixi/base/Rectangle';
 import Sprites from 'components/pixi/Sprites';
 import Viewport from 'components/pixi/base/Viewport';
-import { GRAB, GRABBING, POINTER } from 'constants/cursors';
+import { GRAB, POINTER } from 'constants/cursors';
 import * as Modes from 'constants/modes';
 import ScreenContext from 'contexts/ScreenContext';
 import useOverlayRef from 'hooks/useOverlayRef';
 import usePointerInteractions from 'hooks/usePointerInteractions';
-
-/**
- * Compares all arguments for strict equality
- */
-const allEqual = (...elements) => elements.reduce(
-  (areEqual, element, index) => areEqual && element === elements[(index + 1) % elements.length],
-  true
-);
+import useViewportHandlers from 'hooks/useViewportHandlers';
 
 /**
  * Adds global keyboard shortcuts to `document`.
@@ -100,13 +88,6 @@ const selector = ({
   textureSources,
   scale,
   vertices,
-  selectOverlay: {
-    enabled: selectOverlayEnabled,
-    height: selectOverlayHeight,
-    width: selectOverlayWidth,
-    x: selectOverlayX,
-    y: selectOverlayY,
-  },
 }) => ({
   dispatch,
   backgroundColor,
@@ -115,52 +96,27 @@ const selector = ({
   textureSources,
   scale,
   vertices,
-  selectOverlayEnabled,
-  selectOverlayHeight,
-  selectOverlayWidth,
-  selectOverlayX,
-  selectOverlayY,
 });
 
 const comparator = (
   {
     scale,
     vertices,
-    selectOverlay,
-    selectOverlayEnabled,
-    selectOverlayHeight,
-    selectOverlayWidth,
-    selectOverlayX,
-    selectOverlayY,
     ...restProps
   },
   {
     scale: oldScale,
     vertices: oldVertices,
-    selectOverlay: oldSelectOverlay,
-    selectOverlayEnabled: oldSelectOverlayEnabled,
-    selectOverlayHeight: oldSelectOverlayHeight,
-    selectOverlayWidth: oldSelectOverlayWidth,
-    selectOverlayX: oldSelectOverlayX,
-    selectOverlayY: oldSelectOverlayY,
     ...restOldProps
   }
 ) => {
-  if (
-    (scale?.x ?? scale?.[0] ?? scale) !== (oldScale?.x ?? oldScale?.[0] ?? oldScale) ||
-    (scale?.y ?? scale?.[1] ?? scale) !== (oldScale?.y ?? oldScale?.[1] ?? oldScale)
-  ) {
-    return false;
-  }
+  // @TODO maybe scale can be required to conform to { x. y }, and drop array ans scalar.
+  const scaleX = scale?.x ?? scale?.[0] ?? scale;
+  const scaleY = scale?.y ?? scale?.[1] ?? scale;
+  const oldScaleX = oldScale?.x ?? oldScale?.[0] ?? oldScale;
+  const oldScaleY = oldScale?.y ?? oldScale?.[1] ?? oldScale;
 
-  // @TODO move the selector overlay into it's own component, if possible.
-  if (
-    oldSelectOverlayEnabled !== selectOverlayEnabled ||
-    oldSelectOverlayHeight !== selectOverlayHeight ||
-    oldSelectOverlayWidth !== selectOverlayWidth ||
-    oldSelectOverlayX !== selectOverlayX ||
-    oldSelectOverlayY !== selectOverlayY
-  ) {
+  if (!scaleComparator({ scale: { x: scaleX, y: scaleY } }, { scale: { x: oldScaleX, y: oldScaleY } })) {
     return false;
   }
 
@@ -205,30 +161,18 @@ const InteractiveViewport = props => {
     screenHeight,
     screenWidth,
     vertices,
-    // @TODO move overlay to own component
-    selectOverlayEnabled,
-    selectOverlayHeight,
-    selectOverlayWidth,
-    selectOverlayX,
-    selectOverlayY,
     ...restProps
   } = props;
   const pixiApp = usePixiApp();
-  const { loader, renderer, ticker } = pixiApp;
-  window.ticker = window.ticker ?? pixiApp.ticker;
+  const { loader, renderer } = pixiApp;
   const { plugins: { interaction } } = renderer;
   const [cursor, setCursor] = useState(GRAB);
-  const onPointerDown = event => {
-    setCursor(GRABBING)
-  };
-  // const onPointerDown = () => setCursor(GRABBING);
-  const onPointerUp = () => setCursor(GRAB);
   const {
     handlePointerDown,
     handlePointerMove,
     handlePointerUp,
     selectedVertices,
-  } = usePointerInteractions(dispatch, tool, vertices, scale);
+  } = usePointerInteractions();
   const onZoomed = ({
     viewport: {
       scale: { x, y },
@@ -236,13 +180,6 @@ const InteractiveViewport = props => {
   }) => dispatch(scaleUI({ x, y }));
 
   const viewportRef = useOverlayRef();
-  const [viewportBackgroundProps, setViewportBackgroundProps] = useState({
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-  });
-  const [backgroundPropsSet, setBackgroundPropsSet] = useState(false);
 
   useEffect(
     () => {
@@ -276,6 +213,13 @@ const InteractiveViewport = props => {
     ]
   );
 
+  const {
+    onFrameEnd,
+    onMoved,
+    onMovedEnd,
+    viewportBackgroundProps,
+  } = useViewportHandlers(viewportRef, screenHeight, screenWidth);
+
   useKeyboardShortcuts(dispatch);
 
   return (
@@ -285,66 +229,18 @@ const InteractiveViewport = props => {
       drag={{ keyToPress: 'ControlLeft' }}
       pinch={{ percent: 1 }}
       wheel={{ percent: 0.05 }}
-      onzoomed={onZoomed}
       interaction={interaction}
       // cursor={cursor}
       cursor={getCursor({ mode, tool })}
-      pointerdown={onPointerDown}
-      pointerup={onPointerUp}
       screenHeight={screenHeight}
       screenWidth={screenWidth}
       pointerdown={handlePointerDown}
       pointerup={handlePointerUp}
       pointermove={handlePointerMove}
-      onmovedend={viewport => {
-        const { top, bottom, left, right } = viewport;
-
-        setViewportBackgroundProps(
-          currentViewportBackgroundProps => ({
-              ...currentViewportBackgroundProps,
-              ...{
-                x: left,
-                y: top,
-                width: right - left,
-                height: bottom - top,
-              },
-          })
-        );
-      }}
-      onmoved={({ viewport }) => {
-        const { top, bottom, left, right } = viewport;
-
-        setViewportBackgroundProps(
-          currentViewportBackgroundProps => ({
-              ...currentViewportBackgroundProps,
-              ...{
-                x: left,
-                y: top,
-                width: right - left,
-                height: bottom - top,
-              },
-          })
-        );
-      }}
-      onframeend={viewport => {
-        const { top, bottom, left, right } = viewport;
-
-        if (!backgroundPropsSet && !allEqual(top, bottom, 0) && !allEqual(left, right, 0)) {
-          setViewportBackgroundProps(
-            currentViewportBackgroundProps => ({
-                ...currentViewportBackgroundProps,
-                ...{
-                  x: left,
-                  y: top,
-                  width: right - left,
-                  height: bottom - top,
-                },
-            })
-          );
-
-          setBackgroundPropsSet(true);
-        }
-      }}
+      onframeend={onFrameEnd}
+      onmoved={onMoved}
+      onmovedend={onMovedEnd}
+      onzoomed={onZoomed}
       {...restProps}
     >
       <Rectangle
