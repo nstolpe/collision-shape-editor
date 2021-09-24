@@ -17,6 +17,7 @@ import {
   SET_ALT_PRESSED,
   SET_CTRL_PRESSED,
   SET_SHIFT_PRESSED,
+  SET_SELECT_OVERLAY,
   SET_SELECT_OVERLAY_ENABLED,
   SET_SELECT_OVERLAY_POSITION,
   SET_SELECT_OVERLAY_DIMENSIONS,
@@ -30,24 +31,40 @@ export const setRootContainer = container => ({
   data: { container },
 });
 
-export const setOverlayEnabled = enabled => {
+export const setSelectOverlayEnabled = enabled => {
   return {
     type: SET_SELECT_OVERLAY_ENABLED,
     data: enabled,
   }
 };
 
-export const setOverlayPosition = ({ x, y }) => {
+export const setSelectOverlayPosition = ({ x, y }) => {
   return {
     type: SET_SELECT_OVERLAY_POSITION,
     data: { x, y },
   }
 };
 
-export const setOverlayDimensions = ({ x, y }) => {
+export const setSelectOverlayDimensions = ({ width, height }) => {
   return {
     type: SET_SELECT_OVERLAY_DIMENSIONS,
-    data: { x, y },
+    data: { width, height },
+  }
+};
+
+/**
+ * data: {
+ *   enabled: {boolean}
+ *   x: {number}
+ *   y: {number}
+ *   width: {number}
+ *   height: {number}
+ * }
+ */
+export const setSelectOverlay = data => {
+  return {
+    type: SET_SELECT_OVERLAY,
+    data,
   }
 };
 
