@@ -23,6 +23,28 @@ export const distance = (a, b) => {
   return Math.hypot(x, y);
 };
 
+const point0 = { x: 0, y: 0 };
+
+/**
+ * Checks if `point` is inside of an axis aligned bounding box defined by the points
+ * `boundA` and `boundB`. Add offset if you want to check an area and not just a point.
+ */
+export const withinAABB = (point=point0, boundA=point0, boundB=point0, offset=0) => {
+  if (
+    (point.x + offset >= boundA.x && point.x - offset <= boundB.x) ||
+    (point.x - offset <= boundA.x && point.x + offset >= boundB.x)
+  ) {
+    if (
+      (point.y + offset >= boundA.y && point.y - offset <= boundB.y) ||
+      (point.y - offset <= boundA.y && point.y + offset >= boundB.y)
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 export const timeout = (callback, delay) => {
   let start;
   let id;
