@@ -1,54 +1,33 @@
-// src/js/components/pixi/Overlay.js
+// src/js/hooks/useOverlayRef.js
 import * as PIXI from 'pixi.js';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { usePixiApp } from 'react-pixi-fiber';
 import ScreenContext from 'contexts/ScreenContext';
 import useCustomCompareMemo from 'hooks/useCustomCompareMemo';
+import selectOverlayComparator from 'comparators/select-overlay';
+import scaleComparator from 'comparators/scale';
+import selectOverlaySelector from 'selectors/select-overlay';
 
 const selector = ({
-  selectOverlay: {
-    enabled,
-    width,
-    height,
-    x,
-    y,
-  },
   scale,
+  selectOverlay,
 }) => ({
-  enabled,
-  width,
-  height,
-  x,
-  y,
   scale,
+  ...selectOverlaySelector({ selectOverlay }),
 });
 
 const comparator =({
-  enabled,
-  width,
-  height,
-  x,
-  y,
   scale,
+  ...selectOverlayProps
 }, {
-  enabled: oldEnabled,
-  width: oldWidth,
-  height: oldHeight,
-  x: oldX,
-  y: oldY,
   scale: oldScale,
+  ...oldSelectOverlayProps
 }) => {
-  if (
-    enabled !== oldEnabled ||
-    width !== oldWidth ||
-    height !== oldHeight ||
-    x !== oldX ||
-    y !== oldY
-  ) {
+  if (!scaleComparator({ scale }, { scale: oldScale })) {
     return false;
   }
 
-  if (scale.x !== oldScale.x || scale.y !== oldScale.y) {
+  if (!selectOverlayComparator(selectOverlayProps, oldSelectOverlayProps)) {
     return false;
   }
 
@@ -67,9 +46,8 @@ const useOverlayRef = target => {
     scale,
   } = useCustomCompareMemo(ctx, comparator);
   const { ticker } = usePixiApp();
-  const [time, setTime] = useState(ticker.lastTime);
-
-  // @TODO throttle?
+  // const [time, setTime] = useState(ticker.lastTime);
+  // @TODO add option to enable/disable, and throttle
   // ticker.add(() => setTime(ticker.lastTime));
 
   useEffect(() => {
@@ -79,7 +57,6 @@ const useOverlayRef = target => {
 
     if (ref.current) {
       if (enabled) {
-        const { x: xx, y: yy } = ref.current.toLocal({ x, y });
         const fragment = `
           precision highp float;
           varying vec2 vTextureCoord;
@@ -181,7 +158,7 @@ const useOverlayRef = target => {
             x2: ((x + width) * scale.x) + ref.current.getGlobalPosition().x,
             y1: (y * scale.y) + ref.current.getGlobalPosition().y,
             y2: ((y + height) * scale.y) + ref.current.getGlobalPosition().y,
-            time,
+            // time,
           }
         );
 
@@ -190,7 +167,16 @@ const useOverlayRef = target => {
         ref.current.filters = [];
       }
     }
-  }, [height, width, x, y, time, target, enabled]);
+  }, [
+    height,
+    width,
+    x, y,
+    // time,
+    target,
+    enabled,
+    scale.x,
+    scale.y
+  ]);
 
   return ref;
 };
