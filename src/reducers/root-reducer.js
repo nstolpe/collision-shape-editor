@@ -18,6 +18,7 @@ import {
   SET_ALT_PRESSED,
   SET_CTRL_PRESSED,
   SET_SHIFT_PRESSED,
+  SET_SELECT_OVERLAY,
   SET_SELECT_OVERLAY_ENABLED,
   SET_SELECT_OVERLAY_POSITION,
   SET_SELECT_OVERLAY_DIMENSIONS,
@@ -25,7 +26,6 @@ import {
   REMOVE_TEXTURE_SOURCE,
   ADD_SPRITE,
 } from 'constants/action-types';
-import * as Interactions from 'constants/interactions';
 import * as Modes from 'constants/modes';
 import * as Tools from 'constants/tools';
 import List from 'tools/List';
@@ -102,6 +102,9 @@ export const initialState = {
     x: 0,
     y: 0,
   },
+  uiOptions: {
+    vertexRadius: 6.5,
+  },
 };
 
 const reducer = (state, action) => {
@@ -113,28 +116,34 @@ const reducer = (state, action) => {
         ...state,
         rootContainer: data.container,
       };
+    case SET_SELECT_OVERLAY:
+      return {
+        ...state,
+        selectOverlay: { ...state.selectOverlay, ...data },
+      };
     case SET_SELECT_OVERLAY_ENABLED:
       return {
         ...state,
         selectOverlay: { ...state.selectOverlay, enabled: data }
       };
-      break;
     case SET_SELECT_OVERLAY_POSITION:
       return {
         ...state,
-        selectOverlay: { ...state.selectOverlay, ...data }
+        selectOverlay: {
+          ...state.selectOverlay,
+          x: data.x,
+          y: data.y,
+        },
       };
-      break;
     case SET_SELECT_OVERLAY_DIMENSIONS:
       return {
         ...state,
         selectOverlay: {
           ...state.selectOverlay,
-          height: data.y - state.selectOverlay.y,
-          width: data.x - state.selectOverlay.x,
-        }
+          height: data.height,
+          width: data.width,
+        },
       };
-      break;
     case ADD_VERTEX:
       console.log(ADD_VERTEX)
       return {
@@ -162,10 +171,6 @@ const reducer = (state, action) => {
         movingVerticeIds: state.movingVerticeIds.filter(vid => vid !== data.id),
       };
     case MOVE_VERTICES:
-      let p = state.vertices.map(
-        (vertexX, index, id) => data.vertices.find(vertexY => vertexY.id === id) || vertexX,
-        state.vertices.keys
-      );
       return {
         ...state,
         vertices: state.vertices.map(
