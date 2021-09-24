@@ -1,13 +1,10 @@
-// components/pixi/pixi/Geometry.js
+// components/pixi/Geometry.jsx
 import PropTypes from 'prop-types';
-import React, {
-  useEffect,
-  useState,
-} from 'react';
+import { useEffect, useState } from 'react';
 
 import withSelector from 'components/hoc/withSelector';
-import Edge from 'components/pixi/Edge';
-import Vertex from 'components/pixi/Vertex';
+import ConnectedEdge from 'components/pixi/ConnectedEdge';
+import ConnectedVertex from 'components/pixi/ConnectedVertex';
 import { EDGE, VERTEX } from 'constants/prefixes';
 import { SELECT } from 'constants/tools';
 import ScreenContext from 'contexts/ScreenContext';
@@ -32,11 +29,9 @@ const Geometry = ({
 
   return Array.from(vertices.entries()).reduce((result, [vertex1Index, vertex1Key, vertex1]) => {
     const vertex1Id = addPrefix(vertex1Key, VERTEX);
-    // const vertex2Index = vertex1Index + 1;
     const vertex2Index = (vertex1Index + 1) % vertices.length;
     /* @TODO handle open/closed polygon here */
     const vertex2 = vertices.index(vertex2Index);
-    // const vertex2 = vertices.index((vertex2Index) % vertices.length);
     const vertex2Key = vertices.keys[vertex2Index];
     const vertex2Id = addPrefix(vertex2Key, VERTEX);
 
@@ -65,50 +60,17 @@ const Geometry = ({
       rotation: Math.atan2(dy, dx),
       scale: inverseScale,
       selected: selectedVertices.hasOwnProperty(vertex1Id) && selectedVertices.hasOwnProperty(vertex2Id),
-      x: x1,
-      y: y1,
+      x1: x1,
+      y1: y1,
+      x2: x2,
+      y2: y2,
     };
 
-    result[0].push(<Edge { ...edgeProps } />);
-    result[1].push(<Vertex { ...vertexProps } />);
+    result[0].push(<ConnectedEdge { ...edgeProps } />);
+    result[1].push(<ConnectedVertex { ...vertexProps } />);
 
     return result;
   }, [[], []])
-
-  return vertices.reduce((result, vertex1, idx) => {
-    const { x, y, id } = vertex1;
-    const vertex2 = vertices.index((idx + 1) % vertices.length);
-    const vertexId = addPrefix(id, VERTEX);
-    const edgeId = addPrefix(`${vertex1.id}__${vertex2.id}`, EDGE);
-    const dx = (vertex2.x - vertex1.x) * scale.x;
-    const dy = (vertex2.y - vertex1.y) * scale.y;
-
-    const vertexProps = {
-      id: vertexId,
-      key: vertexId,
-      scale: inverseScale,
-      selected: selectedVertices.hasOwnProperty(vertexId),
-      tool,
-      x,
-      y,
-    };
-
-    const edgeProps = {
-      id: edgeId,
-      key: edgeId,
-      length: Math.sqrt(dx ** 2 + dy ** 2), //Math.hypot(dx, dy),
-      rotation: Math.atan2(dy, dx),
-      scale: inverseScale,
-      selected: selectedVertices.hasOwnProperty(vertexId) && selectedVertices.hasOwnProperty(addPrefix(vertex2.id, VERTEX)),
-      x: vertex1.x,
-      y: vertex1.y,
-    };
-
-    result[0].push(<Edge { ...edgeProps } />);
-    result[1].push(<Vertex { ...vertexProps } />);
-
-    return result;
-  }, [[], []]);
 };
 
 Geometry.propTypes = {
