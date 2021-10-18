@@ -392,8 +392,23 @@ const ListPrototype = Object.create({}, {
    */
   index: {
     value: function(index) {
-      const { values } = this;
-      return values[index];
+      const key = this.keys[index];
+      const { [key]: value } = getValues(this);
+
+      return value;
+    },
+  },
+  /**
+   * Gets the value at index 0
+   */
+  first: {
+    value: function() {
+      return this.index(0);
+    },
+  },
+  last: {
+    value: function() {
+      return this.index(this.length - 1);
     },
   },
   /* @TODO handle with proxy too: list[<key>] */
