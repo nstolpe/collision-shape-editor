@@ -1,5 +1,4 @@
 // src/js/actions/action.js
-
 import {
   SET_ROOT_CONTAINER,
   ADD_VERTEX,

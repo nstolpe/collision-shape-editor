@@ -2,6 +2,7 @@
 
 export const VERTEX = 'VERTEX';
 export const EDGE = 'EDGE';
+export const SHAPE = 'SHAPE';
 export const SPRITE = 'SPRITE';
 
 const prefixes = Object.assign(Object.create(null), {
@@ -9,9 +10,9 @@ const prefixes = Object.assign(Object.create(null), {
   VERTEX,
 });
 
-export const prefix = (key, value, delimiter = '__') => `${prefixes[key]}${delimiter}${value}`;
+export const prefix = (key, value, delimiter = '::') => `${prefixes[key]}${delimiter}${value}`;
 
-export const PFXR = (prefix, delimiter = '__') => {
+export const PFXR = (prefix, delimiter = '::') => {
   return {
     prefix,
     add: value => `${prefix}${delimiter}${value}`,

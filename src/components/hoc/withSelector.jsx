@@ -3,25 +3,9 @@ import React, {
   useContext,
   useMemo,
 } from 'react';
+
+import restComparator from 'comparators/rest';
 import useCustomCompareMemo from 'hooks/useCustomCompareMemo';
-
-/**
- * A default comparator for the HOC. `values` and `oldValues` are props objects,
- * and corresponding keys on each are compared with `!==`.
- */
-export const defaultComparator = (values, oldValues) => {
-  const entries = Object.entries(values);
-
-  for (let i = 0, l = entries.length; i < l; i ++) {
-    const [key, value] = entries[i];
-
-    if (value !== oldValues[key]) {
-      return false;
-    }
-  }
-
-  return true;
-};
 
 /**
  * HOC that returns a memoized version of the wrapped component that has
@@ -38,7 +22,7 @@ export const defaultComparator = (values, oldValues) => {
 const withSelector = (
   context = createContext(),
   selector = values => values,
-  comparator = defaultComparator
+  comparator = restComparator
 ) => WrappedComponent => {
   const WrapperComponent = props => {
     const ctx = selector(useContext(context));
