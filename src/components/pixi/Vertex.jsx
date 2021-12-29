@@ -47,7 +47,7 @@ const Vertex = React.forwardRef(({
     alpha={alpha}
     buttonMode
     cursor={getCursor(tool)}
-    // fill={selectedVertices.find(vertex => vertex.name === `VERTEX__${id}`) ? activeFill : fill}
+    // fill={selectedVertices.find(vertex => vertex.name === `VERTEX::${id}`) ? activeFill : fill}
     fill={selected ? activeFill : fill}
     hitArea={hitArea}
     interactive={true}
@@ -92,27 +92,10 @@ Vertex.propTypes = {
     PropTypes.string,
   ]),
   radius: PropTypes.number,
-  // @TODO get rid of this flexibility. `scale` can be an object: { x, y }
-  scale: PropTypes.oneOfType([
-    PropTypes.number,
-    (props, propName, componentName) => {
-      const prop = props[propName];
-      if (
-        !Array.isArray(prop) ||
-        prop.length !== 2 ||
-        prop.find(isNaN)
-      ) {
-        console.log(prop);
-        return new Error(
-          `Invalid prop \`${propName}\` supplied to \`${componentName}\`, expected array of two numbers.`
-        );
-      }
-    },
-    PropTypes.shape({
-      x: PropTypes.number,
-      y: PropTypes.number,
-    }),
-  ]),
+  scale: PropTypes.shape({
+    x: PropTypes.number,
+    y: PropTypes.number,
+  }),
   selected: PropTypes.bool,
   strokeAlignment: PropTypes.number,
   strokeColor: PropTypes.number,
@@ -129,7 +112,7 @@ const comparator = ({ scale, ...restProps}, { scale: oldScale, ...restOldProps }
   const oldScaleX = oldScale?.x ?? oldScale?.[0] ?? oldScale;
   const oldScaleY = oldScale?.y ?? oldScale?.[1] ?? oldScale;
 
-  if (!scaleComparator({ scale: { x: scaleX, y: scaleY } }, { scale: { x: oldScaleX, y: oldScaleY } })) {
+  if (!scaleComparator({ x: scaleX, y: scaleY }, { x: oldScaleX, y: oldScaleY })) {
     return false;
   }
 
