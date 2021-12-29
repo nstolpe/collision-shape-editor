@@ -1,5 +1,5 @@
 // components/pixi/Geometry.jsx
-import { useEffect, useState , useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Container } from 'react-pixi-fiber';
 import * as PIXI from 'pixi.js';
@@ -39,18 +39,12 @@ const Geometry = ({
   scale,
   name,
 }) => {
-  const inverseScale = {
+  const inverseScale = useMemo(() => ({
     x: 1 / scale.x,
     y: 1 / scale.y,
-  };
+  }), [scale.x, scale.y]);
   const ref = useRef();
-  const [hitArea, setHitArea] = useState(new PIXI.Polygon(vertices.values));
-
-  useEffect(() => {
-    if (ref.current) {
-      setHitArea(new PIXI.Polygon(vertices.values));
-    }
-  }, [vertices]);
+  const hitArea = useMemo(() => new PIXI.Polygon(vertices.values), [vertices]);
 
   const components = Array.from(vertices.entries()).reduce((result, [vertex1Index, vertex1Key, vertex1]) => {
     const shapeKey = removePrefix(name, SHAPE);
@@ -61,7 +55,6 @@ const Geometry = ({
     const vertex2Key = vertices.keys[vertex2Index];
     const vertex2Id = addPrefix(addPrefix(vertex2Key, shapeKey), VERTEX);
 
-    // const edgeId = addPrefix(`${vertex1Key}::${vertex2Key}`, EDGE);
     const edgeId = addPrefix(addPrefix(vertex2Key, vertex1Key), EDGE);
 
     const { x: x1, y: y1 } = vertex1;
