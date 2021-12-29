@@ -23,7 +23,7 @@ const comparator =({
   scale: oldScale,
   ...oldSelectOverlayProps
 }) => {
-  if (!scaleComparator({ scale }, { scale: oldScale })) {
+  if (!scaleComparator(scale, oldScale)) {
     return false;
   }
 
@@ -45,7 +45,7 @@ const useOverlayRef = target => {
     height,
     scale,
   } = useCustomCompareMemo(ctx, comparator);
-  const { ticker } = usePixiApp();
+  // const { ticker } = usePixiApp();
   // const [time, setTime] = useState(ticker.lastTime);
   // @TODO add option to enable/disable, and throttle
   // ticker.add(() => setTime(ticker.lastTime));
