@@ -16,15 +16,15 @@ const KeyedValues = new WeakMap();
 export const getValues = key => KeyedValues.get(key) ?? KeyedValues.set(key, Object.create(null)).get(key);
 export const getKeys = key => Keys.get(key) ?? Keys.set(key, []).get(key);
 
-const merge = (a, b) => {
-  const length = Math.max(a.length, b.length);
-  const keys = [];
-
-  for (let i = 0; i < length; i++) {
-    keys[i] = b[i] ?? a[i];
-  }
-  return keys;
-};
+// const merge = (a, b) => {
+//   const length = Math.max(a.length, b.length);
+//   const keys = [];
+//
+//   for (let i = 0; i < length; i++) {
+//     keys[i] = b[i] ?? a[i];
+//   }
+//   return keys;
+// };
 
 const assign = (...sources) => {
   const maxSourceLength = Math.max(...sources.map(source => source?.length ?? 0));
@@ -248,12 +248,16 @@ const ListPrototype = Object.create({}, {
     },
   },
   sort: {
-    /* @TODO sort needs to persist, so keys need to be sorted too */
+    /**
+     * Returns a new list sorted by a value comparator
+     * @TODO add a sory-by-key method?
+     */
     value: function(comparator) {
-      const { values } = this;
-      const instanceKeys = getKeys(this);
+      const { keys, values } = this;
+      const sortedValues = values.slice().sort(comparator);
+      const sortedKeys = sortedValues.map(value => keys[values.indexOf(value)]);
 
-      return values.sort(comparator);
+      return new List(sortedValues, sortedKeys);
     },
   },
   splice: {
@@ -321,9 +325,8 @@ const ListPrototype = Object.create({}, {
    */
   deleteByValue: {
     value: function(value) {
-      const instanceKeys = getKeys(this);
-      const instanceValues = getValues(this);
-      const [key] = Object.entries(instanceValues).find(([,currentValue]) => currentValue === value);
+      const values = getValues(this);
+      const [key] = Object.entries(values).find(([,currentValue]) => currentValue === value);
 
       return this.deleteByKey(key);
     },
@@ -333,11 +336,10 @@ const ListPrototype = Object.create({}, {
      * iterator of sequential [index, key, value] arrays.
      */
     value: function*() {
-      const { keys, values } = this;
-      // const instanceKeys = getKeys(this);
-      // const instanceValues = getValues(this);
+      const keys = getKeys(this);
+      const values = getValues(this);
       const data = keys.map((key, index) => {
-        const value = values[index];
+        const value = values[key];
         return [index, key, value];
       });
       let index = 0;
@@ -399,13 +401,16 @@ const ListPrototype = Object.create({}, {
     },
   },
   /**
-   * Gets the value at index 0
+   * Gets the value at index 0.
    */
   first: {
     value: function() {
       return this.index(0);
     },
   },
+  /**
+   * Gets the value at the last index.
+   */
   last: {
     value: function() {
       return this.index(this.length - 1);
@@ -458,6 +463,10 @@ const ListPrototype = Object.create({}, {
    */
   init: {
     value: function (values, keys) {
+      if (List.prototype.isPrototypeOf(values)) {
+        return this.init(values.values, Array.isArray(keys) ? keys : values.keys);
+      }
+
       const instanceKeys = getKeys(this);
       const instanceValues = getValues(this);
 
