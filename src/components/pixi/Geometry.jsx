@@ -1,41 +1,68 @@
 // components/pixi/Geometry.jsx
+import { useEffect, useState , useRef } from 'react';
 import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
+import { Container } from 'react-pixi-fiber';
+import * as PIXI from 'pixi.js';
 
+import restComparator from 'comparators/rest';
+import scaleComparator from 'comparators/scale';
 import withSelector from 'components/hoc/withSelector';
 import ConnectedEdge from 'components/pixi/ConnectedEdge';
 import ConnectedVertex from 'components/pixi/ConnectedVertex';
-import { EDGE, VERTEX } from 'constants/prefixes';
+import { EDGE, SHAPE, VERTEX } from 'constants/prefixes';
 import { SELECT } from 'constants/tools';
 import ScreenContext from 'contexts/ScreenContext';
-import { addPrefix } from 'tools/prefix';
+import { addPrefix, removePrefix } from 'tools/prefix';
 
-const selector = ({ tool }) => ({ tool });
+const selector = ({ scale, tool }) => ({ scale, tool });
+
+const comparator = (
+  { scale, ...restProps },
+  { scale: oldScale, ...oldRestProps }
+) => {
+  if (!scaleComparator(scale, oldScale)) {
+    return false;
+  }
+
+  if (!restComparator(restProps, oldRestProps)) {
+    return false;
+  }
+
+  return true;
+};
 
 const Geometry = ({
-  scale,
   selectedVertices,
-  tool,
   vertices,
+  closed,
+  tool,
+  scale,
+  name,
 }) => {
-  const [inverseScale, setInverseScale] = useState([
-    1 / scale.x,
-    1 / scale.y,
-  ]);
+  const inverseScale = {
+    x: 1 / scale.x,
+    y: 1 / scale.y,
+  };
+  const ref = useRef();
+  const [hitArea, setHitArea] = useState(new PIXI.Polygon(vertices.values));
 
   useEffect(() => {
-    setInverseScale([1 / scale.x, 1 / scale.y])
-  }, [scale.x, scale.y]);
+    if (ref.current) {
+      setHitArea(new PIXI.Polygon(vertices.values));
+    }
+  }, [vertices]);
 
-  return Array.from(vertices.entries()).reduce((result, [vertex1Index, vertex1Key, vertex1]) => {
-    const vertex1Id = addPrefix(vertex1Key, VERTEX);
+  const components = Array.from(vertices.entries()).reduce((result, [vertex1Index, vertex1Key, vertex1]) => {
+    const shapeKey = removePrefix(name, SHAPE);
+    const vertex1Id = addPrefix(addPrefix(vertex1Key, shapeKey), VERTEX);
     const vertex2Index = (vertex1Index + 1) % vertices.length;
     /* @TODO handle open/closed polygon here */
     const vertex2 = vertices.index(vertex2Index);
     const vertex2Key = vertices.keys[vertex2Index];
-    const vertex2Id = addPrefix(vertex2Key, VERTEX);
+    const vertex2Id = addPrefix(addPrefix(vertex2Key, shapeKey), VERTEX);
 
-    const edgeId = addPrefix(`${vertex1Key}__${vertex2Key}`, EDGE);
+    // const edgeId = addPrefix(`${vertex1Key}::${vertex2Key}`, EDGE);
+    const edgeId = addPrefix(addPrefix(vertex2Key, vertex1Key), EDGE);
 
     const { x: x1, y: y1 } = vertex1;
     const { x: x2, y: y2 } = vertex2;
@@ -60,17 +87,29 @@ const Geometry = ({
       rotation: Math.atan2(dy, dx),
       scale: inverseScale,
       selected: selectedVertices.hasOwnProperty(vertex1Id) && selectedVertices.hasOwnProperty(vertex2Id),
-      x1: x1,
-      y1: y1,
-      x2: x2,
-      y2: y2,
+      x1,
+      y1,
+      x2,
+      y2,
     };
 
     result[0].push(<ConnectedEdge { ...edgeProps } />);
     result[1].push(<ConnectedVertex { ...vertexProps } />);
 
     return result;
-  }, [[], []])
+  }, [[], []]);
+
+  return (
+    <Container
+      name={name}
+      ref={ref}
+      interactive
+      hitArea={hitArea}
+      cursor={'copy'}
+    >
+      {components}
+    </Container>
+  );
 };
 
 Geometry.propTypes = {
@@ -91,6 +130,7 @@ Geometry.propTypes = {
     x: PropTypes.number,
     y: PropTypes.number,
   })),
+  closed: PropTypes.bool,
 };
 
 Geometry.defaultProps = {
@@ -98,6 +138,7 @@ Geometry.defaultProps = {
   selectedVertices: {},
   tool: SELECT,
   vertices: [],
+  closed: true,
 };
 
-export default withSelector(ScreenContext, selector)(Geometry);
+export default withSelector(ScreenContext, selector, comparator)(Geometry);
