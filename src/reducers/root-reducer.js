@@ -31,46 +31,58 @@ import * as Tools from 'constants/tools';
 import List from 'tools/List';
 
 const vertices = [
-  {
-    x: 400,
-    y: 200,
-    id: uuid(),
-  },
-  {
-    x: 600,
-    y: 200,
-    id: uuid(),
-  },
-  {
-    x: 700,
-    y: 300,
-    id: uuid(),
-  },
-  {
-    x: 700,
-    y: 500,
-    id: uuid(),
-  },
-  {
-    x: 600,
-    y: 600,
-    id: uuid(),
-  },
-  {
-    x: 400,
-    y: 600,
-    id: uuid(),
-  },
-  {
-    x: 300,
-    y: 500,
-    id: uuid(),
-  },
-  {
-    x: 300,
-    y: 300,
-    id: uuid(),
-  },
+  [
+    {
+      x: 400,
+      y: 200,
+    },
+    {
+      x: 600,
+      y: 200,
+    },
+    {
+      x: 700,
+      y: 300,
+    },
+    {
+      x: 700,
+      y: 500,
+    },
+    {
+      x: 600,
+      y: 600,
+    },
+    {
+      x: 400,
+      y: 600,
+    },
+    {
+      x: 300,
+      y: 500,
+    },
+    {
+      x: 300,
+      y: 300,
+    },
+  ],
+  [
+    {
+      x: 800,
+      y: 600,
+    },
+    {
+      x: 1000,
+      y: 600,
+    },
+    {
+      x: 1000,
+      y: 800,
+    },
+    {
+      x: 800,
+      y: 800,
+    },
+  ],
 ];
 
 export const initialState = {
@@ -87,8 +99,17 @@ export const initialState = {
   },
   textureSources: [],
   sprites: [],
-  vertices: List(vertices),
-  // vertices: vertices,
+  vertices: List(vertices[0]),
+  shapes: List([
+    {
+      vertices: List(vertices[0]),
+      closed: true,
+    },
+    {
+      vertices: List(vertices[1]),
+      closed: false,
+    }
+  ]),
   movingVerticeIds: [],
   scale: { x: 1, y: 1 },
   altPressed: false,
@@ -107,7 +128,7 @@ export const initialState = {
   },
 };
 
-const reducer = (state, action) => {
+export const reducer = (state, action) => {
   const { data, type } = action;
 
   switch (type) {
@@ -240,9 +261,7 @@ const reducer = (state, action) => {
         sprites: [ ...state.sprites, { ...data.sprite } ],
       };
     default:
-      console.log(`undefined action: ${action.type}`, action);
+      // console.log(`undefined action: ${action.type}`, action);
       return state;
   }
 };
-
-export default reducer;
