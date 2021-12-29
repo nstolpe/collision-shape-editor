@@ -11,13 +11,21 @@ import {
   setCtrlPressed,
   setShiftPressed,
 } from 'actions/actions';
+import {
+  clearKeys,
+  pressKey,
+  releaseKey,
+} from 'actions/modifier-keys-actions';
+import restComparator from 'comparators/rest';
 import scaleComparator from 'comparators/scale';
+import verticesComparator from 'comparators/vertices';
 import withSelector from 'components/hoc/withSelector';
-import Geometry from 'components/pixi/Geometry';
 import Rectangle from 'components/pixi/base/Rectangle';
+import Shapes from 'components/pixi/Shapes';
 import Sprites from 'components/pixi/Sprites';
 import Viewport from 'components/pixi/base/Viewport';
-import { GRAB, POINTER } from 'constants/cursors';
+import { COPY, CROSSHAIR, GRAB, NO_DROP, POINTER } from 'constants/cursors';
+import { ADD, DELETE, SELECT } from 'constants/tools';
 import * as Modes from 'constants/modes';
 import ScreenContext from 'contexts/ScreenContext';
 import useOverlayRef from 'hooks/useOverlayRef';
@@ -31,37 +39,8 @@ import useViewportHandlers from 'hooks/useViewportHandlers';
  */
 const useKeyboardShortcuts = dispatch => {
   useEffect(() => {
-    const onKeyDown = ({ key, keyCode }) => {
-      switch (true) {
-        case key === 'Control' || keyCode === 17:
-          console.log('control pressed');
-          dispatch(setCtrlPressed(true));
-          break;
-        case key === 'Alt' || keyCode === 18:
-          console.log('alt pressed');
-          dispatch(setAltPressed(true));
-          break;
-        case key === 'Shift' || keyCode === 16:
-          console.log('shift pressed');
-          dispatch(setShiftPressed(true));
-          break;
-        default:
-          /* @TODO log key and keyCode if debugging? (once that's set up)*/
-      }
-    };
-
-    const onKeyUp = ({ key, keyCode }) => {
-      if (key === 'Control' || keyCode === 17) {
-        dispatch(setCtrlPressed(false));
-        console.log('control released');
-      } else if (key === 'Alt' || keyCode === 18) {
-        dispatch(setAltPressed(false));
-        console.log('alt released');
-      } else if (key === 'Shift' || keyCode === 16) {
-        dispatch(setShiftPressed(false));
-        console.log('shift released');
-      }
-    };
+    const onKeyDown = ({ code, key, keyCode }) => dispatch(pressKey(code));
+    const onKeyUp = ({ code, key, keyCode }) => dispatch(releaseKey(code));
 
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('keyup', onKeyUp);
@@ -75,8 +54,10 @@ const useKeyboardShortcuts = dispatch => {
 
 const getCursor = ({ mode, tool, altPressed, ctrlPressed, shiftPressed }) => {
   switch (true) {
-    default:
+    case tool !== SELECT:
       return POINTER;
+    default:
+      return CROSSHAIR;
   }
 };
 
@@ -86,61 +67,28 @@ const selector = ({
   mode,
   tool,
   textureSources,
-  scale,
   vertices,
+  panModifierCode,
 }) => ({
   dispatch,
   backgroundColor,
   mode,
   tool,
   textureSources,
-  scale,
   vertices,
+  panModifierCode,
 });
 
 const comparator = (
-  {
-    scale,
-    vertices,
-    ...restProps
-  },
-  {
-    scale: oldScale,
-    vertices: oldVertices,
-    ...restOldProps
-  }
+  { vertices, ...restProps },
+  { vertices: oldVertices, ...restOldProps }
 ) => {
-  // @TODO maybe scale can be required to conform to { x. y }, and drop array ans scalar.
-  const scaleX = scale?.x ?? scale?.[0] ?? scale;
-  const scaleY = scale?.y ?? scale?.[1] ?? scale;
-  const oldScaleX = oldScale?.x ?? oldScale?.[0] ?? oldScale;
-  const oldScaleY = oldScale?.y ?? oldScale?.[1] ?? oldScale;
-
-  if (!scaleComparator({ scale: { x: scaleX, y: scaleY } }, { scale: { x: oldScaleX, y: oldScaleY } })) {
+  if (!verticesComparator(vertices, oldVertices)) {
     return false;
   }
 
-  if (vertices?.length !== oldVertices?.length) {
+  if (!restComparator(restProps, restOldProps)) {
     return false;
-  }
-
-  for (let i = 0, l = vertices?.length; i < l; i++) {
-    const vertex = vertices.index(i);
-    const oldVertex = oldVertices.index(i);
-
-    if (
-      vertex.name !== oldVertex.name ||
-      vertex.x !== oldVertex.x ||
-      vertex.y !== oldVertex.y
-    ) {
-      return false;
-    }
-  }
-
-  for (let key of Object.keys(restProps)) {
-    if (restProps[key] !== restOldProps[key]) {
-      return false;
-    }
   }
 
   return true;
@@ -149,23 +97,28 @@ const comparator = (
 /**
  * `pixi-viewport` component.
  */
-const InteractiveViewport = props => {
-  const {
-    dispatch,
-    backgroundColor,
-    mode,
-    tool,
-    textureSources,
-    scale,
-    children,
-    screenHeight,
-    screenWidth,
-    vertices,
-    ...restProps
-  } = props;
+const InteractiveViewport = ({
+  dispatch,
+  backgroundColor,
+  mode,
+  tool,
+  textureSources,
+  scale,
+  children,
+  screenHeight,
+  screenWidth,
+  vertices,
+  panModifierCode,
+  ...restProps
+}) => {
   const pixiApp = usePixiApp();
-  const { loader, renderer } = pixiApp;
-  const { plugins: { interaction } } = renderer;
+  const {
+    loader,
+    renderer,
+    renderer: {
+      plugins: { interaction },
+    },
+  } = pixiApp;
   const [cursor, setCursor] = useState(GRAB);
   const {
     handlePointerDown,
@@ -222,11 +175,35 @@ const InteractiveViewport = props => {
 
   useKeyboardShortcuts(dispatch);
 
+  useEffect(() => {
+    const onBlur = () => {
+      if (viewportRef.current) {
+        viewportRef.current.drag({ keyToPress: [panModifierCode] });
+      }
+      dispatch(clearKeys());
+    };
+
+    const onFocus = () => {
+      if (viewportRef.current) {
+        viewportRef.current.drag({ keyToPress: [panModifierCode] });
+      }
+      dispatch(clearKeys());
+    };
+
+    window.addEventListener('blur', onBlur);
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      window.removeEventListener('blur', onBlur);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [dispatch, viewportRef, panModifierCode]);
+
   return (
     <Viewport
       name="VIEWPORT"
       ref={viewportRef}
-      drag={{ keyToPress: 'ControlLeft' }}
+      drag={{ keyToPress: [panModifierCode] }}
       pinch={{ percent: 1 }}
       wheel={{ percent: 0.05 }}
       interaction={interaction}
@@ -246,17 +223,11 @@ const InteractiveViewport = props => {
       <Rectangle
         {...viewportBackgroundProps}
         fill={backgroundColor}
-        name={'BACKGROUND'}
+        name="BACKGROUND"
       />
       <Sprites />
-      <Geometry
-        interactive={mode === Modes.VERTEX}
-        interactiveChildren={mode === Modes.VERTEX}
-        scale={scale}
-        selectedVertices={selectedVertices}
-        setCursor={setCursor}
-        vertices={vertices}
-      />
+      <Shapes selectedVertices={selectedVertices} />
+
     </Viewport>
   );
 };
