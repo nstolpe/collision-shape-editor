@@ -2,23 +2,24 @@
 import { useState } from 'react';
 
 import {
-  setSelectOverlayEnabled,
   setSelectOverlayDimensions,
-  setSelectOverlayPosition,
   setSelectOverlay,
-  moveVertices
+  moveVertices,
 } from 'actions/actions';
 import * as Tools from 'constants/tools';
+import * as Modes from 'constants/modes';
 import ScreenContext from 'contexts/ScreenContext';
 import { translation, withinAABB } from 'tools/math';
 import {
+  DEFAULT_DELIMITER,
   addPrefix,
   hasPrefix,
   removePrefix,
 } from 'tools/prefix';
-import { EDGE, VERTEX } from 'constants/prefixes';
+import { EDGE, VERTEX, SHAPE } from 'constants/prefixes';
 import useSelector from 'hooks/useSelector';
 import selectOverlayComparator from 'comparators/select-overlay';
+import { keySelector } from 'selectors/keys';
 
 const selector = ({
   dispatch,
@@ -29,7 +30,10 @@ const selector = ({
   uiOptions: {
     vertexRadius,
   },
-  ...restProps
+  addModifierCode,
+  subtractModifierCode,
+  panModifierCode,
+  pressedKeyCodes,
 }) => ({
   dispatch,
   mode,
@@ -37,21 +41,42 @@ const selector = ({
   tool,
   vertices,
   vertexRadius,
+  addModifierCode,
+  subtractModifierCode,
+  panModifierCode,
+  pressedKeyCodes,
+  addModifierKeyPressed: !!keySelector(addModifierCode)({ pressedKeyCodes }),
+  panModifierKeyPressed: !!keySelector(panModifierCode)({ pressedKeyCodes }),
 });
 
 const comparator = ({
   selectOverlay,
   vertices,
+  pressedKeyCodes,
   ...restProps
 }, {
   selectOverlay: oldSelectOverlay,
   vertices: oldVertices,
+  pressedKeyCodes: oldPressedKeyCodes,
   ...restOldProps
 }) => {
-
   if (!selectOverlayComparator(selectOverlay, oldSelectOverlay)) {
     return false;
   }
+
+  // pressedKeyCodes
+  if (Object.keys(pressedKeyCodes).length !== Object.keys(oldPressedKeyCodes).length) {
+    return false;
+  }
+
+  const length = Object.keys(pressedKeyCodes).length;
+
+  for (let i = 0; i < length; i++) {
+    if (pressedKeyCodes[i] !== oldPressedKeyCodes[i]) {
+      return false;
+    }
+  }
+  // end pressedKeyCodes
 
   for (let i = 0, l = vertices?.length; i < l; i++) {
     const vertex = vertices.index(i);
@@ -116,12 +141,18 @@ const usePointerInteraction = () => {
   const [selectedVertices, setSelectedVertices] = useState({});
   const [selectedEdges, setSelectedEdges] = useState({});
   const {
-   dispatch,
-   mode,
-   selectOverlay,
-   tool,
-   vertices,
-   vertexRadius,
+    dispatch,
+    mode,
+    selectOverlay,
+    tool,
+    vertices,
+    vertexRadius,
+    addModifierCode,
+    subtractModifierCode,
+    panModifierCode,
+    addModifierKeyPressed,
+    panModifierKeyPressed,
+    pressedKeyCodes,
   } = useSelector(ScreenContext, selector, comparator);
   /**************************************************************************************
    * utility functions                                                                  *
@@ -256,6 +287,10 @@ const usePointerInteraction = () => {
         // main container viewport
         handlePointerDownViewport(event, coordinates);
         break;
+      case hasPrefix(target.name, SHAPE):
+        // @TODO add handler for shape, pass on control to viewport there if necessary.
+        handlePointerDownViewport(event, coordinates);
+        break;
       case hasPrefix(target.name, VERTEX):
         // vertex
         handlePointerDownVertex(event, coordinates);
@@ -314,6 +349,10 @@ const usePointerInteraction = () => {
         // handlePointerMoveViewport(event, pointer, { x: event.data.global.x, y: event.data.global.y });
         handlePointerMoveViewport(event, pointer, pointerCoordinates);
         break;
+      case hasPrefix(pointer?.target?.name, SHAPE):
+        // @TODO add handler for shape, pass on control to viewport there if necessary.
+        handlePointerMoveViewport(event, pointer, pointerCoordinates);
+        break;
       case hasPrefix(pointer?.target?.name, VERTEX):
         // the active pointer's cached target from pointerdown is a vertex.
         handlePointerMoveVertex(event, pointer, pointerCoordinates);
@@ -353,6 +392,10 @@ const usePointerInteraction = () => {
         // main container viewport
         handlePointerUpViewport(event);
         break;
+      case hasPrefix(name, SHAPE):
+        // @TODO add handler for shape, pass on control to viewport there if necessary.
+        handlePointerUpViewport(event);
+        break;
       case hasPrefix(name, VERTEX):
         handlePointerUpVertex(event);
         break;
@@ -372,20 +415,18 @@ const usePointerInteraction = () => {
   };
 
   const handlePointerDownViewport = (event, coordinates) => {
-    const {
-      data: {
-        originalEvent: {
-          ctrlKey = false,
-        } = {},
-      } = {},
-    } = event;
     const { x, y } = coordinates;
     const height = 0;
     const width = 0;
 
-    if (tool === Tools.SELECT && !ctrlKey) {
-      dispatch(setSelectOverlayPosition({ x, y }));
-      dispatch(setSelectOverlayEnabled(true));
+    if (tool === Tools.SELECT && !panModifierKeyPressed) {
+      dispatch(setSelectOverlay({
+        enabled: true,
+        x,
+        y,
+        width,
+        height,
+      }));
     }
   }
 
@@ -393,11 +434,6 @@ const usePointerInteraction = () => {
     const {
       data: {
         identifier,
-        originalEvent: {
-          altKey = false,
-          ctrlKey = false,
-          shiftKey = false,
-        } = {},
       } = {},
       target: { name } = {},
     } = event;
@@ -405,19 +441,7 @@ const usePointerInteraction = () => {
     updateTranslations(coordinates);
 
     switch (true) {
-      // case altKey && ctrlKey && shiftKey:
-      //   break;
-      // case altKey && ctrlKey:
-      //   break;
-      // case altKey && shiftKey:
-      //   break;
-      // case ctrlKey && shiftKey:
-      //   break;
-      // case altKey:
-      //   break;
-      // case ctrlKey:
-      //   break;
-      case shiftKey:
+      case addModifierKeyPressed:
         switch (tool) {
           // case Tools.ADD:
           //   break;
@@ -456,11 +480,6 @@ const usePointerInteraction = () => {
     const {
       data: {
         identifier,
-        originalEvent: {
-          altKey = false,
-          ctrlKey = false,
-          shiftKey = false,
-        } = {},
       } = {},
       target: { name } = {},
     } = event;
@@ -469,7 +488,7 @@ const usePointerInteraction = () => {
 
     switch (tool) {
       case Tools.SELECT:
-        const vertexIds = removePrefix(name, EDGE).split('__');
+        const vertexIds = removePrefix(name, EDGE).split(DEFAULT_DELIMITER);
         const targetEdgeVertices = vertexIds.reduce((newVertices, key) => {
           const value = vertices.key(key);
 
@@ -486,7 +505,7 @@ const usePointerInteraction = () => {
         }, []);
 
         switch (true) {
-          case shiftKey:
+          case addModifierKeyPressed:
             const selected = areVerticesSelected(targetEdgeVertices);
 
             if (areAllVerticesSelected(targetEdgeVertices)) {
@@ -602,6 +621,8 @@ const usePointerInteraction = () => {
   };
 
   const handlePointerUpViewport = () => {
+    // if a select by overlay is in process, change the selection
+    // this could be its own function
     if (selectOverlay.enabled) {
       const targetVertices = vertices.filter(({ x, y }) =>
         withinAABB(
@@ -615,20 +636,42 @@ const usePointerInteraction = () => {
         )
       );
 
-      setSelectedVertices(
-        targetVertices.reduce(
-          (
-            newSelectedVertices,
-            { x, y },
-            idx,
-            key
-          ) => {
-            newSelectedVertices[addPrefix(key, VERTEX)] = { x: 0, y: 0 };
-            return newSelectedVertices;
-          },
-          {}
-        )
-      );
+      if (addModifierKeyPressed) {
+        // add to the selection
+        addSelectedVertices(
+          targetVertices.reduce(
+            (
+              newSelectedVertices,
+              { x, y },
+              idx,
+              key,
+            ) => {
+              newSelectedVertices.push({
+                name: addPrefix(key, VERTEX),
+                distance: { x: 0, y: 0 },
+              });
+              return newSelectedVertices;
+            },
+            []
+          )
+        );
+      } else {
+        // replace the selection
+        setSelectedVertices(
+          targetVertices.reduce(
+            (
+              newSelectedVertices,
+              { x, y },
+              idx,
+              key
+            ) => {
+              newSelectedVertices[addPrefix(key, VERTEX)] = { x: 0, y: 0 };
+              return newSelectedVertices;
+            },
+            {}
+          )
+        );
+      }
 
       dispatch(setSelectOverlay({
         enabled: false,
@@ -679,7 +722,7 @@ const usePointerInteraction = () => {
           case shiftKey:
             break;
           default:
-//             const vertexNames = removePrefix(name, EDGE).split('__').map(id => addPrefix(id, VERTEX));
+//             const vertexNames = removePrefix(name, EDGE).split(DEFAULT_DELIMITER).map(id => addPrefix(id, VERTEX));
 //             const queuedEdgeVertices = [];
 //             const restQueuedVertices = [];
 //
