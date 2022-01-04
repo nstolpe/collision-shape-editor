@@ -1,4 +1,4 @@
-// src/js/hooks/useBackground.js
+// src/js/hooks/useViewportHandlers.js
 import { useEffect, useState } from 'react';
 
 /**

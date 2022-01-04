@@ -128,6 +128,38 @@ export const initialState = {
   },
 };
 
+/**
+ * @TODO this needs to move whever the action is called to MOVE_VERTICES
+ * that point will need access to shapes from state. currently this should be
+ * in usePointerInteractions
+ */
+const moveVertices = (shapes, vertices) => {
+  const newShapes = new List(shapes, shapes.keys);
+
+  for (const v of vertices) {
+    // @TODO use DEFAULT_DELIMITER
+    const [, vertexKey, , shapeKey] = v.name.split('::');
+    const shape = newShapes.key(shapeKey);
+    const vertex = shape.vertices.key(vertexKey);
+    const vertexIndex = shape.vertices.keys.indexOf(vertexKey);
+    const newVertices = shape.vertices.map(
+      (vertex, index, key) => {
+        if (key === vertexKey) {
+          return { x: v.x, y: v.y };
+        } else {
+          return vertex;
+        }
+      }
+    );
+    newShapes.setByKey({
+      ...shape,
+      vertices: newVertices,
+    }, shapeKey);
+  }
+
+  return newShapes;
+};
+
 export const reducer = (state, action) => {
   const { data, type } = action;
 
@@ -192,13 +224,11 @@ export const reducer = (state, action) => {
         movingVerticeIds: state.movingVerticeIds.filter(vid => vid !== data.id),
       };
     case MOVE_VERTICES:
+      // @TODO: this should be MOVE_SHAPE_VERTICES or something. moveVertices logic
+      // should occur before the action is called and should just send { shapes } as data
       return {
         ...state,
-        vertices: state.vertices.map(
-          (vertexX, index, key) =>
-            data.vertices.find(({ id }) => id === key) || vertexX,
-          state.vertices.keys
-        ),
+        shapes: moveVertices(state.shapes, data.vertices),
       };
     case SET_INTERACTION:
       return {

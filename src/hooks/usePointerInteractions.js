@@ -9,6 +9,7 @@ import {
 import * as Tools from 'constants/tools';
 import * as Modes from 'constants/modes';
 import ScreenContext from 'contexts/ScreenContext';
+import List from 'tools/List';
 import { translation, withinAABB } from 'tools/math';
 import {
   DEFAULT_DELIMITER,
@@ -26,7 +27,8 @@ const selector = ({
   mode,
   selectOverlay,
   tool,
-  vertices,
+  // vertices,
+  shapes,
   uiOptions: {
     vertexRadius,
   },
@@ -39,7 +41,17 @@ const selector = ({
   mode,
   selectOverlay,
   tool,
-  vertices,
+  // project all the vertices into a flattened List
+  vertices: shapes.reduce((vertices, shape, _, shapeKey) => {
+    shape.vertices.forEach(
+      (vertex, _, vertexKey) => {
+        const key = `${addPrefix(VERTEX, vertexKey)}${DEFAULT_DELIMITER}${addPrefix(SHAPE, shapeKey)}`
+        vertices.push(vertex, key);
+      }
+    );
+
+    return vertices;
+  }, new List()),
   vertexRadius,
   addModifierCode,
   subtractModifierCode,
@@ -182,27 +194,31 @@ const usePointerInteraction = () => {
     });
   };
 
-  const addSelectedVertices = newVertices => setSelectedVertices(
-    currentSelectedVertices => {
-      newVertices.forEach(({ distance, name }) => currentSelectedVertices[name] = distance);
-      return currentSelectedVertices;
-    }
-  );
+  const addSelectedVertices = newVertices =>
+    setSelectedVertices(
+      currentSelectedVertices => {
+        newVertices.forEach(({ distance, name }) => currentSelectedVertices[name] = distance);
+        return currentSelectedVertices;
+      }
+    );
   /**
    * Removes a vertex from selectedVertices
    */
-  const removeSelectedVertex = name => {
-    setSelectedVertices(currentSelectedVertices => {
-      delete currentSelectedVertices[name];
-      return currentSelectedVertices;
-    });
-  };
+  const removeSelectedVertex = name =>
+    setSelectedVertices(
+      currentSelectedVertices => {
+        delete currentSelectedVertices[name];
+        return currentSelectedVertices;
+      }
+    );
 
   const removeSelectedVertices = names => {
-    setSelectedVertices(currentSelectedVertices => {
-      names.forEach(name => delete currentSelectedVertices[name]);
-      return currentSelectedVertices;
-    });
+    setSelectedVertices(
+      currentSelectedVertices => {
+        names.forEach(name => delete currentSelectedVertices[name]);
+        return currentSelectedVertices;
+      }
+    );
   };
 
   const isVertexSelected = ({ name }) => !!selectedVertices.find(vertex => vertex.name === name);
@@ -250,7 +266,7 @@ const usePointerInteraction = () => {
   const updateTranslations = coordinates => {
     setSelectedVertices(currentSelectedVertices => {
       Object.keys(currentSelectedVertices).forEach(name => {
-        const { x, y } = vertices.key(removePrefix(name, VERTEX));
+        const { x, y } = vertices.key(name);
         // const { x, y } = vertices.find(vertex => vertex.id === removePrefix(name, VERTEX));
         const distance = translation({ x, y }, coordinates);
         currentSelectedVertices[name] = distance;
@@ -488,15 +504,20 @@ const usePointerInteraction = () => {
 
     switch (tool) {
       case Tools.SELECT:
-        const vertexIds = removePrefix(name, EDGE).split(DEFAULT_DELIMITER);
-        const targetEdgeVertices = vertexIds.reduce((newVertices, key) => {
+        const vertexIds = removePrefix(
+          EDGE,
+          name.substring(0, name.indexOf(`${DEFAULT_DELIMITER}${SHAPE}`))
+        ).split(DEFAULT_DELIMITER);
+        const targetEdgeVertices = vertexIds.reduce((newVertices, id) => {
+          const shapeKey = name.substring(name.indexOf('SHAPE'));
+          const key = addPrefix(VERTEX, `${id}${DEFAULT_DELIMITER}${shapeKey}`);
           const value = vertices.key(key);
 
           if (value) {
             const { x, y } = value;
 
             newVertices.push({
-              name: addPrefix(key, VERTEX),
+              name: key,
               distance: translation({ x, y }, coordinates),
             });
           }
@@ -509,9 +530,9 @@ const usePointerInteraction = () => {
             const selected = areVerticesSelected(targetEdgeVertices);
 
             if (areAllVerticesSelected(targetEdgeVertices)) {
-              console.log('edgeDown all selected')
+              console.log('edgeDown all selected', targetEdgeVertices)
               setJustRemoved(true);
-              removeSelectedVertices(vertexIds.map(name => addPrefix(name, VERTEX)));
+              removeSelectedVertices(targetEdgeVertices.map(({ name }) => name));
             } else {
               console.log('edgeDown not all selected')
               addSelectedVertices(targetEdgeVertices);
@@ -527,9 +548,21 @@ const usePointerInteraction = () => {
             // }
             break;
           default:
+            const vertex1Selected = selectedVertices.hasOwnProperty(
+              addPrefix(
+                VERTEX,
+                `${vertexIds[0]}${DEFAULT_DELIMITER}${name.substring(name.indexOf(SHAPE))}`
+              )
+            );
+            const vertex2Selected = selectedVertices.hasOwnProperty(
+              addPrefix(
+                VERTEX,
+                `${vertexIds[1]}${DEFAULT_DELIMITER}${name.substring(name.indexOf(SHAPE))}`
+              )
+            );
             if (
-              !selectedVertices.hasOwnProperty(addPrefix(vertexIds[0], VERTEX)) ||
-              !selectedVertices.hasOwnProperty(addPrefix(vertexIds[1], VERTEX))
+              !vertex1Selected ||
+              !vertex2Selected
             ) {
               setSelectedVertices(targetEdgeVertices.reduce((vertices, { distance, name }) => {
                 vertices[name] = distance;
@@ -575,16 +608,12 @@ const usePointerInteraction = () => {
 
           for (const name in selectedVertices) {
             const distance = selectedVertices[name];
-
             updatedVertices.push({
-              id: removePrefix(name, VERTEX),
+              name,
               x: pointerCoordinates.x + distance.x,
               y: pointerCoordinates.y + distance.y,
-              // x: pointerCoordinates.x + distance.x,
-              // y: pointerCoordinates.y + distance.y,
             });
           }
-
           dispatch(moveVertices(updatedVertices));
         }
     }
@@ -608,7 +637,7 @@ const usePointerInteraction = () => {
         const distance = selectedVertices[name];
 
         updatedVertices.push({
-          id: removePrefix(name, VERTEX),
+          name,
           x: coordinates.x + distance.x,
           y: coordinates.y + distance.y,
         });
@@ -647,7 +676,7 @@ const usePointerInteraction = () => {
               key,
             ) => {
               newSelectedVertices.push({
-                name: addPrefix(key, VERTEX),
+                name: addPrefix(VERTEX, key),
                 distance: { x: 0, y: 0 },
               });
               return newSelectedVertices;
@@ -665,7 +694,7 @@ const usePointerInteraction = () => {
               idx,
               key
             ) => {
-              newSelectedVertices[addPrefix(key, VERTEX)] = { x: 0, y: 0 };
+              newSelectedVertices[key] = { x: 0, y: 0 };
               return newSelectedVertices;
             },
             {}
@@ -722,7 +751,7 @@ const usePointerInteraction = () => {
           case shiftKey:
             break;
           default:
-//             const vertexNames = removePrefix(name, EDGE).split(DEFAULT_DELIMITER).map(id => addPrefix(id, VERTEX));
+//             const vertexNames = removePrefix(name, EDGE).split(DEFAULT_DELIMITER).map(id => addPrefix(VERTEX, id));
 //             const queuedEdgeVertices = [];
 //             const restQueuedVertices = [];
 //

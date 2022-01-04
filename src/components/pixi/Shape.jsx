@@ -22,7 +22,7 @@ const Shape = ({
       selectedVertices={selectedVertices}
       vertices={vertices}
       closed={closed}
-      name={addPrefix(id, SHAPE)}
+      name={addPrefix(SHAPE, id)}
     />
   );
 };

@@ -425,6 +425,31 @@ const ListPrototype = Object.create({}, {
       return instanceValues[key];
     }
   },
+  setByKey: {
+    value: function(value, key) {
+      const instanceValues = getValues(this);
+
+      if (Object.hasOwnProperty.call(instanceValues, key)) {
+        instanceValues[key] = value;
+      } else {
+        this.push(value, key);
+      }
+    }
+  },
+  setByIndex: {
+    value: function(value, index) {
+      const instanceValues = getValues(this);
+      const instanceKeys = getKeys(this);
+
+      if (instanceKeys.hasOwnProperty(index)) {
+        instanceValues[instanceKeys[index]] = value;
+      } else {
+        const key = uniqueKey(instanceKeys);
+        instanceKeys[index] = key;
+        instanceValues[key] = value;
+      }
+    }
+  },
   insert: {
     /**
      * Inserts a new entry at `index`. If `index` is already set, it and all subsequent values will
@@ -441,7 +466,7 @@ const ListPrototype = Object.create({}, {
       const instanceValues = getValues(this);
       const instanceKeys = getKeys(this);
 
-      key = key ?? uniqueKey(instanceKeys)
+      key = key ?? uniqueKey(instanceKeys);
 
       // should this be cheking the index/key combination? or maybe index/key/value?
       // or should any combination overwrite what's there?
@@ -541,7 +566,7 @@ export const createArrayAccessList = (values, keys) => {
 /**
  * Constructor
  */
-const List = function(values, keys) {
+const List = function(values = [], keys = []) {
   if (!new.target) {
     return new List(values, keys);
   }
