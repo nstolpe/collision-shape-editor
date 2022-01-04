@@ -43,35 +43,35 @@ const getIconProps = (dispatch, mode, tool) => {
     edgeIconProps: {
         active: mode === Modes.EDGE,
         onClick: () => dispatch(setMode(mode === Modes.EDGE ? Modes.ALL : Modes.EDGE)),
-        title: 'edge',
+        title: 'mode: edge',
     },
     spriteIconProps: {
         active: mode === Modes.SPRITE,
         onClick: () => dispatch(setMode(mode === Modes.SPRITE ? Modes.ALL : Modes.SPRITE)),
-        title: 'sprite',
+        title: 'mode: sprite',
     },
     vertexIconProps: {
         active: mode === Modes.VERTEX,
         onClick: () => dispatch(setMode(mode === Modes.VERTEX ? Modes.ALL : Modes.VERTEX)),
-        title: 'vertex',
+        title: 'mode: vertex',
     },
     minusIconProps: {
       active: !deleteDisabled && tool === Tools.DELETE,
       disabled: deleteDisabled,
       onClick: () => dispatch(setTool(Tools.DELETE)),
-      title: 'delete',
+      title: 'tool: delete',
     },
     plusIconProps: {
       active: !addDisabled && tool === Tools.ADD,
       disabled: addDisabled,
       onClick: () => dispatch(setTool(Tools.ADD)),
-      title: 'add',
+      title: 'tool: add',
     },
     selectIconProps: {
       active: !selectDisabled && tool === Tools.SELECT,
       disabled: selectDisabled,
       onClick: () => dispatch(setTool(Tools.SELECT)),
-      title: 'select',
+      title: 'tool: select',
     },
   };
 };
