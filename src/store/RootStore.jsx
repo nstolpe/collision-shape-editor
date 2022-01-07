@@ -7,19 +7,19 @@ import {
   initialState as rootInitialState,
 } from 'reducers/root-reducer';
 import {
-  reducer as pressedKeysReducer,
-  initialState as pressedKeysInitialState,
+  reducer as modifierKeysReducer,
+  initialState as modifierKeysInitialState,
 } from 'reducers/modifier-keys-reducer';
 import combineReducers from 'tools/combine-reducers';
 
 const RootStore = ({ children }) => {
   const reducer = combineReducers(
-    pressedKeysReducer,
+    modifierKeysReducer,
     rootReducer,
   );
   const initialState = {
     ...rootInitialState,
-    ...pressedKeysInitialState
+    ...modifierKeysInitialState
   };
   const [state, dispatch] = useReducer(reducer, initialState);
 

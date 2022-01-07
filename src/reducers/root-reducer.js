@@ -9,6 +9,7 @@ import {
   MOVE_VERTICES,
   START_MOVE_VERTEX,
   STOP_MOVE_VERTEX,
+  SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
   SET_INTERACTION,
   SET_MODE,
   SET_TOOL,
@@ -29,6 +30,7 @@ import {
 import * as Modes from 'constants/modes';
 import * as Tools from 'constants/tools';
 import List from 'tools/List';
+import { getShapeVerticesRelativeToCoordinates } from 'tools/state';
 
 const vertices = [
   [
@@ -128,38 +130,6 @@ export const initialState = {
   },
 };
 
-/**
- * @TODO this needs to move whever the action is called to MOVE_VERTICES
- * that point will need access to shapes from state. currently this should be
- * in usePointerInteractions
- */
-const moveVertices = (shapes, vertices) => {
-  const newShapes = new List(shapes, shapes.keys);
-
-  for (const v of vertices) {
-    // @TODO use DEFAULT_DELIMITER
-    const [, vertexKey, , shapeKey] = v.name.split('::');
-    const shape = newShapes.key(shapeKey);
-    const vertex = shape.vertices.key(vertexKey);
-    const vertexIndex = shape.vertices.keys.indexOf(vertexKey);
-    const newVertices = shape.vertices.map(
-      (vertex, index, key) => {
-        if (key === vertexKey) {
-          return { x: v.x, y: v.y };
-        } else {
-          return vertex;
-        }
-      }
-    );
-    newShapes.setByKey({
-      ...shape,
-      vertices: newVertices,
-    }, shapeKey);
-  }
-
-  return newShapes;
-};
-
 export const reducer = (state, action) => {
   const { data, type } = action;
 
@@ -224,11 +194,17 @@ export const reducer = (state, action) => {
         movingVerticeIds: state.movingVerticeIds.filter(vid => vid !== data.id),
       };
     case MOVE_VERTICES:
-      // @TODO: this should be MOVE_SHAPE_VERTICES or something. moveVertices logic
-      // should occur before the action is called and should just send { shapes } as data
+      // @TODO this will probably be removed
+      return state;
+    case SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES:
+      getShapeVerticesRelativeToCoordinates(data.vertices, data.coordinates, state.shapes);
       return {
         ...state,
-        shapes: moveVertices(state.shapes, data.vertices),
+        shapes: getShapeVerticesRelativeToCoordinates(
+          data.vertices,
+          data.coordinates,
+          state.shapes
+        ),
       };
     case SET_INTERACTION:
       return {
