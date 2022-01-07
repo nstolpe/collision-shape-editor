@@ -5,6 +5,7 @@ import {
   DELETE_VERTEX,
   MOVE_VERTEX,
   MOVE_VERTICES,
+  SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
   START_MOVE_VERTEX,
   STOP_MOVE_VERTEX,
   SET_INTERACTION,
@@ -88,6 +89,11 @@ export const moveVertex = ({ id, x, y }) => ({
 export const moveVertices = vertices => ({
   type: MOVE_VERTICES,
   data: { vertices },
+});
+
+export const setVertexPositionsRelativeToCoordinates = (vertices, coordinates) => ({
+  type: SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
+  data: { vertices, coordinates },
 });
 
 export const startMoveVertex = id => ({
