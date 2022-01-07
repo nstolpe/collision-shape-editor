@@ -5,6 +5,7 @@ import {
   setSelectOverlayDimensions,
   setSelectOverlay,
   moveVertices,
+  setVertexPositionsRelativeToCoordinates,
 } from 'actions/actions';
 import * as Tools from 'constants/tools';
 import * as Modes from 'constants/modes';
@@ -27,7 +28,6 @@ const selector = ({
   mode,
   selectOverlay,
   tool,
-  // vertices,
   shapes,
   uiOptions: {
     vertexRadius,
@@ -614,7 +614,8 @@ const usePointerInteraction = () => {
               y: pointerCoordinates.y + distance.y,
             });
           }
-          dispatch(moveVertices(updatedVertices));
+
+          dispatch(setVertexPositionsRelativeToCoordinates(selectedVertices, pointerCoordinates));
         }
     }
 
@@ -643,7 +644,7 @@ const usePointerInteraction = () => {
         });
       }
 
-      dispatch(moveVertices(updatedVertices));
+      dispatch(setVertexPositionsRelativeToCoordinates(selectedVertices, coordinates));
     }
 
     // event.stopPropagation();

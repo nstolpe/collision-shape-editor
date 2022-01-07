@@ -427,16 +427,20 @@ const ListPrototype = Object.create({}, {
   },
   setByKey: {
     value: function(value, key) {
-      const instanceValues = getValues(this);
+      const { values, keys } = this;
 
-      if (Object.hasOwnProperty.call(instanceValues, key)) {
-        instanceValues[key] = value;
+      if (keys.includes(key)) {
+        values[keys.indexOf(key)] = value;
       } else {
-        this.push(value, key);
+        keys.push(key);
+        values[keys.indexOf(key)] = value;
       }
+
+      return new List(values, keys);
     }
   },
   setByIndex: {
+    // @TODO update this to return a new instance like setByKey
     value: function(value, index) {
       const instanceValues = getValues(this);
       const instanceKeys = getKeys(this);
