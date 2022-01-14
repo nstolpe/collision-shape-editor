@@ -6,6 +6,8 @@ import {
   MOVE_VERTEX,
   MOVE_VERTICES,
   SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
+  OPEN_SHAPE,
+  CLOSE_SHAPE,
   START_MOVE_VERTEX,
   STOP_MOVE_VERTEX,
   SET_INTERACTION,
@@ -94,6 +96,16 @@ export const moveVertices = vertices => ({
 export const setVertexPositionsRelativeToCoordinates = (vertices, coordinates) => ({
   type: SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
   data: { vertices, coordinates },
+});
+
+export const openShape = id => ({
+  type: OPEN_SHAPE,
+  data: { id },
+});
+
+export const closeShape = id => ({
+  type: CLOSE_SHAPE,
+  data: { id },
 });
 
 export const startMoveVertex = id => ({

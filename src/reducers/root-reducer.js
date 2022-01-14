@@ -10,6 +10,8 @@ import {
   START_MOVE_VERTEX,
   STOP_MOVE_VERTEX,
   SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
+  OPEN_SHAPE,
+  CLOSE_SHAPE,
   SET_INTERACTION,
   SET_MODE,
   SET_TOOL,
@@ -197,13 +199,21 @@ export const reducer = (state, action) => {
       // @TODO this will probably be removed
       return state;
     case SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES:
-      getShapeVerticesRelativeToCoordinates(data.vertices, data.coordinates, state.shapes);
       return {
         ...state,
         shapes: getShapeVerticesRelativeToCoordinates(
           data.vertices,
           data.coordinates,
           state.shapes
+        ),
+      };
+    case OPEN_SHAPE:
+      return state;
+    case CLOSE_SHAPE:
+      return {
+        ...state,
+        shapes: state.shapes.map(
+          (shape, idx, key) => key === data.id ? { ...shape, closed: true } : shape,
         ),
       };
     case SET_INTERACTION:

@@ -6,6 +6,8 @@ import {
   setSelectOverlay,
   moveVertices,
   setVertexPositionsRelativeToCoordinates,
+  openShape,
+  closeShape,
 } from 'actions/actions';
 import * as Tools from 'constants/tools';
 import * as Modes from 'constants/modes';
@@ -41,6 +43,7 @@ const selector = ({
   mode,
   selectOverlay,
   tool,
+  shapes,
   // project all the vertices into a flattened List
   vertices: shapes.reduce((vertices, shape, _, shapeKey) => {
     shape.vertices.forEach(
@@ -157,6 +160,7 @@ const usePointerInteraction = () => {
     mode,
     selectOverlay,
     tool,
+    shapes,
     vertices,
     vertexRadius,
     addModifierCode,
@@ -446,49 +450,83 @@ const usePointerInteraction = () => {
     }
   }
 
+  const handleVertexSelect = ({
+    name,
+    coordinates,
+    position,
+    addModifierKeyPressed,
+  }) => {
+    const isVertexSelected = selectedVertices.hasOwnProperty(name);
+
+    if (addModifierKeyPressed) {
+      if (isVertexSelected) {
+        removeSelectedVertex(name);
+        setJustRemoved(true);
+      } else {
+        addSelectedVertex(name, translation(coordinates, position))
+      }
+    } else {
+      if (!isVertexSelected) {
+        setSelectedVertices({ [name]: translation(coordinates, position) });
+      }
+    }
+  };
+
+  const handleVertexAdd = ({
+    name,
+  }) => {
+    const [, vertexKey, , shapeKey] = name.split(DEFAULT_DELIMITER);
+    const shape = shapes.key(shapeKey);
+    const vertex = shape.vertices.key(vertexKey);
+    console.log('add', shape, selectedVertices);
+    if (!shape.closed && Object.keys(selectedVertices).length === 1) {
+      if (shape.vertices.last === vertex) {
+        const [, selectedVertexKey] = Object.keys(selectedVertices)[0].split(DEFAULT_DELIMITER);
+        if (selectedVertexKey === shape.vertices.keys[0]) {
+          // close shape
+          console.log('close shape a')
+          dispatch(closeShape(shapeKey));
+        }
+      }
+
+      if (shape.vertices.first === vertex) {
+        const [, selectedVertexKey] = Object.keys(selectedVertices)[0].split(DEFAULT_DELIMITER);
+        if (selectedVertexKey === shape.vertices.keys[shape.vertices.length - 1]) {
+          // close shape
+          console.log('close shape b')
+          dispatch(closeShape(shapeKey));
+        }
+      }
+    }
+  };
+
   const handlePointerDownVertex = (event, coordinates) => {
     const {
       data: {
         identifier,
       } = {},
-      target: { name } = {},
+      target: {
+        name,
+        position,
+      } = {},
     } = event;
 
     updateTranslations(coordinates);
 
-    switch (true) {
-      case addModifierKeyPressed:
-        switch (tool) {
-          // case Tools.ADD:
-          //   break;
-          // case Tools.DELETE:
-          //   break;
-          case Tools.SELECT:
-          default:
-            const isVertexSelected = selectedVertices.hasOwnProperty(event.target.name);
-
-            if (isVertexSelected) {
-              removeSelectedVertex(event.target.name);
-              setJustRemoved(true);
-            } else {
-              addSelectedVertex(event.target.name, translation(coordinates, event.target.position))
-            }
-        }
+    switch (tool) {
+      case Tools.ADD:
+        handleVertexAdd({
+          name,
+        });
         break;
+      case Tools.SELECT:
       default:
-        switch (tool) {
-          // case Tools.ADD:
-          //   break;
-          // case Tools.DELETE:
-          //   break;
-          case Tools.SELECT:
-          default:
-            const isVertexSelected = selectedVertices.hasOwnProperty(event.target.name);
-
-            if (!isVertexSelected) {
-              setSelectedVertices({ [event.target.name]: translation(coordinates, event.target.position)} );
-            }
-        }
+        handleVertexSelect({
+          name,
+          coordinates,
+          position,
+          addModifierKeyPressed,
+        });
     }
   };
 
