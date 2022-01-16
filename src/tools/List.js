@@ -404,7 +404,7 @@ const ListPrototype = Object.create({}, {
    * Gets the value at index 0.
    */
   first: {
-    value: function() {
+    get() {
       return this.index(0);
     },
   },
@@ -412,7 +412,7 @@ const ListPrototype = Object.create({}, {
    * Gets the value at the last index.
    */
   last: {
-    value: function() {
+    get() {
       return this.index(this.length - 1);
     },
   },
