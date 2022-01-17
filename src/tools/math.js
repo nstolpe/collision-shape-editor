@@ -80,3 +80,47 @@ export const interval = (callback, interval) => {
 
   return () => cancel();
 };
+
+/**
+ * Takes 3 points. The first two define a line segment. The third
+ * is a point not on the segment. Returns an array [x, y] of the
+ * closest point.
+ */
+export const closestPointOnSegment = (s1, s2, point) => {
+  const s1x = s1?.x ?? s1?.[0];
+  const s1y = s1?.y ?? s1?.[1];
+  const s2x = s2?.x ?? s2?.[0];
+  const s2y = s2?.y ?? s2?.[1];
+
+  if (![s1x, s1y, s2x, s2y].every(n => !Number.isNaN(parseFloat(n)))) {
+    // throw error or return null or something
+  }
+
+  const dX = s2x - s1x;
+  const dY = s2y - s1y;
+
+  if (dX === 0 && dY === 0) {
+    return [dX, dY];
+  }
+
+  const u = (
+    (((point.x - s1x) * dX) + ((point.y - s1y) * dY)) /
+    (((dX * dX) + (dY * dY)))
+  );
+
+  let closestPoint;
+
+  switch (true) {
+    case u < 0:
+      return [s1x, s1y];
+      break;
+    case u > 1:
+      return [s2x, s2y];
+      break;
+    default:
+      return [
+        s1x + (u * dX),
+        s1y + (u * dY),
+      ];
+  }
+};

@@ -2,7 +2,7 @@
 import {
   SET_ROOT_CONTAINER,
   ADD_VERTEX,
-  INSERT_VERTEX,
+  INSERT_VERTEX_AFTER,
   DELETE_VERTEX,
   MOVE_VERTEX,
   MOVE_VERTICES,
@@ -77,7 +77,7 @@ export const addVertex = ({ x, y }) => ({
 });
 
 export const insertVertex = ({ shapeKey, vertexKey, x, y }) => ({
-  type: INSERT_VERTEX,
+  type: INSERT_VERTEX_AFTER,
   data: { shapeKey, vertexKey, x, y },
 });
 
