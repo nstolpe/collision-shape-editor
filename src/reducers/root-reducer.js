@@ -4,6 +4,7 @@ import { v4 as uuid } from 'uuid';
 import {
   SET_ROOT_CONTAINER,
   ADD_VERTEX,
+  INSERT_VERTEX,
   DELETE_VERTEX,
   MOVE_VERTEX,
   MOVE_VERTICES,
@@ -174,6 +175,26 @@ export const reducer = (state, action) => {
       return {
         ...state,
         vertices: List([...state.vertices, { x: data.x, y: data.y, id: uuid() }]),
+      };
+    case INSERT_VERTEX:
+      return {
+        ...state,
+        shapes: state.shapes.splice(
+          {
+            start: state.shapes.indexOfKey(data.shapeKey),
+            deleteCount: 1,
+          },
+          {
+            ...state.shapes.key(data.shapeKey),
+            vertices: state.shapes.key(data.shapeKey).vertices.splice(
+              {
+                start: state.shapes.key(data.shapeKey).vertices.indexOfKey(data.vertexKey) + 1,
+                deleteCount: 0,
+              },
+              { x: data.x, y: data.y },
+            ),
+          },
+        ),
       };
     case DELETE_VERTEX:
       return {

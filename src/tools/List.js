@@ -139,6 +139,13 @@ const ListPrototype = Object.create({}, {
       return values.indexOf(value);
     },
   },
+  indexOfKey: {
+    value: function(key) {
+      const { keys } = this;
+
+      return keys.indexOf(key);
+    },
+  },
   lastIndexOf: {
     value: function(value) {
       const { values } = this;
@@ -261,28 +268,23 @@ const ListPrototype = Object.create({}, {
     },
   },
   splice: {
-    /* @TODO handle optional keys */
-    value: function(start, deleteCount, ...values) {
-      const instanceKeys = getKeys(this);
-      const instanceValues = getValues(this);
+    /**
+     * Splices at an index, like Array.prototype.splice. It returns a new List though.
+     * The `newKeys` argument allows for an array of new keys to be passed
+     */
+    value: function({ start, deleteCount, newKeys }, ...newValues) {
+      const { keys, values } = this;
 
-      const newKeys = values.map((value, index) => {
-        const key = uniqueKey(instanceKeys);
-        instanceValues[key] = value;
+      newKeys = Array.isArray(newKeys) ? newKeys : [];
 
-        return key;
-      });
+      for (let i = 0, l = newValues.length; i < l; i++) {
+        newKeys[i] = newKeys[i] ?? uniqueKey([...keys, ...newKeys]);
+      }
 
-      /* @TODO return a new List with spliced keys too */
-      return instanceKeys
-        .splice(start, deleteCount, ...newKeys)
-        .map(key => {
-          const value = instanceValues[key];
+      values.splice(start, deleteCount, ...newValues);
+      keys.splice(start, deleteCount, ...newKeys);
 
-          delete instanceValues[key];
-
-          return value;
-        });
+      return new List(values, keys);
     },
   },
   unshift: {
@@ -304,7 +306,7 @@ const ListPrototype = Object.create({}, {
    */
   deleteByIndex: {
     value: function(index) {
-      return this.splice(index, 1)[0];
+      return this.splice({ start: index, deleteCount: 1 })[0];
     }
   },
   /* @TODO handle with proxy deleteHandler for strings/numbers that == an index*/
@@ -457,36 +459,31 @@ const ListPrototype = Object.create({}, {
   insert: {
     /**
      * Inserts a new entry at `index`. If `index` is already set, it and all subsequent values will
-     * see their `index` value rise by 1. Shortcut to `List.prototype.splice(index, 0, value)` that
-     * returns the object property for the new value.
+     * see their `index` value rise by 1.
      *
      * @param {any}     value  The value to be stored in the list
      * @param {number}  index  The index to store the value
-     * @return {string} key    The key to access the value as a property instead of array index
+     * @return {List}   A new List with the inserted value
      *
-     * @TODO probably should check for duplicate keys.
+     * @TODO probably should check for duplicate keys. Also, this test is broken.
      */
     value: function(value, index, key) {
-      const instanceValues = getValues(this);
-      const instanceKeys = getKeys(this);
+      const { keys, values } = this;
 
-      key = key ?? uniqueKey(instanceKeys);
+      key = key ?? uniqueKey(keys);
 
-      // should this be cheking the index/key combination? or maybe index/key/value?
+      // should this be checking the index/key combination? or maybe index/key/value?
       // or should any combination overwrite what's there?
-      if (instanceValues.hasOwnProperty(key)) {
+      if (keys.includes(key)) {
         throw new Error(`key ${key} already exists`)
       }
 
-      instanceValues[key] = value;
-      instanceKeys.splice(index, 0, key);
+      values.splice(index, 0, value);
+      keys.splice(key, 0, key);
 
-      return Object.entries(instanceValues).reduce(
-        (result, [currentKey, currentValue], currentIndex) => value === currentValue ? currentKey : result
-      );
+      return new List(values, keys);
     },
   },
-
   /**
    * Removes all values and keysfrom List and replaces them with new ones.
    */

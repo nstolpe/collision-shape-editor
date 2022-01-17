@@ -2,6 +2,7 @@
 import {
   SET_ROOT_CONTAINER,
   ADD_VERTEX,
+  INSERT_VERTEX,
   DELETE_VERTEX,
   MOVE_VERTEX,
   MOVE_VERTICES,
@@ -73,6 +74,11 @@ export const setSelectOverlay = data => {
 export const addVertex = ({ x, y }) => ({
   type: ADD_VERTEX,
   data: { x, y },
+});
+
+export const insertVertex = ({ shapeKey, vertexKey, x, y }) => ({
+  type: INSERT_VERTEX,
+  data: { shapeKey, vertexKey, x, y },
 });
 
 export const deleteVertex = id => ({

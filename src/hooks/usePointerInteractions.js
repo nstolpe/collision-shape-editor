@@ -2,6 +2,7 @@
 import { useState } from 'react';
 
 import {
+  insertVertex,
   setSelectOverlayDimensions,
   setSelectOverlay,
   moveVertices,
@@ -472,19 +473,21 @@ const usePointerInteraction = () => {
     }
   };
 
-  const handleVertexAdd = ({
+  /**
+   * Checks if the conditions are right to close a shape (first or last vertex
+   * of an open shape is selected and the last or first is clicked).
+   */
+  const handleCloseShape = ({
     name,
   }) => {
     const [, vertexKey, , shapeKey] = name.split(DEFAULT_DELIMITER);
     const shape = shapes.key(shapeKey);
     const vertex = shape.vertices.key(vertexKey);
-    console.log('add', shape, selectedVertices);
+
     if (!shape.closed && Object.keys(selectedVertices).length === 1) {
       if (shape.vertices.last === vertex) {
         const [, selectedVertexKey] = Object.keys(selectedVertices)[0].split(DEFAULT_DELIMITER);
         if (selectedVertexKey === shape.vertices.keys[0]) {
-          // close shape
-          console.log('close shape a')
           dispatch(closeShape(shapeKey));
         }
       }
@@ -492,8 +495,6 @@ const usePointerInteraction = () => {
       if (shape.vertices.first === vertex) {
         const [, selectedVertexKey] = Object.keys(selectedVertices)[0].split(DEFAULT_DELIMITER);
         if (selectedVertexKey === shape.vertices.keys[shape.vertices.length - 1]) {
-          // close shape
-          console.log('close shape b')
           dispatch(closeShape(shapeKey));
         }
       }
@@ -515,7 +516,7 @@ const usePointerInteraction = () => {
 
     switch (tool) {
       case Tools.ADD:
-        handleVertexAdd({
+        handleCloseShape({
           name,
         });
         break;
@@ -530,6 +531,14 @@ const usePointerInteraction = () => {
     }
   };
 
+  const handleAddVertexToEdge = ({ coordinates, name }) => {
+    const [, vertexKey, vertexKey2, , shapeKey] = name.split(DEFAULT_DELIMITER);
+    // const shape = shapes.key(shapeKey);
+    // const vertex1 = shape.vertices.key(vertexKey);
+    // const vertex2 = shape.vertices.key(vertexKey2);
+    dispatch(insertVertex({ ...coordinates, shapeKey, vertexKey }));
+  };
+
   const handlePointerDownEdge = (event, coordinates) => {
     const {
       data: {
@@ -541,6 +550,9 @@ const usePointerInteraction = () => {
     updateTranslations(coordinates);
 
     switch (tool) {
+      case Tools.ADD:
+        handleAddVertexToEdge({ coordinates, name });
+        break;
       case Tools.SELECT:
         const vertexIds = removePrefix(
           EDGE,
