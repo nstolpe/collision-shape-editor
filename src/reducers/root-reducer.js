@@ -4,7 +4,7 @@ import { v4 as uuid } from 'uuid';
 import {
   SET_ROOT_CONTAINER,
   ADD_VERTEX,
-  INSERT_VERTEX,
+  INSERT_VERTEX_AFTER,
   DELETE_VERTEX,
   MOVE_VERTEX,
   MOVE_VERTICES,
@@ -171,31 +171,30 @@ export const reducer = (state, action) => {
         },
       };
     case ADD_VERTEX:
-      console.log(ADD_VERTEX)
       return {
         ...state,
-        vertices: List([...state.vertices, { x: data.x, y: data.y, id: uuid() }]),
+        vertices: List([...state.vertices, { x: data.x, y: data.y }]),
       };
-    case INSERT_VERTEX:
-      return {
-        ...state,
-        shapes: state.shapes.splice(
-          {
-            start: state.shapes.indexOfKey(data.shapeKey),
-            deleteCount: 1,
-          },
-          {
-            ...state.shapes.key(data.shapeKey),
-            vertices: state.shapes.key(data.shapeKey).vertices.splice(
-              {
-                start: state.shapes.key(data.shapeKey).vertices.indexOfKey(data.vertexKey) + 1,
-                deleteCount: 0,
-              },
-              { x: data.x, y: data.y },
-            ),
-          },
-        ),
-      };
+    case INSERT_VERTEX_AFTER: {
+      const { shapeKey, vertexKey, x, y } = data;
+      const shape = state.shapes.key(shapeKey);
+      const vertices = shape.vertices.splice(
+        {
+          start: shape.vertices.indexOfKey(vertexKey) + 1,
+          deleteCount: 0,
+        },
+        { x, y },
+      );
+      const shapes = state.shapes.splice(
+        {
+          start: state.shapes.indexOf(shape),
+          deleteCount: 1,
+        },
+        { ...shape, vertices },
+      );
+
+      return { ...state, shapes };
+    }
     case DELETE_VERTEX:
       return {
         ...state,

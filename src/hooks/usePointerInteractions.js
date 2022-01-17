@@ -14,7 +14,11 @@ import * as Tools from 'constants/tools';
 import * as Modes from 'constants/modes';
 import ScreenContext from 'contexts/ScreenContext';
 import List from 'tools/List';
-import { translation, withinAABB } from 'tools/math';
+import {
+  closestPointOnSegment,
+  translation,
+  withinAABB,
+} from 'tools/math';
 import {
   DEFAULT_DELIMITER,
   addPrefix,
@@ -46,6 +50,7 @@ const selector = ({
   tool,
   shapes,
   // project all the vertices into a flattened List
+  // @TODO move this to util: Projections.flattenShapeVertices(shapes);
   vertices: shapes.reduce((vertices, shape, _, shapeKey) => {
     shape.vertices.forEach(
       (vertex, _, vertexKey) => {
@@ -280,6 +285,105 @@ const usePointerInteraction = () => {
       return currentSelectedVertices;
     });
   };
+  /***********************************************************************************
+   * End events, these will eventually receive the event data and dispatch an action *
+   ***********************************************************************************/
+  const handleAddVertexToEdge = (coordinates, name) => {
+    const [, vertexKey, vertexKey2, , shapeKey] = name.split(DEFAULT_DELIMITER);
+    const vertex1 = vertices.key(
+      `${VERTEX}${DEFAULT_DELIMITER}${vertexKey}${DEFAULT_DELIMITER}${SHAPE}${DEFAULT_DELIMITER}${shapeKey}`
+    );
+    const vertex2 = vertices.key(
+      `${VERTEX}${DEFAULT_DELIMITER}${vertexKey2}${DEFAULT_DELIMITER}${SHAPE}${DEFAULT_DELIMITER}${shapeKey}`
+    );
+    const [x, y] = closestPointOnSegment(vertex1, vertex2, coordinates);
+
+    dispatch(insertVertex({ shapeKey, vertexKey, x, y }));
+  };
+
+  /**
+   * Checks if the conditions are right to close a shape (first or last vertex
+   * of an open shape is selected and the last or first is clicked).
+   */
+  const handleCloseShape = ({
+    name,
+  }) => {
+    const [, vertexKey, , shapeKey] = name.split(DEFAULT_DELIMITER);
+    const shape = shapes.key(shapeKey);
+    const vertex = shape.vertices.key(vertexKey);
+
+    if (!shape.closed && Object.keys(selectedVertices).length === 1) {
+      if (shape.vertices.last === vertex) {
+        const [, selectedVertexKey] = Object.keys(selectedVertices)[0].split(DEFAULT_DELIMITER);
+        if (selectedVertexKey === shape.vertices.keys[0]) {
+          dispatch(closeShape(shapeKey));
+        }
+      }
+
+      if (shape.vertices.first === vertex) {
+        const [, selectedVertexKey] = Object.keys(selectedVertices)[0].split(DEFAULT_DELIMITER);
+        if (selectedVertexKey === shape.vertices.keys[shape.vertices.length - 1]) {
+          dispatch(closeShape(shapeKey));
+        }
+      }
+    }
+  };
+
+  const handleSelectEdge = (coordinates, name) => {
+    const [, vertexId1, vertexId2] = name.split(DEFAULT_DELIMITER);
+    const targetEdgeVertices = [vertexId1, vertexId2].reduce((newVertices, id) => {
+      const shapeKey = name.substring(name.indexOf('SHAPE'));
+      const key = addPrefix(VERTEX, `${id}${DEFAULT_DELIMITER}${shapeKey}`);
+      const value = vertices.key(key);
+
+      if (value) {
+        const { x, y } = value;
+
+        newVertices.push({
+          name: key,
+          distance: translation({ x, y }, coordinates),
+        });
+      }
+
+      return newVertices;
+    }, []);
+
+    switch (true) {
+      case addModifierKeyPressed:
+        const selected = areVerticesSelected(targetEdgeVertices);
+
+        if (areAllVerticesSelected(targetEdgeVertices)) {
+          setJustRemoved(true);
+          removeSelectedVertices(targetEdgeVertices.map(({ name }) => name));
+        } else {
+          addSelectedVertices(targetEdgeVertices);
+        }
+        break;
+      default:
+        const vertex1Selected = selectedVertices.hasOwnProperty(
+          addPrefix(
+            VERTEX,
+            `${vertexId1}${DEFAULT_DELIMITER}${name.substring(name.indexOf(SHAPE))}`
+          )
+        );
+        const vertex2Selected = selectedVertices.hasOwnProperty(
+          addPrefix(
+            VERTEX,
+            `${vertexId2}${DEFAULT_DELIMITER}${name.substring(name.indexOf(SHAPE))}`
+          )
+        );
+        if (
+          !vertex1Selected ||
+          !vertex2Selected
+        ) {
+          setSelectedVertices(targetEdgeVertices.reduce((vertices, { distance, name }) => {
+            vertices[name] = distance;
+            return vertices;
+          }, {}));
+        }
+    }
+  };
+
   /****************************************************************************************
    * Main pointer events, catch all interactions and pass them to more specific handlers. *
    ***************************************************************************************/
@@ -473,34 +577,6 @@ const usePointerInteraction = () => {
     }
   };
 
-  /**
-   * Checks if the conditions are right to close a shape (first or last vertex
-   * of an open shape is selected and the last or first is clicked).
-   */
-  const handleCloseShape = ({
-    name,
-  }) => {
-    const [, vertexKey, , shapeKey] = name.split(DEFAULT_DELIMITER);
-    const shape = shapes.key(shapeKey);
-    const vertex = shape.vertices.key(vertexKey);
-
-    if (!shape.closed && Object.keys(selectedVertices).length === 1) {
-      if (shape.vertices.last === vertex) {
-        const [, selectedVertexKey] = Object.keys(selectedVertices)[0].split(DEFAULT_DELIMITER);
-        if (selectedVertexKey === shape.vertices.keys[0]) {
-          dispatch(closeShape(shapeKey));
-        }
-      }
-
-      if (shape.vertices.first === vertex) {
-        const [, selectedVertexKey] = Object.keys(selectedVertices)[0].split(DEFAULT_DELIMITER);
-        if (selectedVertexKey === shape.vertices.keys[shape.vertices.length - 1]) {
-          dispatch(closeShape(shapeKey));
-        }
-      }
-    }
-  };
-
   const handlePointerDownVertex = (event, coordinates) => {
     const {
       data: {
@@ -531,14 +607,6 @@ const usePointerInteraction = () => {
     }
   };
 
-  const handleAddVertexToEdge = ({ coordinates, name }) => {
-    const [, vertexKey, vertexKey2, , shapeKey] = name.split(DEFAULT_DELIMITER);
-    // const shape = shapes.key(shapeKey);
-    // const vertex1 = shape.vertices.key(vertexKey);
-    // const vertex2 = shape.vertices.key(vertexKey2);
-    dispatch(insertVertex({ ...coordinates, shapeKey, vertexKey }));
-  };
-
   const handlePointerDownEdge = (event, coordinates) => {
     const {
       data: {
@@ -551,75 +619,10 @@ const usePointerInteraction = () => {
 
     switch (tool) {
       case Tools.ADD:
-        handleAddVertexToEdge({ coordinates, name });
+        handleAddVertexToEdge(coordinates, name);
         break;
       case Tools.SELECT:
-        const vertexIds = removePrefix(
-          EDGE,
-          name.substring(0, name.indexOf(`${DEFAULT_DELIMITER}${SHAPE}`))
-        ).split(DEFAULT_DELIMITER);
-        const targetEdgeVertices = vertexIds.reduce((newVertices, id) => {
-          const shapeKey = name.substring(name.indexOf('SHAPE'));
-          const key = addPrefix(VERTEX, `${id}${DEFAULT_DELIMITER}${shapeKey}`);
-          const value = vertices.key(key);
-
-          if (value) {
-            const { x, y } = value;
-
-            newVertices.push({
-              name: key,
-              distance: translation({ x, y }, coordinates),
-            });
-          }
-
-          return newVertices;
-        }, []);
-
-        switch (true) {
-          case addModifierKeyPressed:
-            const selected = areVerticesSelected(targetEdgeVertices);
-
-            if (areAllVerticesSelected(targetEdgeVertices)) {
-              console.log('edgeDown all selected', targetEdgeVertices)
-              setJustRemoved(true);
-              removeSelectedVertices(targetEdgeVertices.map(({ name }) => name));
-            } else {
-              console.log('edgeDown not all selected')
-              addSelectedVertices(targetEdgeVertices);
-            }
-            // const addVertices = targetEdgeVertices.reduce((acc, vertex) => {
-            //   if (selected[vertex.name]) {
-            //     acc.push(vertex);
-            //   }
-            //   return acc;
-            // }, []);
-            // if (addVertices.length) {
-            //   addSelectedVertices(addVertices);
-            // }
-            break;
-          default:
-            const vertex1Selected = selectedVertices.hasOwnProperty(
-              addPrefix(
-                VERTEX,
-                `${vertexIds[0]}${DEFAULT_DELIMITER}${name.substring(name.indexOf(SHAPE))}`
-              )
-            );
-            const vertex2Selected = selectedVertices.hasOwnProperty(
-              addPrefix(
-                VERTEX,
-                `${vertexIds[1]}${DEFAULT_DELIMITER}${name.substring(name.indexOf(SHAPE))}`
-              )
-            );
-            if (
-              !vertex1Selected ||
-              !vertex2Selected
-            ) {
-              setSelectedVertices(targetEdgeVertices.reduce((vertices, { distance, name }) => {
-                vertices[name] = distance;
-                return vertices;
-              }, {}));
-            }
-        }
+        handleSelectEdge(coordinates, name);
         break;
       default:
         // nothing
