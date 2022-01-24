@@ -195,11 +195,32 @@ export const reducer = (state, action) => {
 
       return { ...state, shapes };
     }
-    case DELETE_VERTEX:
-      return {
-        ...state,
-        vertices: state.vertices.filter(vertex => vertex.id !== data.id),
-      };
+    case DELETE_VERTEX: {
+      console.log(DELETE_VERTEX);
+      const { shapeKey, vertexKey } = data;
+      const shape = state.shapes.key(shapeKey);
+      const vertices = shape.vertices.splice(
+        {
+          start: shape.vertices.indexOfKey(vertexKey),
+          deleteCount: 1,
+        }
+      );
+      const shapes = vertices.length > 0 ?
+        state.shapes.splice(
+          {
+            start: state.shapes.indexOf(shape),
+            deleteCount: 1,
+          },
+          { ...shape, vertices },
+        ) :
+        state.shapes.splice(
+          {
+            start: state.shapes.indexOf(shape),
+            deleteCount: 1,
+          },
+        );
+      return { ...state, shapes };
+    }
     case MOVE_VERTEX:
       return {
         ...state,

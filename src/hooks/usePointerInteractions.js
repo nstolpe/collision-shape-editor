@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import {
   insertVertex,
+  deleteVertex,
   setSelectOverlayDimensions,
   setSelectOverlay,
   moveVertices,
@@ -301,6 +302,33 @@ const usePointerInteraction = () => {
     dispatch(insertVertex({ shapeKey, vertexKey, x, y }));
   };
 
+  const handleVertexSelect = ({
+    name,
+    coordinates,
+    position,
+    addModifierKeyPressed,
+  }) => {
+    const isVertexSelected = selectedVertices.hasOwnProperty(name);
+
+    if (addModifierKeyPressed) {
+      if (isVertexSelected) {
+        removeSelectedVertex(name);
+        setJustRemoved(true);
+      } else {
+        addSelectedVertex(name, translation(coordinates, position))
+      }
+    } else {
+      if (!isVertexSelected) {
+        setSelectedVertices({ [name]: translation(coordinates, position) });
+      }
+    }
+  };
+
+  const handleVertexDelete = name => {
+    const [, vertexKey, , shapeKey] = name.split(DEFAULT_DELIMITER);
+    dispatch(deleteVertex({ shapeKey, vertexKey }));
+  };
+
   /**
    * Checks if the conditions are right to close a shape (first or last vertex
    * of an open shape is selected and the last or first is clicked).
@@ -555,28 +583,6 @@ const usePointerInteraction = () => {
     }
   }
 
-  const handleVertexSelect = ({
-    name,
-    coordinates,
-    position,
-    addModifierKeyPressed,
-  }) => {
-    const isVertexSelected = selectedVertices.hasOwnProperty(name);
-
-    if (addModifierKeyPressed) {
-      if (isVertexSelected) {
-        removeSelectedVertex(name);
-        setJustRemoved(true);
-      } else {
-        addSelectedVertex(name, translation(coordinates, position))
-      }
-    } else {
-      if (!isVertexSelected) {
-        setSelectedVertices({ [name]: translation(coordinates, position) });
-      }
-    }
-  };
-
   const handlePointerDownVertex = (event, coordinates) => {
     const {
       data: {
@@ -595,6 +601,9 @@ const usePointerInteraction = () => {
         handleCloseShape({
           name,
         });
+        break;
+      case Tools.DELETE:
+        handleVertexDelete(name);
         break;
       case Tools.SELECT:
       default:

@@ -81,9 +81,9 @@ export const insertVertex = ({ shapeKey, vertexKey, x, y }) => ({
   data: { shapeKey, vertexKey, x, y },
 });
 
-export const deleteVertex = id => ({
+export const deleteVertex = ({ shapeKey, vertexKey }) => ({
   type: DELETE_VERTEX,
-  data: { id },
+  data: { shapeKey, vertexKey },
 });
 
 export const moveVertex = ({ id, x, y }) => ({
