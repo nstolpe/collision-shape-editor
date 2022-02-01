@@ -271,6 +271,11 @@ const ListPrototype = Object.create({}, {
     /**
      * Splices at an index, like Array.prototype.splice. It returns a new List though.
      * The `newKeys` argument allows for an array of new keys to be passed
+     *
+     * @param {number} start
+     * @param {number} deleteCount
+     * @param {array}  newKeys
+     * @param {...any} newValues
      */
     value: function({ start, deleteCount, newKeys }, ...newValues) {
       const { keys, values } = this;

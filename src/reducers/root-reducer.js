@@ -198,28 +198,144 @@ export const reducer = (state, action) => {
     case DELETE_VERTEX: {
       console.log(DELETE_VERTEX);
       const { shapeKey, vertexKey } = data;
-      const shape = state.shapes.key(shapeKey);
-      const vertices = shape.vertices.splice(
-        {
-          start: shape.vertices.indexOfKey(vertexKey),
-          deleteCount: 1,
+      const { shapes } = state;
+      const shape = shapes.key(shapeKey);
+      const vertex = shape.vertices.key(vertexKey);
+      const { closed, vertices } = shape;
+      // const vertices = shape.vertices.splice(
+      //   {
+      //     start: shape.vertices.indexOfKey(vertexKey),
+      //     deleteCount: 1,
+      //   }
+      // );
+
+      switch (true) {
+        case vertices.length <= 1: {
+          // last vertex, remove the shape.
+          const newShapes = shapes.splice(
+            {
+              start: shapes.indexOf(shape),
+              deleteCount: 1,
+            }
+          );
+
+          return { ...state, shapes: newShapes };
         }
-      );
-      const shapes = vertices.length > 0 ?
-        state.shapes.splice(
-          {
-            start: state.shapes.indexOf(shape),
-            deleteCount: 1,
-          },
-          { ...shape, vertices },
-        ) :
-        state.shapes.splice(
-          {
-            start: state.shapes.indexOf(shape),
-            deleteCount: 1,
-          },
-        );
-      return { ...state, shapes };
+        case (
+          vertex !== shape.vertices.first &&
+          vertex !== shape.vertices.last &&
+          closed
+        ): {
+          // first vertex deleted from closed shape, make vertices to
+          // either side of vertex into new first and last
+          const vertexIndex = vertices.indexOf(vertex);
+          const keys = [];
+          const values = [];
+
+          for (let i = 1, l = vertices.length; i < l; i++) {
+            const idx = (vertexIndex + i) % l;
+            keys.push(vertices.keys[idx]);
+            values.push(vertices.values[idx]);
+          }
+
+          const newVertices = new List(values, keys);
+          const newShapes = shapes.splice(
+            {
+              start: shapes.indexOf(shape),
+              deleteCount: 1,
+            },
+            { vertices: newVertices, closed: false },
+          );
+          return { ...state, shapes: newShapes };
+        }
+        case (
+          vertex !== shape.vertices.first &&
+          vertex !== shape.vertices.last
+        ): {
+          // 2 open shapes are created from remaining vertices
+          const vertexIndex = vertices.indexOf(vertex);
+          const keys1 = [];
+          const keys2 = [];
+          const values1 = [];
+          const values2 = [];
+
+          for (let i = 0; i < vertexIndex; i++) {
+            keys1.push(vertices.keys[i]);
+            values1.push(vertices.values[i]);
+          }
+
+          for (let i = vertexIndex + 1, l = vertices.length; i < l; i++) {
+            keys2.push(vertices.keys[i]);
+            values2.push(vertices.values[i]);
+          }
+
+          const newVertices1 = new List(values1, keys1);
+          const newVertices2 = new List(values2, keys2);
+          const newShapes = shapes.splice(
+            {
+              start: shapes.indexOf(shape),
+              deleteCount: 1,
+            },
+            { vertices: newVertices1, closed: false },
+            { vertices: newVertices2, closed: false },
+          );
+          return { ...state, shapes: newShapes }
+        }
+        case vertex === shape.vertices.first: {
+          const newShapes = shapes.splice(
+            {
+              start: shapes.indexOf(shape),
+              deleteCount: 1,
+            },
+            {
+              vertices: vertices.splice(
+                {
+                  start: 0,
+                  deleteCount: 1,
+                }
+              ),
+              closed: false,
+            }
+          );
+          return { ...state, shapes: newShapes };
+        }
+        case vertex === shape.vertices.last: {
+          const newShapes = shapes.splice(
+            {
+              start: shapes.indexOf(shape),
+              deleteCount: 1,
+            },
+            {
+              vertices: vertices.splice(
+                {
+                  start: vertices.indexOf(vertex),
+                  deleteCount: 1,
+                }
+              ),
+              closed: false,
+            }
+          );
+          return { ...state, shapes: newShapes };
+        }
+        default:
+          return state;
+      }
+
+      // const shapes = vertices.length > 0 ?
+      //   state.shapes.splice(
+      //     {
+      //       start: state.shapes.indexOf(shape),
+      //       deleteCount: 1,
+      //     },
+      //     { ...shape, vertices, closed: false },
+      //   ) :
+      //   state.shapes.splice(
+      //     {
+      //       start: state.shapes.indexOf(shape),
+      //       deleteCount: 1,
+      //     },
+      //   );
+      // return { ...state, shapes };
     }
     case MOVE_VERTEX:
       return {
