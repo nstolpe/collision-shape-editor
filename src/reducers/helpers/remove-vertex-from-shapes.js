@@ -1,7 +1,7 @@
-// src/reducers/helpers/delete-vertex.js
+// src/reducers/helpers/remove-vertex-from-shapes.js
 import List from 'tools/List';
 
-const deleteVertex = (shapes, shapeKey, vertexKey) => {
+const removeVertexFromShapes = (shapes, shapeKey, vertexKey) => {
   const shape = shapes.key(shapeKey);
   const vertex = shape.vertices.key(vertexKey);
   const { closed, vertices } = shape;
@@ -121,4 +121,4 @@ const deleteVertex = (shapes, shapeKey, vertexKey) => {
   }
 };
 
-export default deleteVertex;
+export default removeVertexFromShapes;

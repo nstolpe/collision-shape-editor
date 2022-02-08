@@ -302,12 +302,7 @@ const usePointerInteraction = () => {
     dispatch(insertVertex({ shapeKey, vertexKey, x, y }));
   };
 
-  const handleVertexSelect = ({
-    name,
-    coordinates,
-    position,
-    addModifierKeyPressed,
-  }) => {
+  const handleVertexSelect = ({ name, coordinates, position, addModifierKeyPressed }) => {
     const isVertexSelected = selectedVertices.hasOwnProperty(name);
 
     if (addModifierKeyPressed) {
@@ -333,27 +328,37 @@ const usePointerInteraction = () => {
    * Checks if the conditions are right to close a shape (first or last vertex
    * of an open shape is selected and the last or first is clicked).
    */
-  const handleCloseShape = ({
-    name,
-  }) => {
+  const handleAddClickOnVertex = ({ coordinates, name, position }) => {
     const [, vertexKey, , shapeKey] = name.split(DEFAULT_DELIMITER);
     const shape = shapes.key(shapeKey);
     const vertex = shape.vertices.key(vertexKey);
 
     if (!shape.closed && Object.keys(selectedVertices).length === 1) {
+      // the shape is open and only one vertex is selected. This could potentially close the shape.
       if (shape.vertices.last === vertex) {
+        // the vertex is the last vertex of the shape, if the other is the first vertex...
         const [, selectedVertexKey] = Object.keys(selectedVertices)[0].split(DEFAULT_DELIMITER);
         if (selectedVertexKey === shape.vertices.keys[0]) {
+          // ...close it
+          addSelectedVertex(name, translation(coordinates, position));
+          setSelectedVertices({});
           dispatch(closeShape(shapeKey));
         }
       }
 
       if (shape.vertices.first === vertex) {
+        // the vertex is the first vertex of the shape, if the other is the first vertex...
         const [, selectedVertexKey] = Object.keys(selectedVertices)[0].split(DEFAULT_DELIMITER);
         if (selectedVertexKey === shape.vertices.keys[shape.vertices.length - 1]) {
+          // ...close it
+          // addSelectedVertex(name, translation(coordinates, position));
+          setSelectedVertices({});
           dispatch(closeShape(shapeKey));
         }
       }
+    } else if (!shape.closed && ([shape.vertices.first, shape.vertices.last].includes(vertex))) {
+      // if the target vertex is the first or last of an open shape, select only that vertex
+      setSelectedVertices({ [name]: translation(coordinates, position) });
     }
   };
 
@@ -598,8 +603,10 @@ const usePointerInteraction = () => {
 
     switch (tool) {
       case Tools.ADD:
-        handleCloseShape({
+        handleAddClickOnVertex({
           name,
+          coordinates,
+          position,
         });
         break;
       case Tools.DELETE:

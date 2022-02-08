@@ -1,7 +1,7 @@
 // src/reducers/root-reducer.js
 import { v4 as uuid } from 'uuid';
 
-import deleteVertex from 'reducers/helpers/delete-vertex';
+import removeVertexFromShapes from 'reducers/helpers/remove-vertex-from-shapes';
 
 import {
   SET_ROOT_CONTAINER,
@@ -179,23 +179,28 @@ export const reducer = (state, action) => {
       };
     case INSERT_VERTEX_AFTER: {
       const { shapeKey, vertexKey, x, y } = data;
-      const shape = state.shapes.key(shapeKey);
+      const { shapes } = state;
+      const shape = shapes.key(shapeKey);
+      const vertexIndex = shape.vertices.indexOfKey(vertexKey) + 1;
+      const shapeIndex = shapes.indexOf(shape);
       const vertices = shape.vertices.splice(
         {
-          start: shape.vertices.indexOfKey(vertexKey) + 1,
+          start: vertexIndex,
           deleteCount: 0,
+          newKeys: [undefined],
         },
         { x, y },
       );
-      const shapes = state.shapes.splice(
+      const newShapes = shapes.splice(
         {
-          start: state.shapes.indexOf(shape),
+          start: shapeIndex,
           deleteCount: 1,
+          newKeys: [shapes.keys[shapeIndex]],
         },
         { ...shape, vertices },
       );
 
-      return { ...state, shapes };
+      return { ...state, shapes: newShapes };
     }
     case DELETE_VERTEX: {
       const { shapes } = state;
@@ -203,7 +208,7 @@ export const reducer = (state, action) => {
 
       return {
         ...state,
-        shapes: deleteVertex(shapes, shapeKey, vertexKey),
+        shapes: removeVertexFromShapes(shapes, shapeKey, vertexKey),
       };
     }
     case MOVE_VERTEX:
