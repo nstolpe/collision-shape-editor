@@ -321,6 +321,14 @@ const usePointerInteraction = () => {
 
   const handleVertexDelete = name => {
     const [, vertexKey, , shapeKey] = name.split(DEFAULT_DELIMITER);
+
+    if (selectedVertices.hasOwnProperty(name)) {
+      setSelectedVertices(currentSelectedVertices => {
+        delete currentSelectedVertices[name];
+        return currentSelectedVertices;
+      });
+    }
+
     dispatch(deleteVertex({ shapeKey, vertexKey }));
   };
 
@@ -669,6 +677,9 @@ const usePointerInteraction = () => {
     } = event;
 
     switch (true) {
+      case tool === Tools.ADD:
+      case tool === Tools.DELETE:
+        break;
       // case shiftKey:
       //   break;
       default:
