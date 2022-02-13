@@ -36,10 +36,12 @@ const removeVertexFromShapes = (shapes, shapeKey, vertexKey) => {
       }
 
       const newVertices = new List(values, keys);
+      const shapeIndex = shapes.indexOf(shape);
       const newShapes = shapes.splice(
         {
-          start: shapes.indexOf(shape),
+          start: shapeIndex,
           deleteCount: 1,
+          newKeys: [shapes.keys[shapeIndex]]
         },
         { vertices: newVertices, closed: false },
       );

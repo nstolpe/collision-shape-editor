@@ -93,7 +93,7 @@ const vertices = [
 ];
 
 export const initialState = {
-  backgroundColor: 0x19f750,
+  backgroundColor: 0xbff2d4,
   // interaction: Interactions.TRANSLATE,
   mode: Modes.VERTEX,
   tool: Tools.SELECT,

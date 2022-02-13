@@ -46,7 +46,6 @@ const Geometry = ({
 
   const ref = container => {
     if (container) {
-      console.log('updating pivot');
       const { height, width, x, y } = container.getBounds();
 
       container.pivot.set(x + width / 2, y + height / 2);
