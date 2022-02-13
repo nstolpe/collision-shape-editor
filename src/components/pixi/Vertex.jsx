@@ -6,24 +6,19 @@ import * as PIXI from 'pixi.js';
 import restComparator from 'comparators/rest';
 import scaleComparator from 'comparators/scale';
 import Circle from 'components/pixi/base/Circle';
-import {
-  CELL,
-  DEFAULT,
-  MOVE,
-  NOT_ALLOWED,
-} from 'constants/cursors';
+import * as Cursors from 'constants/cursors';
 import * as Tools from 'constants/tools';
 
 export const getCursor = tool => {
   switch (tool) {
     case Tools.ADD:
-      return CELL;
+      return Cursors.CELL;
     case Tools.DELETE:
-      return NOT_ALLOWED;
+      return Cursors.NOT_ALLOWED;
     case Tools.SELECT:
-      return MOVE;
+      return Cursors.MOVE;
     default:
-      return DEFAULT;
+      return Cursors.DEFAULT;
   }
 };
 

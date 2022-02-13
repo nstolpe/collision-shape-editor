@@ -1,5 +1,5 @@
 // components/pixi/Geometry.jsx
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Container } from 'react-pixi-fiber';
 import * as PIXI from 'pixi.js';
@@ -43,7 +43,17 @@ const Geometry = ({
     x: 1 / scale.x,
     y: 1 / scale.y,
   }), [scale.x, scale.y]);
-  const ref = useRef();
+
+  const ref = container => {
+    if (container) {
+      console.log('updating pivot');
+      const { height, width, x, y } = container.getBounds();
+
+      container.pivot.set(x + width / 2, y + height / 2);
+      container.position.set(x + width / 2, y + height / 2);
+    }
+  };
+
   const hitArea = useMemo(() => new PIXI.Polygon(vertices.values), [vertices]);
 
   const components = Array.from(vertices.entries()).reduce((result, [vertex1Index, vertex1Key, vertex1]) => {
@@ -76,6 +86,7 @@ const Geometry = ({
         rotation: Math.atan2(dy, dx),
         scale: inverseScale,
         selected: selectedVertices.hasOwnProperty(vertex1Id) && selectedVertices.hasOwnProperty(vertex2Id),
+        tool,
         x1,
         y1,
         x2,

@@ -33,6 +33,7 @@ const ConnectedEdge = ({
   rotation,
   scale,
   selected,
+  tool,
   x1,
   y1,
   x2,
@@ -90,6 +91,7 @@ const ConnectedEdge = ({
       rotation={rotation}
       scale={scale}
       selected={selected || isWithinOverlayBounds}
+      tool={tool}
       x={x1}
       y={y1}
     />
