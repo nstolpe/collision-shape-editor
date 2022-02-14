@@ -289,7 +289,7 @@ const usePointerInteraction = () => {
   /***********************************************************************************
    * End events, these will eventually receive the event data and dispatch an action *
    ***********************************************************************************/
-  const handleAddVertexToEdge = (coordinates, name) => {
+  const addVertexToEdge = (coordinates, name) => {
     const [, vertexKey, vertexKey2, , shapeKey] = name.split(DEFAULT_DELIMITER);
     const vertex1 = vertices.key(
       `${VERTEX}${DEFAULT_DELIMITER}${vertexKey}${DEFAULT_DELIMITER}${SHAPE}${DEFAULT_DELIMITER}${shapeKey}`
@@ -302,7 +302,7 @@ const usePointerInteraction = () => {
     dispatch(insertVertex({ shapeKey, vertexKey, x, y }));
   };
 
-  const handleVertexSelect = ({ name, coordinates, position, addModifierKeyPressed }) => {
+  const vertexSelect = ({ name, coordinates, position, addModifierKeyPressed }) => {
     const isVertexSelected = selectedVertices.hasOwnProperty(name);
 
     if (addModifierKeyPressed) {
@@ -319,7 +319,7 @@ const usePointerInteraction = () => {
     }
   };
 
-  const handleVertexDelete = name => {
+  const vertexDelete = name => {
     const [, vertexKey, , shapeKey] = name.split(DEFAULT_DELIMITER);
 
     if (selectedVertices.hasOwnProperty(name)) {
@@ -336,7 +336,7 @@ const usePointerInteraction = () => {
    * Checks if the conditions are right to close a shape (first or last vertex
    * of an open shape is selected and the last or first is clicked).
    */
-  const handleAddClickOnVertex = ({ coordinates, name, position }) => {
+  const addClickOnVertex = ({ coordinates, name, position }) => {
     const [, vertexKey, , shapeKey] = name.split(DEFAULT_DELIMITER);
     const shape = shapes.key(shapeKey);
     const vertex = shape.vertices.key(vertexKey);
@@ -370,7 +370,10 @@ const usePointerInteraction = () => {
     }
   };
 
-  const handleSelectEdge = (coordinates, name) => {
+  /**
+   * Selects vertices on either end of an edge.
+   */
+  const selectEdge = (coordinates, name) => {
     const [, vertexId1, vertexId2] = name.split(DEFAULT_DELIMITER);
     const targetEdgeVertices = [vertexId1, vertexId2].reduce((newVertices, id) => {
       const shapeKey = name.substring(name.indexOf('SHAPE'));
@@ -451,19 +454,19 @@ const usePointerInteraction = () => {
     switch (true) {
       case target.name === 'VIEWPORT':
         // main container viewport
-        handlePointerDownViewport(event, coordinates);
+        pointerDownViewport(event, coordinates);
         break;
       case hasPrefix(target.name, SHAPE):
         // @TODO add handler for shape, pass on control to viewport there if necessary.
-        handlePointerDownViewport(event, coordinates);
+        pointerDownViewport(event, coordinates);
         break;
       case hasPrefix(target.name, VERTEX):
         // vertex
-        handlePointerDownVertex(event, coordinates);
+        pointerDownVertex(event, coordinates);
         break;
       case hasPrefix(target.name, EDGE):
         // edge
-        handlePointerDownEdge(event, coordinates);
+        pointerDownEdge(event, coordinates);
         break;
       default:
         break;
@@ -512,20 +515,20 @@ const usePointerInteraction = () => {
       case pointer?.target?.name === 'VIEWPORT':
         // main container viewport
         // using global (viewport?) coordinates. size is right, position is wrong.
-        // handlePointerMoveViewport(event, pointer, { x: event.data.global.x, y: event.data.global.y });
-        handlePointerMoveViewport(event, pointer, pointerCoordinates);
+        // pointerMoveViewport(event, pointer, { x: event.data.global.x, y: event.data.global.y });
+        pointerMoveViewport(event, pointer, pointerCoordinates);
         break;
       case hasPrefix(pointer?.target?.name, SHAPE):
         // @TODO add handler for shape, pass on control to viewport there if necessary.
-        handlePointerMoveViewport(event, pointer, pointerCoordinates);
+        pointerMoveViewport(event, pointer, pointerCoordinates);
         break;
       case hasPrefix(pointer?.target?.name, VERTEX):
         // the active pointer's cached target from pointerdown is a vertex.
-        handlePointerMoveVertex(event, pointer, pointerCoordinates);
+        pointerMoveVertex(event, pointer, pointerCoordinates);
         break;
       case hasPrefix(pointer?.target?.name, EDGE):
         // the active pointer's cached target from pointerdown is an edge.
-        handlePointerMoveEdge(event, pointer, pointerCoordinates);
+        pointerMoveEdge(event, pointer, pointerCoordinates);
         break;
       default:
         break;
@@ -556,17 +559,17 @@ const usePointerInteraction = () => {
     switch (true) {
       case name === 'VIEWPORT':
         // main container viewport
-        handlePointerUpViewport(event);
+        pointerUpViewport(event);
         break;
       case hasPrefix(name, SHAPE):
         // @TODO add handler for shape, pass on control to viewport there if necessary.
-        handlePointerUpViewport(event);
+        pointerUpViewport(event);
         break;
       case hasPrefix(name, VERTEX):
-        handlePointerUpVertex(event);
+        pointerUpVertex(event);
         break;
       case hasPrefix(name, EDGE):
-        handlePointerUpEdge(event);
+        pointerUpEdge(event);
         break;
       default:
         break;
@@ -580,7 +583,7 @@ const usePointerInteraction = () => {
     setJustRemoved(false);
   };
 
-  const handlePointerDownViewport = (event, coordinates) => {
+  const pointerDownViewport = (event, coordinates) => {
     const { x, y } = coordinates;
     const height = 0;
     const width = 0;
@@ -596,7 +599,7 @@ const usePointerInteraction = () => {
     }
   }
 
-  const handlePointerDownVertex = (event, coordinates) => {
+  const pointerDownVertex = (event, coordinates) => {
     const {
       data: {
         identifier,
@@ -611,18 +614,18 @@ const usePointerInteraction = () => {
 
     switch (tool) {
       case Tools.ADD:
-        handleAddClickOnVertex({
+        addClickOnVertex({
           name,
           coordinates,
           position,
         });
         break;
       case Tools.DELETE:
-        handleVertexDelete(name);
+        vertexDelete(name);
         break;
       case Tools.SELECT:
       default:
-        handleVertexSelect({
+        vertexSelect({
           name,
           coordinates,
           position,
@@ -631,7 +634,7 @@ const usePointerInteraction = () => {
     }
   };
 
-  const handlePointerDownEdge = (event, coordinates) => {
+  const pointerDownEdge = (event, coordinates) => {
     const {
       data: {
         identifier,
@@ -643,17 +646,17 @@ const usePointerInteraction = () => {
 
     switch (tool) {
       case Tools.ADD:
-        handleAddVertexToEdge(coordinates, name);
+        addVertexToEdge(coordinates, name);
         break;
       case Tools.SELECT:
-        handleSelectEdge(coordinates, name);
+        selectEdge(coordinates, name);
         break;
       default:
         // nothing
     }
   };
 
-  const handlePointerMoveViewport = (event, activePointer, pointerCoordinates) => {
+  const pointerMoveViewport = (event, activePointer, pointerCoordinates) => {
     const { x, y } = pointerCoordinates;
     switch (tool) {
       case Tools.SELECT:
@@ -667,7 +670,7 @@ const usePointerInteraction = () => {
     }
   };
 
-  const handlePointerMoveVertex = (event, activePointer, pointerCoordinates) => {
+  const pointerMoveVertex = (event, activePointer, pointerCoordinates) => {
     const {
       data: {
         originalEvent: {
@@ -698,11 +701,9 @@ const usePointerInteraction = () => {
           dispatch(setVertexPositionsRelativeToCoordinates(selectedVertices, pointerCoordinates));
         }
     }
-
-    // event.stopPropagation();
   };
 
-  const handlePointerMoveEdge = (event, pointer, coordinates) => {
+  const pointerMoveEdge = (event, pointer, coordinates) => {
     const {
       data: {
         originalEvent: {
@@ -726,11 +727,9 @@ const usePointerInteraction = () => {
 
       dispatch(setVertexPositionsRelativeToCoordinates(selectedVertices, coordinates));
     }
-
-    // event.stopPropagation();
   };
 
-  const handlePointerUpViewport = () => {
+  const pointerUpViewport = () => {
     // if a select by overlay is in process, change the selection
     // this could be its own function
     if (selectOverlay.enabled) {
@@ -793,7 +792,7 @@ const usePointerInteraction = () => {
     }
   };
 
-  const handlePointerUpVertex = event => {
+  const pointerUpVertex = event => {
     const {
       data: {
         identifier,
@@ -815,7 +814,7 @@ const usePointerInteraction = () => {
     }
   };
 
-  const handlePointerUpEdge = event => {
+  const pointerUpEdge = event => {
     const {
       data: {
         identifier,
