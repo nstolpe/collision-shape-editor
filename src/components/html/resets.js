@@ -5,7 +5,7 @@ export const Button = styled.button`
   outline: none;
   border: 0;
   font-family: inherit;
-  font-size: 100%;
+  font-size: inherit;
   line-height: 1.15;
   margin: 0;
   padding: 0;
@@ -15,4 +15,10 @@ export const Button = styled.button`
   &::-moz-focus-inner {
     border: 0;
   }
+`;
+
+export const Ul = styled.ul`
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
 `;
