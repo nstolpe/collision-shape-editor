@@ -2,12 +2,14 @@
 import { v4 as uuid } from 'uuid';
 
 import removeVertexFromShapes from 'reducers/helpers/remove-vertex-from-shapes';
+import removeEdgeFromShapes from 'reducers/helpers/remove-edge-from-shapes';
 
 import {
   SET_ROOT_CONTAINER,
   ADD_VERTEX,
   INSERT_VERTEX_AFTER,
   DELETE_VERTEX,
+  DELETE_EDGE,
   MOVE_VERTEX,
   MOVE_VERTICES,
   START_MOVE_VERTEX,
@@ -15,6 +17,8 @@ import {
   SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
   OPEN_SHAPE,
   CLOSE_SHAPE,
+  REVERSE_SHAPE_WINDING,
+  TOGGLE_SHAPE_SHOW_WINDING,
   SET_INTERACTION,
   SET_MODE,
   SET_TOOL,
@@ -31,6 +35,10 @@ import {
   ADD_TEXTURE_SOURCE,
   REMOVE_TEXTURE_SOURCE,
   ADD_SPRITE,
+  SET_CONTEXT_MENU,
+  SET_CONTEXT_MENU_OPEN,
+  SET_CONTEXT_MENU_POSITION,
+  CLOSE_CONTEXT_MENU,
 } from 'constants/action-types';
 import * as Modes from 'constants/modes';
 import * as Tools from 'constants/tools';
@@ -111,10 +119,12 @@ export const initialState = {
     {
       vertices: List(vertices[0]),
       closed: true,
+      showWinding: false,
     },
     {
       vertices: List(vertices[1]),
       closed: false,
+      showWinding: false,
     }
   ]),
   movingVerticeIds: [],
@@ -133,6 +143,7 @@ export const initialState = {
   uiOptions: {
     vertexRadius: 6.5,
   },
+  contextMenu: { type: undefined },
 };
 
 export const reducer = (state, action) => {
@@ -211,6 +222,15 @@ export const reducer = (state, action) => {
         shapes: removeVertexFromShapes(shapes, shapeKey, vertexKey),
       };
     }
+    case DELETE_EDGE: {
+      const { shapes } = state;
+      const { shapeKey, vertexKey1, vertexKey2 } = data;
+
+      return {
+        ...state,
+        shapes: removeEdgeFromShapes(shapes, shapeKey, vertexKey1, vertexKey2),
+      };
+    }
     case MOVE_VERTEX:
       return {
         ...state,
@@ -245,6 +265,20 @@ export const reducer = (state, action) => {
         ...state,
         shapes: state.shapes.map(
           (shape, idx, key) => key === data.id ? { ...shape, closed: true } : shape,
+        ),
+      };
+    case REVERSE_SHAPE_WINDING:
+      return {
+        ...state,
+        shapes: state.shapes.map(
+          (shape, idx, key) => key === data.id ? { ...shape, vertices: shape.vertices.reverse() } : shape,
+        ),
+      };
+    case TOGGLE_SHAPE_SHOW_WINDING:
+      return {
+        ...state,
+        shapes: state.shapes.map(
+          (shape, idx, key) => key === data.id ? { ...shape, showWinding: !shape.showWinding } : shape,
         ),
       };
     case SET_INTERACTION:
@@ -306,6 +340,37 @@ export const reducer = (state, action) => {
       return {
         ...state,
         sprites: [ ...state.sprites, { ...data.sprite } ],
+      };
+    case SET_CONTEXT_MENU:
+      return {
+        ...state,
+        contextMenu: {
+          type: data.type,
+          x: data.x,
+          y: data.y,
+          options: data.options,
+        },
+      };
+    case SET_CONTEXT_MENU_OPEN:
+      return {
+        ...state,
+        contextMenu: { ...state.contextMenu, open: !!data.open },
+      };
+    case SET_CONTEXT_MENU_POSITION:
+      return {
+        ...state,
+        contextMenu: {
+          ...state.contextMenu,
+          x: data.x ?? state.contextMenu.x,
+          y: data.y ?? state.contextMenu.y,
+        },
+      };
+    case CLOSE_CONTEXT_MENU:
+      return {
+        ...state,
+        contextMenu: {
+          type: undefined,
+        },
       };
     default:
       // console.log(`undefined action: ${action.type}`, action);
