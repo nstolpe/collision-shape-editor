@@ -9,6 +9,8 @@ const Shape = ({
   vertices,
   selectedVertices,
   closed,
+  showWinding,
+  index,
   id,
 }) => {
   // const selected = Array.from(vertices.entries()).reduce(
@@ -23,6 +25,8 @@ const Shape = ({
       vertices={vertices}
       closed={closed}
       name={addPrefix(SHAPE, id)}
+      index={index}
+      showWinding={showWinding}
     />
   );
 };

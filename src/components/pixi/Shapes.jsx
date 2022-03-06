@@ -12,13 +12,15 @@ const comparator = ({ shapes }, { shapes: oldShapes }) => {
 };
 
 const Shapes = ({ shapes, selectedVertices }) =>
-  shapes.map(({ vertices, closed }, idx, key) => (
+  shapes.map(({ vertices, closed, showWinding }, index, key) => (
     <Shape
       key={key}
       id={key}
+      index={index}
       vertices={vertices}
       selectedVertices={selectedVertices}
       closed={closed}
+      showWinding={showWinding}
     />
   ));
 

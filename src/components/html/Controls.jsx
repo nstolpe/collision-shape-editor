@@ -1,4 +1,4 @@
-// src/js/components/html/Controls.js
+// src/components/html/Controls.js
 import React from 'react';
 import styled from '@emotion/styled';
 import chroma from 'chroma-js';

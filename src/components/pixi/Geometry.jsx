@@ -1,7 +1,7 @@
 // components/pixi/Geometry.jsx
 import { useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Container } from 'react-pixi-fiber';
+import { Container, Text } from 'react-pixi-fiber';
 import * as PIXI from 'pixi.js';
 
 import restComparator from 'comparators/rest';
@@ -35,6 +35,7 @@ const Geometry = ({
   selectedVertices,
   vertices,
   closed,
+  showWinding,
   tool,
   scale,
   name,
@@ -97,16 +98,18 @@ const Geometry = ({
 
     result[1].push(<ConnectedVertex { ...vertexProps } />);
 
+    if (showWinding) {
+      result[2].push(<Text key={vertex1Id} text={vertex1Index} x={x1} y={y1} />)
+    }
     return result;
-  }, [[], []]);
+  }, showWinding ? [[], [], []] : [[], []]);
 
   return (
     <Container
       name={name}
       ref={ref}
       interactive
-      // hitArea={hitArea}
-      cursor={'copy'}
+      hitArea={hitArea}
     >
       {components}
     </Container>
