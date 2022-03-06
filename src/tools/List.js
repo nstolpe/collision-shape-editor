@@ -222,7 +222,7 @@ const ListPrototype = Object.create({}, {
   },
   reverse: {
     value: function() {
-      return this.values.reverse();
+      return new List(this.values.reverse(), this.keys.reverse());
     },
   },
   shift: {

@@ -6,6 +6,7 @@ import { Global } from '@emotion/react';
 
 import FiraMonoRegular from 'fonts/FiraMono/FiraMono-Regular.ttf';
 import AppWrapper from 'components/html/AppWrapper';
+import ContextMenu from 'components/html/ContextMenu';
 import Controls from 'components/html/Controls';
 import FlexResizer from 'components/html/FlexResizer';
 import Screen from 'components/pixi/Screen';
@@ -31,6 +32,10 @@ render(
   <RootStore>
     <Global
       styles={{
+        html: {
+          fontSize: '10px',
+          lineHeight: 1.5,
+        },
         '@font-face': {
           fontFamily: 'Fira Mono',
           src: `local('Fira Mono'),
@@ -45,6 +50,7 @@ render(
         <Screen />
       </FlexResizer>
       <Controls />
+      <ContextMenu />
     </AppWrapper>
   </RootStore>,
   appContainer

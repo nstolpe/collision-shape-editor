@@ -1,6 +1,9 @@
 // src/reducers/helpers/remove-vertex-from-shapes.js
 import List from 'tools/List';
 
+/**
+ * Removes a single vertex from a List of vertices that belong to a Shape in a List of Shapes.
+ */
 const removeVertexFromShapes = (shapes, shapeKey, vertexKey) => {
   const shape = shapes.key(shapeKey);
   const vertex = shape.vertices.key(vertexKey);
@@ -19,24 +22,26 @@ const removeVertexFromShapes = (shapes, shapeKey, vertexKey) => {
       return newShapes;
     }
     case (
+      closed &&
       vertex !== shape.vertices.first &&
-      vertex !== shape.vertices.last &&
-      closed
+      vertex !== shape.vertices.last
     ): {
       // first vertex deleted from closed shape, make vertices to
       // either side of vertex into new first and last
       const vertexIndex = vertices.indexOf(vertex);
+      const shapeIndex = shapes.indexOf(shape);
       const keys = [];
       const values = [];
 
       for (let i = 1, l = vertices.length; i < l; i++) {
+        // start at 1 since 0 will be the vertex we're deleting,
+        // then use % to loop around the end
         const idx = (vertexIndex + i) % l;
         keys.push(vertices.keys[idx]);
         values.push(vertices.values[idx]);
       }
 
       const newVertices = new List(values, keys);
-      const shapeIndex = shapes.indexOf(shape);
       const newShapes = shapes.splice(
         {
           start: shapeIndex,

@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import {
   insertVertex,
+  deleteEdge,
   deleteVertex,
   setSelectOverlayDimensions,
   setSelectOverlay,
@@ -10,6 +11,9 @@ import {
   setVertexPositionsRelativeToCoordinates,
   openShape,
   closeShape,
+  setContextMenu,
+  setContextMenuOpen,
+  setContextMenuPosition,
 } from 'actions/actions';
 import * as Tools from 'constants/tools';
 import * as Modes from 'constants/modes';
@@ -332,21 +336,38 @@ const usePointerInteraction = () => {
     dispatch(deleteVertex({ shapeKey, vertexKey }));
   };
 
+  const edgeDelete = name => {
+    const [, vertexKey1, vertexKey2,, shapeKey] = name.split(DEFAULT_DELIMITER);
+    dispatch(deleteEdge({ shapeKey, vertexKey1, vertexKey2 }));
+  };
+
   /**
    * Checks if the conditions are right to close a shape (first or last vertex
    * of an open shape is selected and the last or first is clicked).
+   * @TODO needs to combine shapes too, when both open and first or last selected on one
+   * and first or last clicked on two
    */
   const addClickOnVertex = ({ coordinates, name, position }) => {
     const [, vertexKey, , shapeKey] = name.split(DEFAULT_DELIMITER);
     const shape = shapes.key(shapeKey);
     const vertex = shape.vertices.key(vertexKey);
+    const [, selectedVertexKey] =
+      Object.keys(selectedVertices).length === 1 &&
+      Object.keys(selectedVertices)?.[0].split(DEFAULT_DELIMITER) || [];
+    const isClosed = shape.closed;
+    const isFirst = shape.vertices.first === vertex
+    const isLast = shape.vertices.last === vertex;
 
+    switch (true) {
+      // case (isOpen)
+    }
     if (!shape.closed && Object.keys(selectedVertices).length === 1) {
-      // the shape is open and only one vertex is selected. This could potentially close the shape.
-      if (shape.vertices.last === vertex) {
+      // The shape is open and only one vertex is selected.
+      // This could potentially close the shape with itself or another shape.
+      // const [, selectedVertexKey] = Object.keys(selectedVertices)[0].split(DEFAULT_DELIMITER);
+      if (isLast) {
         // the vertex is the last vertex of the shape, if the other is the first vertex...
-        const [, selectedVertexKey] = Object.keys(selectedVertices)[0].split(DEFAULT_DELIMITER);
-        if (selectedVertexKey === shape.vertices.keys[0]) {
+        if (selectedVertexKey && selectedVertexKey === shape.vertices.keys[0]) {
           // ...close it
           addSelectedVertex(name, translation(coordinates, position));
           setSelectedVertices({});
@@ -354,10 +375,9 @@ const usePointerInteraction = () => {
         }
       }
 
-      if (shape.vertices.first === vertex) {
+      if (isFirst) {
         // the vertex is the first vertex of the shape, if the other is the first vertex...
-        const [, selectedVertexKey] = Object.keys(selectedVertices)[0].split(DEFAULT_DELIMITER);
-        if (selectedVertexKey === shape.vertices.keys[shape.vertices.length - 1]) {
+        if (selectedVertexKey && selectedVertexKey === shape.vertices.keys[shape.vertices.length - 1]) {
           // ...close it
           // addSelectedVertex(name, translation(coordinates, position));
           setSelectedVertices({});
@@ -437,7 +457,10 @@ const usePointerInteraction = () => {
    */
   const handlePointerDown = event => {
     const {
-      data: { identifier },
+      data: {
+        button,
+        identifier,
+      },
       target,
     } = event;
     const viewport = findViewportParent(event.target);
@@ -448,28 +471,53 @@ const usePointerInteraction = () => {
 
     const coordinates = event.data.getLocalPosition(viewport);
 
-    // the pointer that just touched down is now active.
-    setActivePointers(currentActivePointers => [...currentActivePointers, { coordinates, identifier, target }]);
+    if (button === 0) {
+      // the pointer that just touched down is now active.
+      setActivePointers(currentActivePointers => [...currentActivePointers, { coordinates, identifier, target }]);
 
-    switch (true) {
-      case target.name === 'VIEWPORT':
-        // main container viewport
-        pointerDownViewport(event, coordinates);
-        break;
-      case hasPrefix(target.name, SHAPE):
-        // @TODO add handler for shape, pass on control to viewport there if necessary.
-        pointerDownViewport(event, coordinates);
-        break;
-      case hasPrefix(target.name, VERTEX):
-        // vertex
-        pointerDownVertex(event, coordinates);
-        break;
-      case hasPrefix(target.name, EDGE):
-        // edge
-        pointerDownEdge(event, coordinates);
-        break;
-      default:
-        break;
+      switch (true) {
+        case target.name === 'VIEWPORT':
+          // main container viewport
+          pointerDownViewport(event, coordinates);
+          break;
+        case hasPrefix(target.name, SHAPE):
+          // @TODO add handler for shape, pass on control to viewport there if necessary.
+          pointerDownViewport(event, coordinates);
+          break;
+        case hasPrefix(target.name, VERTEX):
+          // vertex
+          pointerDownVertex(event, coordinates);
+          break;
+        case hasPrefix(target.name, EDGE):
+          // edge
+          pointerDownEdge(event, coordinates);
+          break;
+        default:
+          break;
+      }
+    }
+
+    if (button === 2) {
+      console.log('right click', target.name);
+      const {
+        data: {
+          originalEvent: {
+            clientX,
+            clientY,
+          },
+        },
+      } = event;
+      switch (true) {
+        case hasPrefix(target.name, SHAPE): {
+          console.log(event);
+          const shapeKey = removePrefix(SHAPE, target.name);
+          const shape = shapes.key(shapeKey);
+          dispatch(setContextMenu(SHAPE, clientX, clientY, { shape, shapeKey }));
+          break;
+        }
+        default:
+          break;
+      }
     }
   };
 
@@ -647,6 +695,9 @@ const usePointerInteraction = () => {
     switch (tool) {
       case Tools.ADD:
         addVertexToEdge(coordinates, name);
+        break;
+      case Tools.DELETE:
+        edgeDelete(name);
         break;
       case Tools.SELECT:
         selectEdge(coordinates, name);
