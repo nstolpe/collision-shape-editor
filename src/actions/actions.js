@@ -4,11 +4,14 @@ import {
   ADD_VERTEX,
   INSERT_VERTEX_AFTER,
   DELETE_VERTEX,
+  DELETE_EDGE,
   MOVE_VERTEX,
   MOVE_VERTICES,
   SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
   OPEN_SHAPE,
   CLOSE_SHAPE,
+  REVERSE_SHAPE_WINDING,
+  TOGGLE_SHAPE_SHOW_WINDING,
   START_MOVE_VERTEX,
   STOP_MOVE_VERTEX,
   SET_INTERACTION,
@@ -24,6 +27,10 @@ import {
   SET_SELECT_OVERLAY_ENABLED,
   SET_SELECT_OVERLAY_POSITION,
   SET_SELECT_OVERLAY_DIMENSIONS,
+  SET_CONTEXT_MENU,
+  SET_CONTEXT_MENU_OPEN,
+  SET_CONTEXT_MENU_POSITION,
+  CLOSE_CONTEXT_MENU,
   ADD_TEXTURE_SOURCE,
   REMOVE_TEXTURE_SOURCE,
   ADD_SPRITE,
@@ -86,6 +93,11 @@ export const deleteVertex = ({ shapeKey, vertexKey }) => ({
   data: { shapeKey, vertexKey },
 });
 
+export const deleteEdge = ({ shapeKey, vertexKey1, vertexKey2 }) => ({
+  type: DELETE_EDGE,
+  data: { shapeKey, vertexKey1, vertexKey2 },
+});
+
 export const moveVertex = ({ id, x, y }) => ({
   type: MOVE_VERTEX,
   data: { x, y, id },
@@ -111,6 +123,16 @@ export const openShape = id => ({
 
 export const closeShape = id => ({
   type: CLOSE_SHAPE,
+  data: { id },
+});
+
+export const reverseShapeWinding = id => ({
+  type: REVERSE_SHAPE_WINDING,
+  data: { id },
+});
+
+export const toggleShapeShowWinding = id => ({
+  type: TOGGLE_SHAPE_SHOW_WINDING,
   data: { id },
 });
 
@@ -167,6 +189,25 @@ export const setCtrlPressed = pressed => ({
 export const setShiftPressed = pressed => ({
   type: SET_SHIFT_PRESSED,
   data: { pressed },
+});
+
+export const setContextMenu = (type, x, y, options) => ({
+  type: SET_CONTEXT_MENU,
+  data: { type, x, y, options },
+});
+
+export const setContextMenuOpen = open => ({
+  type: SET_CONTEXT_MENU_OPEN,
+  data: { open },
+});
+
+export const setContextMenuPosition = (x ,y) => ({
+  type: SET_CONTEXT_MENU_POSITION,
+  data: { x, y },
+});
+
+export const closeContextMenu = () => ({
+  type: CLOSE_CONTEXT_MENU,
 });
 
 export const addTextureSource = (id, data) => ({
