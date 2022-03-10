@@ -181,9 +181,7 @@ const ListPrototype = Object.create({}, {
       const key = instanceKeys.pop();
       const value = instanceValues[key];
 
-      delete instanceValues[key];
-
-      return value;
+      return List([value], [key]);
     },
   },
   push: {
@@ -229,12 +227,10 @@ const ListPrototype = Object.create({}, {
     value: function() {
       const instanceValues = getValues(this);
       const instanceKeys = getKeys(this);
-      const key = instanceKeys.shift();
+      const key = instanceKeys[0];
       const value = instanceValues[key];
 
-      delete instanceValues[key];
-
-      return value;
+      return List([value], [key]);
     },
   },
   slice: {

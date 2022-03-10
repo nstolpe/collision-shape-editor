@@ -1,7 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
 import * as PIXI from 'pixi.js';
-// import { createGlobalStyle } from 'styled-components/macro';
 import { Global } from '@emotion/react';
 
 import FiraMonoRegular from 'fonts/FiraMono/FiraMono-Regular.ttf';
@@ -13,15 +12,6 @@ import Screen from 'components/pixi/Screen';
 import RootStore from 'store/RootStore';
 
 const appContainer = document.getElementById('root');
-// const Fonts = createGlobalStyle`
-//   @font-face {
-//     font-family: 'Fira Mono';
-//     src: local('Fira Mono'),
-//       url(${FiraMonoRegular}) format('truetype');
-//     font-weight: 400;
-//     font-style: normal;
-//   }
-// `;
 
 // workaround for pixi to work with dev tools
 window.__PIXI_INSPECTOR_GLOBAL_HOOK__ &&

@@ -8,6 +8,7 @@ import {
   closeContextMenu,
   reverseShapeWinding,
   toggleShapeShowWinding,
+  deleteShape,
 } from 'actions/actions'
 import { SHAPE } from 'constants/prefixes';
 import RootContext from 'contexts/RootContext';
@@ -84,20 +85,70 @@ const ShapeContextMenu = withSelector(RootContext, shapeContextMenuSelector)(
     const toggleWinding = () => {
       dispatch(toggleShapeShowWinding(shapeKey));
       dispatch(closeContextMenu());
+      document.removeEventListener('keydown', onKeyDown);
     };
     const reverseWinding = () => {
       dispatch(reverseShapeWinding(shapeKey));
       dispatch(closeContextMenu());
+      document.removeEventListener('keydown', onKeyDown);
     }
+    const selectShapeVertices = (shapeKey, replace = false) => {
+      if (replace) {
+        console.log('@TODO setup state and dispatch for selectedVertices so this can replace the selection');
+      } else {
+        console.log('@TODO setup state and dispatch for selectedVertices so this can add to the selection');
+      }
+      dispatch(closeContextMenu());
+      document.removeEventListener('keydown', onKeyDown);
+    };
+    const removeShape = () => {
+      dispatch(deleteShape(shapeKey))
+      dispatch(closeContextMenu());
+      document.removeEventListener('keydown', onKeyDown);
+    };
+    const onKeyDown = event => {
+      const key = event.key.toLowerCase();
+
+      switch (key) {
+        case 'w':
+          toggleWinding();
+          break;
+        case 'r':
+          reverseWinding();
+          break;
+        case 'a':
+          selectShapeVertices(shapeKey);
+          break;
+        case 's':
+          selectShapeVertices(shapeKey, true);
+          break;
+        case 'd':
+          removeShape();
+          break;
+      }
+
+      document.removeEventListener('keydown', onKeyDown);
+    };
+
+    document.addEventListener('keydown', onKeyDown);
     return (
       <List>
         <li>
           <ContextButton onClick={toggleWinding}>
-            {shape.showWinding ? 'hide winding' : 'show winding'}
+            {shape.showWinding ? 'hide [w]inding' : 'show [w]inding'}
           </ContextButton>
         </li>
         <li>
-          <ContextButton onClick={reverseWinding}>reverse winding</ContextButton>
+          <ContextButton onClick={reverseWinding}>[r]everse winding</ContextButton>
+        </li>
+        <li>
+          <ContextButton onClick={() => selectShapeVertices(shapeKey)}>select shape verts ([a]dd)</ContextButton>
+        </li>
+        <li>
+          <ContextButton onClick={() => selectShapeVertices(shapeKey, true)}>select shape verts ([s]et)</ContextButton>
+        </li>
+        <li>
+          <ContextButton onClick={removeShape}>[d]elete shape</ContextButton>
         </li>
       </List>
     );

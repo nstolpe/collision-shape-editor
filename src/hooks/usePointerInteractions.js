@@ -1,5 +1,6 @@
 // hooks/usePointerInteractions.js
 import { useState } from 'react';
+import * as PIXI from 'pixi.js';
 
 import {
   insertVertex,
@@ -11,6 +12,7 @@ import {
   setVertexPositionsRelativeToCoordinates,
   openShape,
   closeShape,
+  joinShapes,
   setContextMenu,
   setContextMenuOpen,
   setContextMenuPosition,
@@ -103,6 +105,10 @@ const comparator = ({
     }
   }
   // end pressedKeyCodes
+
+  if (vertices.length !== oldVertices.length) {
+    return false;
+  }
 
   for (let i = 0, l = vertices?.length; i < l; i++) {
     const vertex = vertices.index(i);
@@ -281,10 +287,14 @@ const usePointerInteraction = () => {
   const updateTranslations = coordinates => {
     setSelectedVertices(currentSelectedVertices => {
       Object.keys(currentSelectedVertices).forEach(name => {
-        const { x, y } = vertices.key(name);
+        const { x, y } = vertices.key(name) ?? {};
         // const { x, y } = vertices.find(vertex => vertex.id === removePrefix(name, VERTEX));
-        const distance = translation({ x, y }, coordinates);
-        currentSelectedVertices[name] = distance;
+        if (x && y) {
+          const distance = translation({ x, y }, coordinates);
+          currentSelectedVertices[name] = distance;
+        } else {
+          console.log("@TODO: if you never see this, remove it. If you do, figure out why you're seeing it");
+        }
       });
 
       return currentSelectedVertices;
@@ -304,6 +314,7 @@ const usePointerInteraction = () => {
     const [x, y] = closestPointOnSegment(vertex1, vertex2, coordinates);
 
     dispatch(insertVertex({ shapeKey, vertexKey, x, y }));
+    setSelectedVertices({});
   };
 
   const vertexSelect = ({ name, coordinates, position, addModifierKeyPressed }) => {
@@ -347,46 +358,88 @@ const usePointerInteraction = () => {
    * @TODO needs to combine shapes too, when both open and first or last selected on one
    * and first or last clicked on two
    */
-  const addClickOnVertex = ({ coordinates, name, position }) => {
-    const [, vertexKey, , shapeKey] = name.split(DEFAULT_DELIMITER);
-    const shape = shapes.key(shapeKey);
-    const vertex = shape.vertices.key(vertexKey);
-    const [, selectedVertexKey] =
-      Object.keys(selectedVertices).length === 1 &&
-      Object.keys(selectedVertices)?.[0].split(DEFAULT_DELIMITER) || [];
-    const isClosed = shape.closed;
-    const isFirst = shape.vertices.first === vertex
-    const isLast = shape.vertices.last === vertex;
+  const addClickOnVertex = ({ coordinates, name, position, addModifierKeyPressed }) => {
+    const [, vertexKey, , targetShapeKey] = name.split(DEFAULT_DELIMITER);
+    const targetShape = shapes.key(targetShapeKey);
+    const targetVertex = targetShape.vertices.key(vertexKey);
+    const isTargetFirst = targetShape.vertices.first === targetVertex
+    const isTargetLast = targetShape.vertices.last === targetVertex;
 
-    switch (true) {
-      // case (isOpen)
-    }
-    if (!shape.closed && Object.keys(selectedVertices).length === 1) {
-      // The shape is open and only one vertex is selected.
-      // This could potentially close the shape with itself or another shape.
-      // const [, selectedVertexKey] = Object.keys(selectedVertices)[0].split(DEFAULT_DELIMITER);
-      if (isLast) {
-        // the vertex is the last vertex of the shape, if the other is the first vertex...
-        if (selectedVertexKey && selectedVertexKey === shape.vertices.keys[0]) {
-          // ...close it
-          addSelectedVertex(name, translation(coordinates, position));
+    if (!targetShape.closed && Object.keys(selectedVertices).length === 1) {
+      // The targetShape is open and only one other vertex is selected.
+      // This could potentially close targetShape or join it with another shape.
+      const [, selectedVertexKey, , selectedVertexShapeKey] =
+        Object.keys(selectedVertices)?.[0].split(DEFAULT_DELIMITER) || [];
+
+      if (selectedVertexShapeKey === targetShapeKey) {
+        // selected and clicked vertices are on the same shape.
+        // const [, selectedVertexKey] = Object.keys(selectedVertices)[0].split(DEFAULT_DELIMITER);
+
+        if (isTargetLast) {
+          // targetVertex is the last vertex of targetShape, if the other is the first vertex...
+          if (selectedVertexKey && selectedVertexKey === targetShape.vertices.keys[0]) {
+            // ...close it
+            // addSelectedVertex(name, translation(coordinates, position));
+            setSelectedVertices({});
+            dispatch(closeShape(targetShapeKey));
+          }
+        }
+
+        if (isTargetFirst) {
+          // targetVertex is the first vertex of the shape, if the other is the first vertex...
+          if (selectedVertexKey && selectedVertexKey === targetShape.vertices.keys[targetShape.vertices.length - 1]) {
+            // ...close it
+            // addSelectedVertex(name, translation(coordinates, position));
+            setSelectedVertices({});
+            dispatch(closeShape(targetShapeKey));
+          }
+        }
+      } else {
+        // selected and clicked vertices are on different shapes
+        const selectedVertexShape = shapes.key(selectedVertexShapeKey);
+        const selectedVertex = selectedVertexShape.vertices.key(selectedVertexKey);
+        const isSelectedFirst = selectedVertexShape.vertices.first === selectedVertex;
+        const isSelectedLast = selectedVertexShape.vertices.last === selectedVertex;
+        let joinType;
+
+        switch (true) {
+          case isSelectedFirst && isTargetFirst:
+            joinType = 'FIRST_FIRST';
+            break;
+          case isSelectedFirst && isTargetLast:
+            joinType = 'FIRST_LAST';
+            break;
+          case isSelectedLast && isTargetFirst:
+            joinType = 'LAST_FIRST';
+            break;
+          case isSelectedLast && isTargetLast:
+            joinType = 'LAST_LAST';
+            break;
+          default:
+            break;
+        }
+
+        if (joinType) {
+          dispatch(joinShapes({
+            shape1: selectedVertexShape,
+            shapeKey1: selectedVertexShapeKey,
+            shape2: targetShape,
+            shapeKey2: targetShapeKey,
+            joinType,
+          }));
           setSelectedVertices({});
-          dispatch(closeShape(shapeKey));
         }
       }
-
-      if (isFirst) {
-        // the vertex is the first vertex of the shape, if the other is the first vertex...
-        if (selectedVertexKey && selectedVertexKey === shape.vertices.keys[shape.vertices.length - 1]) {
-          // ...close it
-          // addSelectedVertex(name, translation(coordinates, position));
-          setSelectedVertices({});
-          dispatch(closeShape(shapeKey));
-        }
-      }
-    } else if (!shape.closed && ([shape.vertices.first, shape.vertices.last].includes(vertex))) {
+    // } else if (!targetShape.closed && ([targetShape.vertices.first, targetShape.vertices.last].includes(targetVertex))) {
+    } else {
       // if the target vertex is the first or last of an open shape, select only that vertex
-      setSelectedVertices({ [name]: translation(coordinates, position) });
+      // setSelectedVertices({ [name]: translation(coordinates, position) });
+      vertexSelect({
+        name,
+        coordinates,
+        position,
+        addModifierKeyPressed,
+      });
     }
   };
 
@@ -472,6 +525,7 @@ const usePointerInteraction = () => {
     const coordinates = event.data.getLocalPosition(viewport);
 
     if (button === 0) {
+      console.log(coordinates);
       // the pointer that just touched down is now active.
       setActivePointers(currentActivePointers => [...currentActivePointers, { coordinates, identifier, target }]);
 
@@ -498,7 +552,7 @@ const usePointerInteraction = () => {
     }
 
     if (button === 2) {
-      console.log('right click', target.name);
+       // @TODO move to secondary click handler
       const {
         data: {
           originalEvent: {
@@ -508,13 +562,39 @@ const usePointerInteraction = () => {
         },
       } = event;
       switch (true) {
-        case hasPrefix(target.name, SHAPE): {
-          console.log(event);
-          const shapeKey = removePrefix(SHAPE, target.name);
-          const shape = shapes.key(shapeKey);
-          dispatch(setContextMenu(SHAPE, clientX, clientY, { shape, shapeKey }));
+        case target.name === 'VIEWPORT': {
+          // handle hits on shapes here. Activating hitArea on shapes
+          // excludes the parts of vertices that extend beyond the hitArea.
+
+          const [targetShape, targetShapeKey] = shapes.reduce((result, shape, index, key) => {
+            const polygon = new PIXI.Polygon(shape.vertices.values);
+            const l = target.toLocal({ x: clientX, y: clientY });
+
+            // @TODO something w/ z index here?
+            if (result !== undefined) {
+              return result;
+            }
+
+            if (polygon.contains(l.x, l.y)) {
+              return [shape, key];
+            }
+          }) ?? [];
+
+          if (targetShapeKey) {
+            dispatch(setContextMenu(
+              SHAPE,
+              clientX,
+              clientY,
+              {
+                shape: targetShape,
+                shapeKey: targetShapeKey,
+              }
+            ));
+          }
           break;
         }
+        case hasPrefix(target.name, VERTEX):
+        case hasPrefix(target.name, EDGE):
         default:
           break;
       }
@@ -666,6 +746,7 @@ const usePointerInteraction = () => {
           name,
           coordinates,
           position,
+          addModifierKeyPressed,
         });
         break;
       case Tools.DELETE:
@@ -731,7 +812,7 @@ const usePointerInteraction = () => {
     } = event;
 
     switch (true) {
-      case tool === Tools.ADD:
+      // case tool === Tools.ADD:
       case tool === Tools.DELETE:
         break;
       // case shiftKey:

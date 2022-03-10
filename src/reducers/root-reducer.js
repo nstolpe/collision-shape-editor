@@ -1,6 +1,7 @@
 // src/reducers/root-reducer.js
 import { v4 as uuid } from 'uuid';
 
+import combineShapes from 'reducers/helpers/combine-shapes';
 import removeVertexFromShapes from 'reducers/helpers/remove-vertex-from-shapes';
 import removeEdgeFromShapes from 'reducers/helpers/remove-edge-from-shapes';
 
@@ -19,6 +20,8 @@ import {
   CLOSE_SHAPE,
   REVERSE_SHAPE_WINDING,
   TOGGLE_SHAPE_SHOW_WINDING,
+  JOIN_SHAPES,
+  DELETE_SHAPE,
   SET_INTERACTION,
   SET_MODE,
   SET_TOOL,
@@ -281,6 +284,26 @@ export const reducer = (state, action) => {
           (shape, idx, key) => key === data.id ? { ...shape, showWinding: !shape.showWinding } : shape,
         ),
       };
+    case JOIN_SHAPES:
+      return {
+        ...state,
+        shapes: combineShapes({
+          shapes: state.shapes,
+          shape1: data.shape1,
+          shape2: data.shape2,
+          joinType: data.joinType,
+        })
+      }
+    case DELETE_SHAPE: {
+      console.log(state.shapes.indexOfKey(data.id))
+      return {
+        ...state,
+        shapes: state.shapes.splice({
+          start: state.shapes.indexOfKey(data.id),
+          deleteCount: 1,
+        }),
+      };
+    }
     case SET_INTERACTION:
       return {
         ...state,

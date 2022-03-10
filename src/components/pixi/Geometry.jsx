@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Container, Text } from 'react-pixi-fiber';
 import * as PIXI from 'pixi.js';
+import chroma from 'chroma-js';
 
 import restComparator from 'comparators/rest';
 import scaleComparator from 'comparators/scale';
@@ -13,8 +14,8 @@ import { EDGE, SHAPE, VERTEX } from 'constants/prefixes';
 import { SELECT } from 'constants/tools';
 import ScreenContext from 'contexts/ScreenContext';
 import { addPrefix, removePrefix, DEFAULT_DELIMITER } from 'tools/prefix';
-
-const selector = ({ scale, tool }) => ({ scale, tool });
+window.chroma = chroma;
+const selector = ({ backgroundColor, scale, tool }) => ({ backgroundColor, scale, tool });
 
 const comparator = (
   { scale, ...restProps },
@@ -32,6 +33,7 @@ const comparator = (
 };
 
 const Geometry = ({
+  backgroundColor,
   selectedVertices,
   vertices,
   closed,
@@ -54,7 +56,7 @@ const Geometry = ({
     }
   };
 
-  const hitArea = useMemo(() => new PIXI.Polygon(vertices.values), [vertices]);
+  // const hitArea = useMemo(() => new PIXI.Polygon(vertices.values), [vertices]);
 
   const components = Array.from(vertices.entries()).reduce((result, [vertex1Index, vertex1Key, vertex1]) => {
     const vertex1Id = `${addPrefix(VERTEX, vertex1Key)}${DEFAULT_DELIMITER}${name}`;
@@ -99,8 +101,25 @@ const Geometry = ({
     result[1].push(<ConnectedVertex { ...vertexProps } />);
 
     if (showWinding) {
-      result[2].push(<Text key={vertex1Id} text={vertex1Index} x={x1} y={y1} />)
+      const [r, g, b] = chroma(backgroundColor.toString(16).padStart(6, 0)).rgb();
+      const inverseHex = chroma({ r: 255 - r, g: 255 - g, b: 255 - b }).hex();
+
+      result[2].push(
+        <Text
+          key={vertex1Id}
+          text={vertex1Index}
+          x={x1}
+          y={y1}
+          style={{
+            fontFamily: 'Fira Mono',
+            fontSize: '2rem',
+            fill: inverseHex,
+          }}
+          scale={inverseScale}
+        />
+      );
     }
+
     return result;
   }, showWinding ? [[], [], []] : [[], []]);
 
@@ -109,7 +128,7 @@ const Geometry = ({
       name={name}
       ref={ref}
       interactive
-      hitArea={hitArea}
+      // hitArea={hitArea}
     >
       {components}
     </Container>
