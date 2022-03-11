@@ -16,6 +16,7 @@ import {
   START_MOVE_VERTEX,
   STOP_MOVE_VERTEX,
   SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
+  SET_SELECTED_VERTICES,
   OPEN_SHAPE,
   CLOSE_SHAPE,
   REVERSE_SHAPE_WINDING,
@@ -118,6 +119,14 @@ export const initialState = {
   textureSources: [],
   sprites: [],
   vertices: List(vertices[0]),
+  selectedVertices: {
+      // coordinates (really coordinate modifiers) keyed to a string with
+      // delimited vertex and shape identifiers
+      // ['VERTEX::<uid>::SHAPE::<uid>']: {
+      //   x: 0,
+      //   y: 0,
+      // },
+  },
   shapes: List([
     {
       vertices: List(vertices[0]),
@@ -260,6 +269,11 @@ export const reducer = (state, action) => {
           data.coordinates,
           state.shapes
         ),
+      };
+    case SET_SELECTED_VERTICES:
+      return {
+        ...state,
+        selectedVertices: data.selectedVertices,
       };
     case OPEN_SHAPE:
       return state;

@@ -8,6 +8,7 @@ import {
   MOVE_VERTEX,
   MOVE_VERTICES,
   SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
+  SET_SELECTED_VERTICES,
   OPEN_SHAPE,
   CLOSE_SHAPE,
   REVERSE_SHAPE_WINDING,
@@ -116,6 +117,11 @@ export const moveVertices = vertices => ({
 export const setVertexPositionsRelativeToCoordinates = (vertices, coordinates) => ({
   type: SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
   data: { vertices, coordinates },
+});
+
+export const setSelectedVertices = selectedVertices => ({
+  type: SET_SELECTED_VERTICES,
+  data: { selectedVertices },
 });
 
 export const openShape = id => ({
