@@ -229,15 +229,9 @@ const usePointerInteraction = () => {
   /**
    * Adds a vertex to selectedVertices
    */
-  const addSelectedVertex = (name, distance) => {
-    dispatch(setSelectedVertices({ ...selectedVertices, [name]: distance}));
-    // setSelectedVertices(currentSelectedVertices => {
-    //   currentSelectedVertices[name] = distance;
-    //   return currentSelectedVertices;
-    // });
-  };
+  const addSelectedVertex = (name, distance) => dispatch(setSelectedVertices({ ...selectedVertices, [name]: distance}));
 
-  const addSelectedVertices = addedVertices =>
+  const addSelectedVertices = addedVertices => {
     dispatch(setSelectedVertices({
       ...selectedVertices,
       ...addedVertices.reduce((result, { distance, name }) => {
@@ -245,6 +239,7 @@ const usePointerInteraction = () => {
         return result;
       }, {}),
     }));
+  }
 
   /**
    * Removes a vertex from selectedVertices
@@ -555,7 +550,6 @@ const usePointerInteraction = () => {
     const coordinates = event.data.getLocalPosition(viewport);
 
     if (button === 0) {
-      console.log(coordinates);
       // the pointer that just touched down is now active.
       setActivePointers(currentActivePointers => [...currentActivePointers, { coordinates, identifier, target }]);
 
@@ -918,7 +912,7 @@ const usePointerInteraction = () => {
               key,
             ) => {
               newSelectedVertices.push({
-                name: addPrefix(VERTEX, key),
+                name: key,
                 distance: { x: 0, y: 0 },
               });
               return newSelectedVertices;
