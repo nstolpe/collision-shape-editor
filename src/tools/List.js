@@ -268,15 +268,18 @@ const ListPrototype = Object.create({}, {
      * Splices at an index, like Array.prototype.splice. It returns a new List though.
      * The `newKeys` argument allows for an array of new keys to be passed
      *
-     * @param {number} start
-     * @param {number} deleteCount
-     * @param {array}  newKeys
+     * @param {number} options.start
+     * @param {number} options.deleteCount
+     * @param {array}  options.newKeys
      * @param {...any} newValues
      */
-    value: function({ start, deleteCount, newKeys }, ...newValues) {
+    value: function(options={}, ...newValues) {
+      // const { start=0, deleteCount=0, newKeys=[] } = options ?? {};
+      const start = options?.start ?? 0;
+      const deleteCount = options?.deleteCount ?? 0;
+      const newKeys = options?.newKeys ? Array.from(options.newKeys) : [];
       const { keys, values } = this;
-
-      newKeys = Array.isArray(newKeys) ? newKeys : [];
+      const uniqueKeys = [...keys, ...newKeys];
 
       for (let i = 0, l = newValues.length; i < l; i++) {
         newKeys[i] = newKeys[i] ?? uniqueKey([...keys, ...newKeys]);
@@ -301,6 +304,30 @@ const ListPrototype = Object.create({}, {
     },
   },
   // List methods
+  keyOf: {
+    value: function(value) {
+      const { values, keys } = this;
+      const index = values.indexOf(value);
+
+      return keys[index];
+    },
+  },
+  /**
+   * Returns a new List with newValues appeneded to the existing values.
+   */
+  append: {
+    value: function(newKeys=[], ...newValues) {
+      return this.splice({ newKeys, start: this.length }, ...newValues);
+    }
+  },
+  /**
+   * Returns a new List with newValues prepended to the existing values.
+   */
+  prepend: {
+    value: function(newKeys=[], ...newValues) {
+      return this.splice({ newKeys }, ...newValues);
+    }
+  },
   /**
    * Deletes a key/value by the numerical index of the value. Values with higher
    * indices will have their indices decremented.
