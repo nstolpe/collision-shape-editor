@@ -8,6 +8,7 @@ import removeEdgeFromShapes from 'reducers/helpers/remove-edge-from-shapes';
 import {
   SET_ROOT_CONTAINER,
   ADD_VERTEX,
+  INSERT_VERTEX_BEFORE,
   INSERT_VERTEX_AFTER,
   DELETE_VERTEX,
   DELETE_EDGE,
@@ -17,11 +18,13 @@ import {
   STOP_MOVE_VERTEX,
   SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
   SET_SELECTED_VERTICES,
+  ADD_SELECTED_VERTICES,
   OPEN_SHAPE,
   CLOSE_SHAPE,
   REVERSE_SHAPE_WINDING,
   TOGGLE_SHAPE_SHOW_WINDING,
   JOIN_SHAPES,
+  CREATE_SHAPE,
   DELETE_SHAPE,
   SET_INTERACTION,
   SET_MODE,
@@ -36,6 +39,7 @@ import {
   SET_SELECT_OVERLAY_ENABLED,
   SET_SELECT_OVERLAY_POSITION,
   SET_SELECT_OVERLAY_DIMENSIONS,
+  SET_PIXI_APP,
   ADD_TEXTURE_SOURCE,
   REMOVE_TEXTURE_SOURCE,
   ADD_SPRITE,
@@ -156,6 +160,7 @@ export const initialState = {
     vertexRadius: 6.5,
   },
   contextMenu: { type: undefined },
+  pixiApp: undefined,
 };
 
 export const reducer = (state, action) => {
@@ -195,13 +200,50 @@ export const reducer = (state, action) => {
           width: data.width,
         },
       };
+    case SET_PIXI_APP:
+      return {
+        ...state,
+        pixiApp: data.pixiApp,
+      };
     case ADD_VERTEX:
       return {
         ...state,
         vertices: List([...state.vertices, { x: data.x, y: data.y }]),
       };
+    case INSERT_VERTEX_BEFORE: {
+      const { shapeKey, vertexKey, x, y, makeSelected } = data;
+      const { shapes } = state;
+      const shape = shapes.key(shapeKey);
+      const vertexIndex = shape.vertices.indexOfKey(vertexKey) + 1;
+      const shapeIndex = shapes.indexOf(shape);
+      const vertices = shape.vertices.splice(
+        {
+          start: vertexIndex - 1,
+          deleteCount: 0,
+          newKeys: [undefined],
+        },
+        { x, y },
+      );
+      const newShapes = shapes.splice(
+        {
+          start: shapeIndex,
+          deleteCount: 1,
+          newKeys: [shapes.keys[shapeIndex]],
+        },
+        { ...shape, vertices },
+      );
+
+      const newState = { ...state, shapes: newShapes };
+
+      if (makeSelected) {
+        const key = `VERTEX::${vertices.keys[vertexIndex - 1]}::SHAPE::${shapeKey}`;
+        newState.selectedVertices = { [key]: { x: 0, y: 0 } };
+      }
+
+      return newState;
+    }
     case INSERT_VERTEX_AFTER: {
-      const { shapeKey, vertexKey, x, y } = data;
+      const { shapeKey, vertexKey, x, y, makeSelected } = data;
       const { shapes } = state;
       const shape = shapes.key(shapeKey);
       const vertexIndex = shape.vertices.indexOfKey(vertexKey) + 1;
@@ -223,7 +265,14 @@ export const reducer = (state, action) => {
         { ...shape, vertices },
       );
 
-      return { ...state, shapes: newShapes };
+      const newState = { ...state, shapes: newShapes };
+
+      if (makeSelected) {
+        const key = `VERTEX::${vertices.keys[vertexIndex]}::SHAPE::${shapeKey}`;
+        newState.selectedVertices = { [key]: { x: 0, y: 0 } };
+      }
+
+      return newState;
     }
     case DELETE_VERTEX: {
       const { shapes } = state;
@@ -270,6 +319,14 @@ export const reducer = (state, action) => {
           state.shapes
         ),
       };
+    case ADD_SELECTED_VERTICES:
+      return {
+        ...state,
+        selectedVertices: {
+          ...state.selectedVertices,
+          ...data.selectedVertices,
+        },
+      };
     case SET_SELECTED_VERTICES:
       return {
         ...state,
@@ -308,8 +365,28 @@ export const reducer = (state, action) => {
           joinType: data.joinType,
         })
       }
+    case CREATE_SHAPE: {
+      const { vertices, closed, showWinding } = data;
+      const newShape = { vertices, closed, showWinding };
+      const { shapes: { keys, values } } = state;
+      const newShapes = List([...values, newShape], keys);
+      const shapeKey = newShapes.keyOf(newShape);
+      const newSelectedVertices = vertices.reduce(
+        (result, { x, y }, _, vertexKey) => {
+          const key = `VERTEX::${vertexKey}::SHAPE::${shapeKey}`;
+          result[key] = { x, y };
+          return result;
+        },
+        {},
+      );
+
+      return {
+        ...state,
+        shapes: newShapes,
+        selectedVertices: newSelectedVertices,
+      };
+    }
     case DELETE_SHAPE: {
-      console.log(state.shapes.indexOfKey(data.id))
       return {
         ...state,
         shapes: state.shapes.splice({

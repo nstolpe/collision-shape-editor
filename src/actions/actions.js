@@ -1,7 +1,10 @@
 // src/js/actions/action.js
+import List from 'tools/List';
+
 import {
   SET_ROOT_CONTAINER,
   ADD_VERTEX,
+  INSERT_VERTEX_BEFORE,
   INSERT_VERTEX_AFTER,
   DELETE_VERTEX,
   DELETE_EDGE,
@@ -9,11 +12,13 @@ import {
   MOVE_VERTICES,
   SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
   SET_SELECTED_VERTICES,
+  ADD_SELECTED_VERTICES,
   OPEN_SHAPE,
   CLOSE_SHAPE,
   REVERSE_SHAPE_WINDING,
   TOGGLE_SHAPE_SHOW_WINDING,
   JOIN_SHAPES,
+  CREATE_SHAPE,
   DELETE_SHAPE,
   START_MOVE_VERTEX,
   STOP_MOVE_VERTEX,
@@ -30,6 +35,7 @@ import {
   SET_SELECT_OVERLAY_ENABLED,
   SET_SELECT_OVERLAY_POSITION,
   SET_SELECT_OVERLAY_DIMENSIONS,
+  SET_PIXI_APP,
   SET_CONTEXT_MENU,
   SET_CONTEXT_MENU_OPEN,
   SET_CONTEXT_MENU_POSITION,
@@ -65,6 +71,11 @@ export const setSelectOverlayDimensions = ({ width, height }) => {
   }
 };
 
+export const setPixiApp = pixiApp => ({
+  type: SET_PIXI_APP,
+  data: { pixiApp },
+});
+
 /**
  * data: {
  *   enabled: {boolean}
@@ -86,9 +97,14 @@ export const addVertex = ({ x, y }) => ({
   data: { x, y },
 });
 
-export const insertVertex = ({ shapeKey, vertexKey, x, y }) => ({
+export const insertVertexBefore = ({ shapeKey, vertexKey, x, y, makeSelected=false }) => ({
+  type: INSERT_VERTEX_BEFORE,
+  data: { shapeKey, vertexKey, x, y, makeSelected },
+});
+
+export const insertVertexAfter = ({ shapeKey, vertexKey, x, y, makeSelected=false }) => ({
   type: INSERT_VERTEX_AFTER,
-  data: { shapeKey, vertexKey, x, y },
+  data: { shapeKey, vertexKey, x, y, makeSelected },
 });
 
 export const deleteVertex = ({ shapeKey, vertexKey }) => ({
@@ -121,6 +137,11 @@ export const setVertexPositionsRelativeToCoordinates = (vertices, coordinates) =
 
 export const setSelectedVertices = selectedVertices => ({
   type: SET_SELECTED_VERTICES,
+  data: { selectedVertices },
+});
+
+export const addSelectedVertices = selectedVertices => ({
+  type: ADD_SELECTED_VERTICES,
   data: { selectedVertices },
 });
 
@@ -159,6 +180,15 @@ export const joinShapes = ({
     shapeKey2,
     joinType,
   },
+});
+
+export const createShape = ({
+  vertices=List(),
+  closed=false,
+  showWinding=false,
+}) => ({
+  type: CREATE_SHAPE,
+  data: { vertices, closed, showWinding },
 });
 
 export const deleteShape = id => ({
