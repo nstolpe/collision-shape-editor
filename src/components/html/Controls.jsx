@@ -20,6 +20,7 @@ import SelectIcon from 'components/html/SelectIcon';
 import SpriteIcon from 'components/html/SpriteIcon';
 import VertexIcon from 'components/html/VertexIcon';
 import Separator from 'components/html/Separator';
+import FPSMonitor from 'components/html/FPSMonitor';
 import RootContext from 'contexts/RootContext';
 import { property } from 'tools/property';
 import ColorPicker from 'color-picker';
@@ -27,6 +28,7 @@ import ColorPicker from 'color-picker';
 const ControlWrapper = styled.div`
   background-color: hsl(0, 0%, 75%);
   padding: 1em;
+  display: flex;
   & > * {
     margin-right: 1rem !important;
   }
@@ -98,6 +100,8 @@ const Controls = ({
   rootContainer,
   tool,
 }) => {
+  // @TODO make debug settable somewhere higher up in abb state.
+  const debug = false;
   const onColorChange =({ r, g, b }) => {
     const color = chroma(r, g, b);
     dispatch(setBackgroundColor(parseInt(color.hex().replace('#', ''), 16)));
@@ -141,6 +145,7 @@ const Controls = ({
       <SelectIcon {...selectIconProps} />
       <PlusIcon {...plusIconProps} />
       <MinusIcon {...minusIconProps} />
+      {debug && <FPSMonitor />}
       {children}
     </ControlWrapper>
   );

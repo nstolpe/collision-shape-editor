@@ -3,13 +3,15 @@ import { useState } from 'react';
 import * as PIXI from 'pixi.js';
 
 import {
-  insertVertex,
+  insertVertexBefore,
+  insertVertexAfter,
   deleteEdge,
   deleteVertex,
   setSelectOverlayDimensions,
   setSelectOverlay,
   moveVertices,
   setVertexPositionsRelativeToCoordinates,
+  createShape,
   openShape,
   closeShape,
   joinShapes,
@@ -340,7 +342,7 @@ const usePointerInteraction = () => {
     );
     const [x, y] = closestPointOnSegment(vertex1, vertex2, coordinates);
 
-    dispatch(insertVertex({ shapeKey, vertexKey, x, y }));
+    dispatch(insertVertexAfter({ shapeKey, vertexKey, x, y }));
     dispatch(setSelectedVertices({}));
   };
 
@@ -560,6 +562,8 @@ const usePointerInteraction = () => {
           break;
         case hasPrefix(target.name, SHAPE):
           // @TODO add handler for shape, pass on control to viewport there if necessary.
+          // or delete. probably the better option. shapes have no hit area now and are checked
+          // below under the secondary (button === 2) click condition
           pointerDownViewport(event, coordinates);
           break;
         case hasPrefix(target.name, VERTEX):
@@ -665,13 +669,10 @@ const usePointerInteraction = () => {
 
     switch (true) {
       case pointer?.target?.name === 'VIEWPORT':
+      case hasPrefix(pointer?.target?.name, SHAPE):
         // main container viewport
         // using global (viewport?) coordinates. size is right, position is wrong.
         // pointerMoveViewport(event, pointer, { x: event.data.global.x, y: event.data.global.y });
-        pointerMoveViewport(event, pointer, pointerCoordinates);
-        break;
-      case hasPrefix(pointer?.target?.name, SHAPE):
-        // @TODO add handler for shape, pass on control to viewport there if necessary.
         pointerMoveViewport(event, pointer, pointerCoordinates);
         break;
       case hasPrefix(pointer?.target?.name, VERTEX):
@@ -735,19 +736,49 @@ const usePointerInteraction = () => {
     setJustRemoved(false);
   };
 
-  const pointerDownViewport = (event, coordinates) => {
+  const extendShapeOrAddShape = coordinates => {
     const { x, y } = coordinates;
-    const height = 0;
-    const width = 0;
+    const selectedVertexKeys = Object.keys(selectedVertices);
 
-    if (tool === Tools.SELECT && !panModifierKeyPressed) {
-      dispatch(setSelectOverlay({
-        enabled: true,
-        x,
-        y,
-        width,
-        height,
-      }));
+    if (selectedVertexKeys.length === 1) {
+      // one selected vertex...
+      const [selectedVertexKey] = selectedVertexKeys;
+      const [, vertexKey,, shapeKey] = selectedVertexKey.split(DEFAULT_DELIMITER);
+      const shape = shapes.key(shapeKey);
+      const vertices = shape.vertices;
+
+      if (!shape.closed && vertexKey === vertices.keys[0]) {
+        // ...it was the first in a shape, prepend a new one before it
+        return dispatch(insertVertexBefore({ shapeKey, vertexKey, x, y, makeSelected: true }));
+      } else if (!shape.closed && vertexKey === vertices.keys[vertices.length - 1]) {
+        // ...it was the last in a shape, prepend a new one after it
+        return dispatch(insertVertexAfter({ shapeKey, vertexKey, x, y, makeSelected: true }));
+      }
+    }
+    dispatch(createShape({ vertices: List([{ ...coordinates }]) }));
+  };
+
+  const pointerDownViewport = (event, coordinates) => {
+    if (!panModifierKeyPressed) {
+      switch (true) {
+        case (tool === Tools.SELECT): {
+          const { x, y } = coordinates;
+
+          dispatch(setSelectOverlay({
+            enabled: true,
+            x,
+            y,
+            width: 0,
+            height: 0,
+          }));
+          break;
+        }
+        case tool === Tools.ADD:
+          extendShapeOrAddShape(coordinates)
+          break;
+        default:
+          //
+      }
     }
   }
 

@@ -2,11 +2,12 @@
 import * as PIXI from 'pixi.js';
 import PropTypes from 'prop-types';
 import React, { useCallback, useEffect } from 'react';
-import { Stage } from 'react-pixi-fiber';
+import { Stage, AppContext } from 'react-pixi-fiber';
 
 import { useRootContext } from 'contexts/RootContext';
 import ScreenContext from 'contexts/ScreenContext';
 import {
+  setPixiApp,
   setAltPressed,
   setCtrlPressed,
   setShiftPressed,
@@ -36,12 +37,20 @@ const Screen = ({ children, width, height }) => {
       }
     >
       <ScreenContext.Provider value={state}>
-        <InteractiveViewport
-          screenWidth={width}
-          screenHeight={height}
-          worldWidth={width}
-          worldHeight={height}
-        />
+        <AppContext.Consumer>{pixiApp => {
+          if (state.pixiApp !== pixiApp) {
+            state.dispatch(setPixiApp(pixiApp));
+          }
+
+          return (
+            <InteractiveViewport
+              screenWidth={width}
+              screenHeight={height}
+              worldWidth={width}
+              worldHeight={height}
+            />
+          );
+        }}</AppContext.Consumer>
       </ScreenContext.Provider>
     </Stage>
     );

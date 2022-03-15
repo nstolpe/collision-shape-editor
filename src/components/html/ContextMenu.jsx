@@ -9,11 +9,21 @@ import {
   reverseShapeWinding,
   toggleShapeShowWinding,
   deleteShape,
+  setSelectedVertices,
+  addSelectedVertices,
 } from 'actions/actions'
 import { SHAPE } from 'constants/prefixes';
 import RootContext from 'contexts/RootContext';
 import withSelector from 'components/hoc/withSelector';
 import { Button, Ul } from 'components/html/resets';
+
+const Screen = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+`;
 
 const Modal = styled(
   'div',
@@ -92,12 +102,29 @@ const ShapeContextMenu = withSelector(RootContext, shapeContextMenuSelector)(
       dispatch(closeContextMenu());
       document.removeEventListener('keydown', onKeyDown);
     }
-    const selectShapeVertices = (shapeKey, replace = false) => {
+    const selectShapeVertices = (shapeKey, replace=false) => {
       if (replace) {
-        console.log('@TODO setup state and dispatch for selectedVertices so this can replace the selection');
+        const newSelectedVertices = shape.vertices.reduce(
+          (result, { x, y }, _, vertexKey) => {
+            result[`VERTEX::${vertexKey}::SHAPE::${shapeKey}`] = { x, y };
+            return result;
+          },
+          {},
+        );
+
+        dispatch(setSelectedVertices(newSelectedVertices));
       } else {
-        console.log('@TODO setup state and dispatch for selectedVertices so this can add to the selection');
+        const newSelectedVertices = shape.vertices.reduce(
+          (result, { x, y }, _, vertexKey) => {
+            result[`VERTEX::${vertexKey}::SHAPE::${shapeKey}`] = { x, y };
+            return result;
+          },
+          {},
+        );
+
+        dispatch(addSelectedVertices(newSelectedVertices));
       }
+
       dispatch(closeContextMenu());
       document.removeEventListener('keydown', onKeyDown);
     };
@@ -178,58 +205,43 @@ const ContextMenu = ({
   options,
 }) => {
   const open = !!type;
-  const modalRef = useRef();
+  const screenRef = useRef();
+  const onPointerDown = ({ target }) => {
+    if (target === screenRef.current) {
+      dispatch(closeContextMenu());
+    }
+  };
 
   useEffect(() => {
-    const close = event => {
-      const modal = modalRef.current;
-      let doClose = false;
-
-      const { type: eventType, target, key } = event;
-      switch (eventType) {
-        case 'keydown':
-          if (key === 'Escape' || key === 'Esc') {
-            doClose = true;
-          }
-          break;
-        case 'pointerdown':
-          if (target !== modal && !modal?.contains(target) && event.button !== 2) {
-            doClose = true;
-          }
-          break;
-        default:
-          break;
-      }
-
-      if (doClose) {
+    const close = ({ key }) => {
+      if (key === 'Escape' || key === 'Esc') {
         dispatch(closeContextMenu());
         document.removeEventListener('keydown', close);
-        document.removeEventListener('pointerdown', close);
       }
     };
 
     if (open) {
       document.addEventListener('keydown', close);
-      document.addEventListener('pointerdown', close);
     }
 
     return () => {
       document.removeEventListener('keydown', close);
-      document.removeEventListener('pointerdown', close);
     };
   }, [dispatch, open]);
 
   return (
     rootContainer && open ?
       createPortal(
-        <Modal
-          left={x}
-          top={y}
-          ref={modalRef}
+        <Screen
+          ref={screenRef}
+          onPointerDown={onPointerDown}
+          onContextMenu={e => e.preventDefault()}
         >
-          <Header>{type.toLowerCase()} options</Header>
-          {getMenuContents(type, options)}
-        </Modal>,
+          <Modal left={x} top={y}>
+            <Header>{type.toLowerCase()} options</Header>
+            {getMenuContents(type, options)}
+          </Modal>
+        </Screen>,
         rootContainer,
       ) :
       null
