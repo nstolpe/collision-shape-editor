@@ -5,7 +5,7 @@ import { Global } from '@emotion/react';
 
 import FiraMonoRegular from 'fonts/FiraMono/FiraMono-Regular.ttf';
 import AppWrapper from 'components/html/AppWrapper';
-import ContextMenu from 'components/html/ContextMenu';
+import ShapeContextMenu from 'components/html/containers/ShapeContextMenu';
 import Controls from 'components/html/Controls';
 import FlexResizer from 'components/html/FlexResizer';
 import Screen from 'components/pixi/Screen';
@@ -40,7 +40,7 @@ render(
         <Screen />
       </FlexResizer>
       <Controls />
-      <ContextMenu />
+      <ShapeContextMenu />
     </AppWrapper>
   </RootStore>,
   appContainer
