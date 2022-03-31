@@ -2,6 +2,7 @@
 import React from 'react';
 import styled from '@emotion/styled';
 import chroma from 'chroma-js';
+import ColorPicker from 'color-picker';
 
 import { setMode, setTool } from 'actions/actions';
 import * as Modes from 'constants/modes';
@@ -19,11 +20,12 @@ import MinusIcon from 'components/html/MinusIcon';
 import SelectIcon from 'components/html/SelectIcon';
 import SpriteIcon from 'components/html/SpriteIcon';
 import VertexIcon from 'components/html/VertexIcon';
-import Separator from 'components/html/Separator';
+import PointerCoordinates from 'components/html/containers/PointerCoordinates';
+import SelectCoordinates from 'components/html/containers/SelectCoordinates';
 import FPSMonitor from 'components/html/FPSMonitor';
+import Separator from 'components/html/Separator';
 import RootContext from 'contexts/RootContext';
 import { property } from 'tools/property';
-import ColorPicker from 'color-picker';
 
 const ControlWrapper = styled.div`
   background-color: hsl(0, 0%, 75%);
@@ -136,6 +138,8 @@ const Controls = ({
         onColorChange={onColorChange}
         titleFontFamily="Fira Mono"
         valueFontFamily="Fira Mono"
+        triggerWidth={'64px'}
+        triggerHeight={'64px'}
       />
       <Separator />
       <VertexIcon {...vertexIconProps} />
@@ -145,6 +149,8 @@ const Controls = ({
       <SelectIcon {...selectIconProps} />
       <PlusIcon {...plusIconProps} />
       <MinusIcon {...minusIconProps} />
+      <SelectCoordinates  styles={{ marginLeft: 'auto' }}/>
+      <PointerCoordinates />
       {debug && <FPSMonitor />}
       {children}
     </ControlWrapper>

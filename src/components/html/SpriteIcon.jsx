@@ -104,8 +104,8 @@ SpriteIcon.propTypes = {
 
 SpriteIcon.defaultProps = {
   active: false,
-  height: '56px',
-  width: '56px',
+  height: '64px',
+  width: '64px',
 };
 
 export default SpriteIcon;

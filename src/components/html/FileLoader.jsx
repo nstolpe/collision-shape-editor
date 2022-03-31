@@ -17,9 +17,9 @@ const Label = styled.label`
   display: inline-block;
   font-family: 'Fira Mono';
   font-size: 1.8em;
-  width: 54px;
-  height: 54px;
-  line-height: 54px;
+  width: 64px;
+  height: 64px;
+  line-height: 64px;
   vertical-align: middle;
   text-align: center;
   background-color: hsl(0,0%,50%);

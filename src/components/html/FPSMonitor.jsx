@@ -10,11 +10,10 @@ const Wrapper = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-left: auto;
   border-radius: 4px;
   background: grey;
-  height: 56px;
-  width: 56px;
+  height: 6.4rem;
+  width: 6.4rem;
   background: darkturquoise;
   vertical-align: middle;
   box-shadow: 0 0 10px rgb(0 0 0 / 50%) inset;

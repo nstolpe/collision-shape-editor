@@ -58,12 +58,14 @@ const Screen = ({ children, width, height }) => {
 
 Screen.propTypes = {
   children: PropTypes.array,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
+  width: PropTypes.number,
+  height: PropTypes.number,
 };
 
 Screen.defaultProps = {
   children: [],
+  width: 0,
+  height: 0,
 };
 
 export default Screen;
