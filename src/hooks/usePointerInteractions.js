@@ -19,6 +19,7 @@ import {
   setContextMenuOpen,
   setContextMenuPosition,
   setSelectedVertices,
+  setPointerCoordinates,
 } from 'actions/actions';
 import * as Tools from 'constants/tools';
 import * as Modes from 'constants/modes';
@@ -40,6 +41,10 @@ import useSelector from 'hooks/useSelector';
 import selectOverlayComparator from 'comparators/select-overlay';
 import { keySelector } from 'selectors/keys';
 
+// @TODO break this file up. maybe convert it into multiple hooks.. useCallback(handler)
+// https://stackoverflow.com/a/55015145
+// or make into an hoc? (still break out functions).
+// consider combining some logic from the reducer helpers
 const selector = ({
   dispatch,
   mode,
@@ -188,6 +193,7 @@ const usePointerInteraction = () => {
   // pointers currently interacting with the component.
   // pointer = { coordinates: { x: number, y: number }, identifier: number, target: PIXI.DisplayObject, }
   const [activePointers, setActivePointers] = useState([]);
+  const [lastMoved, setLastMoved] = useState(0);
   // `true` indicates that a `pointerdown` even just removed whatever it's target was. clear on pointerup
   const [justRemoved, setJustRemoved] = useState(false);
   // queued selected vertices = { name: string, distance: { x: number, y: number} }
@@ -633,29 +639,32 @@ const usePointerInteraction = () => {
    * Main pointermove, covers a large variety of interactions.
    */
   const handlePointerMove = event => {
-    // exit early if the activePointers is empty.
-    // for when a pointer moves onto the pixi canvas from outside.
-    if (!activePointers.length || !event.target) {
-      return;
-    }
-
     const {
       data: { identifier } = {},
     } = event;
+    const currentMoved = Date.now();
     const pointerIndex = activePointers.findIndex(pointer => pointer.identifier === identifier);
     const pointer = activePointers[pointerIndex];
-
-    if (!pointer) {
-      return;
-    }
-
     const viewport = findViewportParent(event.target);
 
     if (!viewport) {
+      dispatch(setPointerCoordinates());
       return;
     }
 
     const pointerCoordinates = event.data.getLocalPosition(viewport);
+
+    // @TODO move this 50 out, maybe make configurable.
+    if (currentMoved - lastMoved >= 50) {
+      dispatch(setPointerCoordinates(pointerCoordinates.x, pointerCoordinates.y));
+      setLastMoved(currentMoved);
+    }
+
+    // exit early if the activePointers is empty.
+    // for when a pointer moves onto the pixi canvas from outside.
+    if (!pointer || !activePointers.length || !event.target) {
+      return;
+    }
 
     // update pointerCoordinates of the active pointer.
     setActivePointers(currentActivePointers => [

@@ -47,6 +47,7 @@ import {
   SET_CONTEXT_MENU_OPEN,
   SET_CONTEXT_MENU_POSITION,
   CLOSE_CONTEXT_MENU,
+  SET_POINTER_COORDINATES,
 } from 'constants/action-types';
 import * as Modes from 'constants/modes';
 import * as Tools from 'constants/tools';
@@ -161,6 +162,7 @@ export const initialState = {
   },
   contextMenu: { type: undefined },
   pixiApp: undefined,
+  pointerCoordinates: { x: undefined, y: undefined },
 };
 
 export const reducer = (state, action) => {
@@ -204,6 +206,11 @@ export const reducer = (state, action) => {
       return {
         ...state,
         pixiApp: data.pixiApp,
+      };
+    case SET_POINTER_COORDINATES:
+      return {
+        ...state,
+        pointerCoordinates: { x: data.x, y: data.y },
       };
     case ADD_VERTEX:
       return {

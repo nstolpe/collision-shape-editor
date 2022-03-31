@@ -22,3 +22,11 @@ export const Ul = styled.ul`
   margin: 0;
   padding: 0;
 `;
+
+export const Input = styled.input`
+  padding: 0;
+  margin: 0;
+  border: 0;
+  line-height: 1.5;
+  background: transparent;
+`;

@@ -36,6 +36,7 @@ import {
   SET_SELECT_OVERLAY_POSITION,
   SET_SELECT_OVERLAY_DIMENSIONS,
   SET_PIXI_APP,
+  SET_POINTER_COORDINATES,
   SET_CONTEXT_MENU,
   SET_CONTEXT_MENU_OPEN,
   SET_CONTEXT_MENU_POSITION,
@@ -74,6 +75,11 @@ export const setSelectOverlayDimensions = ({ width, height }) => {
 export const setPixiApp = pixiApp => ({
   type: SET_PIXI_APP,
   data: { pixiApp },
+});
+
+export const setPointerCoordinates = (x, y) => ({
+  type: SET_POINTER_COORDINATES,
+  data: { x, y },
 });
 
 /**
