@@ -29,7 +29,7 @@ const ValueWrapper = styled.label(`
   display: flex;
   font-size: 1.2rem;
   border-radius: 4px;
-  padding: 0 0.4rem;
+  padding: 0 0 0 0.4rem;
 `, ({ styles }) => styles);
 
 const ValueLabel = styled.span(({ styles }) => styles);
@@ -39,6 +39,7 @@ const ValueInput = styled(Input)(`
 `, ({ styles }) => styles);
 
 const Value = ({
+  type,
   label,
   title,
   value,
@@ -46,19 +47,22 @@ const Value = ({
   styles,
   labelStyles,
   inputStyles,
+  onChange,
 }) => (
   <ValueWrapper title={title} styles={styles}>
     <ValueLabel styles={labelStyles}>{label}: </ValueLabel>
     <ValueInput
-      type="text"
+      type={type}
       value={value ?? ''}
       disabled={disabled}
       styles={inputStyles}
+      onChange={onChange}
     />
   </ValueWrapper>
 );
 
 Value.propTypes = {
+  type: PropTypes.string,
   label: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   title: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
@@ -69,6 +73,7 @@ Value.propTypes = {
 };
 
 Value.defaultProps = {
+  type: 'text',
   disabled: false,
   styles: {},
   labelStyles: {},
