@@ -26,6 +26,32 @@ export const distance = (a, b) => {
 const point0 = { x: 0, y: 0 };
 
 /**
+ * Expands a rectangle defined by minX, maxX, minY, and maxY to include
+ * the point at [x, y] if that point is not already inside the rectangle.
+ *
+ * @return [minX, maxX, minY, maxY]
+ */
+export const expandAABB = (
+  x,
+  y,
+  minX,
+  maxX,
+  minY,
+  maxY,
+) => {
+  return [
+    // minX:
+    x < minX ? x : minX,
+    // maxX:
+    x > maxX ? x : maxX,
+    // minY:
+    y < minY ? y : minY,
+    // maxY:
+    y > maxY ? y : maxY,
+  ];
+};
+
+/**
  * Checks if `point` is inside of an axis aligned bounding box defined by the points
  * `boundA` and `boundB`. Add offset if you want to check an area and not just a point.
  */

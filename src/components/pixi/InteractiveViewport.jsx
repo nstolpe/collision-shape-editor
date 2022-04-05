@@ -18,7 +18,6 @@ import {
 } from 'actions/modifier-keys-actions';
 import restComparator from 'comparators/rest';
 import scaleComparator from 'comparators/scale';
-import verticesComparator from 'comparators/vertices';
 import withSelector from 'components/hoc/withSelector';
 import Rectangle from 'components/pixi/base/Rectangle';
 import Shapes from 'components/pixi/Shapes';
@@ -67,7 +66,6 @@ const selector = ({
   mode,
   tool,
   textureSources,
-  vertices,
   panModifierCode,
 }) => ({
   dispatch,
@@ -75,24 +73,8 @@ const selector = ({
   mode,
   tool,
   textureSources,
-  vertices,
   panModifierCode,
 });
-
-const comparator = (
-  { vertices, ...restProps },
-  { vertices: oldVertices, ...restOldProps }
-) => {
-  if (!verticesComparator(vertices, oldVertices)) {
-    return false;
-  }
-
-  if (!restComparator(restProps, restOldProps)) {
-    return false;
-  }
-
-  return true;
-};
 
 /**
  * `pixi-viewport` component.
@@ -107,7 +89,6 @@ const InteractiveViewport = ({
   children,
   screenHeight,
   screenWidth,
-  vertices,
   panModifierCode,
   ...restProps
 }) => {
@@ -232,4 +213,4 @@ const InteractiveViewport = ({
   );
 };
 
-export default withSelector(ScreenContext, selector, comparator)(InteractiveViewport);
+export default withSelector(ScreenContext, selector)(InteractiveViewport);

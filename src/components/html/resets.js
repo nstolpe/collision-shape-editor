@@ -1,4 +1,6 @@
 // src/components/html/resets.js
+// @TODO rename this to /components/html/styles.js or /components/html/base-styles.js
+// or /components/html/styles/base.js or something.
 import styled from '@emotion/styled/macro';
 
 export const Button = styled.button`
