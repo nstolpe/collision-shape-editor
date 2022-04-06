@@ -1,5 +1,5 @@
 // tools/throttle.js
-const throttle = (handler, wait=100) => {
+const throttle = (callback, wait=100) => {
   let last = Date.now();
   let tailCallId;
 
@@ -9,14 +9,14 @@ const throttle = (handler, wait=100) => {
     const elapsed = now - last;
 
     if (elapsed >= wait) {
-       window.called = (window.called ?? 0) + 1;
+      window.called = (window.called ?? 0) + 1;
       last = now;
-      handler(event);
+      callback(event);
     } else {
       tailCallId = window.setTimeout(() => {
-         window.tailing = (window.tailing ?? 0) + 1;
-         handler(event);
-         last = now;
+        window.tailing = (window.tailing ?? 0) + 1;
+        callback(event);
+        last = now;
       }, wait - elapsed);
     }
   };

@@ -6,9 +6,9 @@ import { DEFAULT_DELIMITER } from 'tools/prefix';
 
 /**
  * recreates a List of shapes, updating the coordinates of shapes vertices based
- * on their their distance from touch coordinates
+ * on their distance from coordinates
  */
-export const getShapeVerticesRelativeToCoordinates = (selectedVertices, coordinates, shapes) => {
+const getShapeVerticesRelativeToCoordinates = (selectedVertices, coordinates, shapes) => {
   let newShapes = new List(shapes, shapes.keys);
 
   for (const name in selectedVertices) {
@@ -38,3 +38,5 @@ export const getShapeVerticesRelativeToCoordinates = (selectedVertices, coordina
 
   return newShapes;
 };
+
+export default getShapeVerticesRelativeToCoordinates;

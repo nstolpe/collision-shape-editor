@@ -13,6 +13,7 @@ import {
   SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
   SET_SELECTED_VERTICES,
   ADD_SELECTED_VERTICES,
+  RECENTER_SELECTED_VERTICES,
   OPEN_SHAPE,
   CLOSE_SHAPE,
   REVERSE_SHAPE_WINDING,
@@ -149,6 +150,11 @@ export const setSelectedVertices = selectedVertices => ({
 export const addSelectedVertices = selectedVertices => ({
   type: ADD_SELECTED_VERTICES,
   data: { selectedVertices },
+});
+
+export const recenterSelectedVertices = (x, y) => ({
+  type: RECENTER_SELECTED_VERTICES,
+  data: { x, y },
 });
 
 export const openShape = id => ({

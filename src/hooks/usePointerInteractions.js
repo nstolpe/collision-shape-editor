@@ -1,5 +1,5 @@
 // hooks/usePointerInteractions.js
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import * as PIXI from 'pixi.js';
 
 import {
@@ -23,7 +23,7 @@ import {
 import * as Tools from 'constants/tools';
 import * as Modes from 'constants/modes';
 import ScreenContext from 'contexts/ScreenContext';
-import throttle from 'tools/throttle';
+import useThrottle from 'hooks/useThrottle';
 import List from 'tools/List';
 import {
   closestPointOnSegment,
@@ -1015,7 +1015,7 @@ const usePointerInteraction = () => {
 
   return {
     handlePointerDown,
-    handlePointerMove: useCallback(throttle(handlePointerMove, 50), [activePointers]),
+    handlePointerMove: useThrottle(handlePointerMove, [activePointers], 50),
     handlePointerUp,
     selectedVertices,
   };

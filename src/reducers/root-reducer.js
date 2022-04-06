@@ -4,6 +4,8 @@ import { v4 as uuid } from 'uuid';
 import combineShapes from 'reducers/helpers/combine-shapes';
 import removeVertexFromShapes from 'reducers/helpers/remove-vertex-from-shapes';
 import removeEdgeFromShapes from 'reducers/helpers/remove-edge-from-shapes';
+import getShapeVerticesRelativeToCoordinates from 'reducers/helpers/get-shape-vertices-relative-to-coordinates';
+import recenterSelectedVertices from 'reducers/helpers/recenter-selected-vertices';
 
 import {
   SET_ROOT_CONTAINER,
@@ -19,6 +21,7 @@ import {
   SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
   SET_SELECTED_VERTICES,
   ADD_SELECTED_VERTICES,
+  RECENTER_SELECTED_VERTICES,
   OPEN_SHAPE,
   CLOSE_SHAPE,
   REVERSE_SHAPE_WINDING,
@@ -52,7 +55,6 @@ import {
 import * as Modes from 'constants/modes';
 import * as Tools from 'constants/tools';
 import List from 'tools/List';
-import { getShapeVerticesRelativeToCoordinates } from 'tools/state';
 
 const vertices = [
   [
@@ -317,6 +319,7 @@ export const reducer = (state, action) => {
     case MOVE_VERTICES:
       // @TODO this will probably be removed
       return state;
+    // @TODO this constant and everything related to it should be named better.
     case SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES:
       return {
         ...state,
@@ -324,6 +327,16 @@ export const reducer = (state, action) => {
           data.vertices,
           data.coordinates,
           state.shapes
+        ),
+      };
+    case RECENTER_SELECTED_VERTICES:
+      console.log(data);
+      return {
+        ...state,
+        shapes: recenterSelectedVertices(
+          data,
+          state.selectedVertices,
+          state.shapes,
         ),
       };
     case ADD_SELECTED_VERTICES:
