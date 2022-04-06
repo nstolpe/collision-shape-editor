@@ -1,5 +1,5 @@
 // hooks/usePointerInteractions.js
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import * as PIXI from 'pixi.js';
 
 import {
@@ -9,7 +9,6 @@ import {
   deleteVertex,
   setSelectOverlayDimensions,
   setSelectOverlay,
-  moveVertices,
   setVertexPositionsRelativeToCoordinates,
   createShape,
   openShape,
@@ -24,6 +23,7 @@ import {
 import * as Tools from 'constants/tools';
 import * as Modes from 'constants/modes';
 import ScreenContext from 'contexts/ScreenContext';
+import throttle from 'tools/throttle';
 import List from 'tools/List';
 import {
   closestPointOnSegment,
@@ -38,7 +38,10 @@ import {
 } from 'tools/prefix';
 import { EDGE, VERTEX, SHAPE } from 'constants/prefixes';
 import useSelector from 'hooks/useSelector';
+import restComparator from 'comparators/rest';
 import selectOverlayComparator from 'comparators/select-overlay';
+import selectedVerticesComparator from 'comparators/selected-vertices';
+import verticesComparator from 'comparators/vertices';
 import { keySelector } from 'selectors/keys';
 
 // @TODO break this file up. maybe convert it into multiple hooks.. useCallback(handler)
@@ -118,43 +121,16 @@ const comparator = ({
   }
   // end pressedKeyCodes
 
-  // selectedVertices
-  const selectedVerticesEntries = Object.entries(selectedVertices);
-
-  if (selectedVerticesEntries.length !== Object.keys(oldSelectedVertices).length) {
+  if (!selectedVerticesComparator(selectedVertices, oldSelectedVertices)) {
     return false;
   }
 
-  for (const [key, vertex1] of selectedVerticesEntries) {
-    const vertex2 = oldVertices[key];
-
-    if (!vertex2 || vertex1.x !== vertex2.x || vertex1.y !== vertex2.y) {
-      return false;
-    }
-  }
-  // end selectedVertices
-
-  if (vertices.length !== oldVertices.length) {
+  if (!verticesComparator(vertices, oldVertices)) {
     return false;
   }
 
-  for (let i = 0, l = vertices?.length; i < l; i++) {
-    const vertex = vertices.index(i);
-    const oldVertex = oldVertices.index(i);
-
-    if (
-      vertex.name !== oldVertex.name ||
-      vertex.x !== oldVertex.x ||
-      vertex.y !== oldVertex.y
-    ) {
-      return false;
-    }
-  }
-
-  for (let key of Object.keys(restProps)) {
-    if (restProps[key] !== restOldProps[key]) {
-      return false;
-    }
+  if (!restComparator(restProps, restOldProps)) {
+    return false;
   }
 
   return true;
@@ -637,65 +613,63 @@ const usePointerInteraction = () => {
 
   /**
    * Main pointermove, covers a large variety of interactions.
+   * @TODO decide whether throttling this whole function or
    */
   const handlePointerMove = event => {
-    const {
-      data: { identifier } = {},
-    } = event;
-    const currentMoved = Date.now();
-    const pointerIndex = activePointers.findIndex(pointer => pointer.identifier === identifier);
-    const pointer = activePointers[pointerIndex];
-    const viewport = findViewportParent(event.target);
+      const {
+        data: { identifier } = {},
+        target,
+      } = event;
+      const pointerIndex = activePointers.findIndex(pointer => pointer.identifier === identifier);
+      const pointer = activePointers[pointerIndex];
+      const viewport = findViewportParent(target);
 
-    if (!viewport) {
-      dispatch(setPointerCoordinates());
-      return;
-    }
+      // the move event isn't over the pixi canvas. clear out pointer coords and exit early.
+      if (!viewport) {
+        dispatch(setPointerCoordinates());
+        return;
+      }
 
-    const pointerCoordinates = event.data.getLocalPosition(viewport);
+      const pointerCoordinates = event.data.getLocalPosition(viewport);
 
-    // @TODO move this 50 out, maybe make configurable.
-    if (currentMoved - lastMoved >= 50) {
       dispatch(setPointerCoordinates(pointerCoordinates.x, pointerCoordinates.y));
-      setLastMoved(currentMoved);
-    }
 
-    // exit early if the activePointers is empty.
-    // for when a pointer moves onto the pixi canvas from outside.
-    if (!pointer || !activePointers.length || !event.target) {
-      return;
-    }
+      // exit early if the activePointers is empty.
+      // for when a pointer moves onto the pixi canvas from outside.
+      if (!pointer || !activePointers.length || !target) {
+        return;
+      }
 
-    // update pointerCoordinates of the active pointer.
-    setActivePointers(currentActivePointers => [
-      ...currentActivePointers.slice(0, pointerIndex),
-      {
-        ...pointer,
-        coordinates: pointerCoordinates,
-      },
-      ...currentActivePointers.slice(pointerIndex + 1),
-    ]);
+      // update pointerCoordinates of the active pointer.
+      setActivePointers(currentActivePointers => [
+        ...currentActivePointers.slice(0, pointerIndex),
+        {
+          ...pointer,
+          coordinates: pointerCoordinates,
+        },
+        ...currentActivePointers.slice(pointerIndex + 1),
+      ]);
 
-    switch (true) {
-      case pointer?.target?.name === 'VIEWPORT':
-      case hasPrefix(pointer?.target?.name, SHAPE):
-        // main container viewport
-        // using global (viewport?) coordinates. size is right, position is wrong.
-        // pointerMoveViewport(event, pointer, { x: event.data.global.x, y: event.data.global.y });
-        pointerMoveViewport(event, pointer, pointerCoordinates);
-        break;
-      case hasPrefix(pointer?.target?.name, VERTEX):
-        // the active pointer's cached target from pointerdown is a vertex.
-        pointerMoveVertex(event, pointer, pointerCoordinates);
-        break;
-      case hasPrefix(pointer?.target?.name, EDGE):
-        // the active pointer's cached target from pointerdown is an edge.
-        pointerMoveEdge(event, pointer, pointerCoordinates);
-        break;
-      default:
-        break;
-    }
-  };
+      switch (true) {
+        case pointer?.target?.name === 'VIEWPORT':
+        case hasPrefix(pointer?.target?.name, SHAPE):
+          // main container viewport
+          // using global (viewport?) coordinates. size is right, position is wrong.
+          // pointerMoveViewport(event, pointer, { x: event.data.global.x, y: event.data.global.y });
+          pointerMoveViewport(event, pointer, pointerCoordinates);
+          break;
+        case hasPrefix(pointer?.target?.name, VERTEX):
+          // the active pointer's cached target from pointerdown is a vertex.
+          pointerMoveVertex(event, pointer, pointerCoordinates);
+          break;
+        case hasPrefix(pointer?.target?.name, EDGE):
+          // the active pointer's cached target from pointerdown is an edge.
+          pointerMoveEdge(event, pointer, pointerCoordinates);
+          break;
+        default:
+          break;
+      }
+    };
 
   /**
    * Main pointerup, final main entry for an interaction.
@@ -881,21 +855,11 @@ const usePointerInteraction = () => {
         break;
       // case shiftKey:
       //   break;
-      default:
+      default: {
         if (Object.keys(selectedVertices).length && !justRemoved) {
-          const updatedVertices = [];
-
-          for (const name in selectedVertices) {
-            const distance = selectedVertices[name];
-            updatedVertices.push({
-              name,
-              x: pointerCoordinates.x + distance.x,
-              y: pointerCoordinates.y + distance.y,
-            });
-          }
-
           dispatch(setVertexPositionsRelativeToCoordinates(selectedVertices, pointerCoordinates));
         }
+      }
     }
   };
 
@@ -1051,7 +1015,7 @@ const usePointerInteraction = () => {
 
   return {
     handlePointerDown,
-    handlePointerMove,
+    handlePointerMove: useCallback(throttle(handlePointerMove, 50), [activePointers]),
     handlePointerUp,
     selectedVertices,
   };
