@@ -42,7 +42,6 @@ const Vertex = React.forwardRef(({
     alpha={alpha}
     buttonMode
     cursor={getCursor(tool)}
-    // fill={selectedVertices.find(vertex => vertex.name === `VERTEX::${id}`) ? activeFill : fill}
     fill={selected ? activeFill : fill}
     hitArea={hitArea}
     interactive={true}
@@ -56,6 +55,7 @@ const Vertex = React.forwardRef(({
     strokeAlignment={strokeAlignment}
     strokeColor={strokeColor}
     strokeWidth={strokeWidth}
+    zIndex={selected ? 10 : 0}
   />
 ));
 

@@ -12,12 +12,12 @@ const PointerCoordinates = ({ x, y, ...props }) => {
   const values = [
     {
       label: 'x',
-      value: x,
+      value: x ?? '--',
       disabled: true,
     },
     {
       label: 'y',
-      value: y,
+      value: y ?? '--',
       disabled: true,
     },
   ];
