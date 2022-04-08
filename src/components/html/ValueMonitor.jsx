@@ -48,18 +48,24 @@ const Value = ({
   labelStyles,
   inputStyles,
   onChange,
-}) => (
-  <ValueWrapper title={title} styles={styles}>
-    <ValueLabel styles={labelStyles}>{label}: </ValueLabel>
-    <ValueInput
-      type={type}
-      value={value ?? ''}
-      disabled={disabled}
-      styles={inputStyles}
-      onChange={onChange}
-    />
-  </ValueWrapper>
-);
+  step=1,
+}) => {
+  const extraProps = type === 'number' && { step };
+
+  return (
+    <ValueWrapper title={title} styles={styles}>
+      <ValueLabel styles={labelStyles}>{label}: </ValueLabel>
+      <ValueInput
+        type={type}
+        value={value ?? ''}
+        disabled={disabled}
+        styles={inputStyles}
+        onChange={onChange}
+        {...extraProps}
+      />
+    </ValueWrapper>
+  );
+};
 
 Value.propTypes = {
   type: PropTypes.string,
@@ -90,7 +96,7 @@ const ValueMonitor = ({
   return (
     <Wrapper title={title} styles={styles}>
       <Header styles={headerStyles}>{name}</Header>
-      {values.map((props, i) => <Value {...props} key={`${name}-${i}`}/>)}
+      {values.map((props, i) => <Value {...props} key={`${i}-${name}`}/>)}
     </Wrapper>
   )
 };

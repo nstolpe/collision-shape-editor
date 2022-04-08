@@ -64,6 +64,7 @@ const SelectCoordinates = ({ dispatch, selectedVertices, shapes, ...props }) => 
         label: 'x',
         value: center.x,
         disabled: false,
+        step: 0.01,
         onChange: e => {
           dispatch(recenterSelectedVertices(+e.target.value, center.y));
         },
@@ -73,6 +74,7 @@ const SelectCoordinates = ({ dispatch, selectedVertices, shapes, ...props }) => 
         label: 'y',
         value: center.y,
         disabled: false,
+        step: 0.01,
         onChange: e => {
           dispatch(recenterSelectedVertices(center.x, +e.target.value));
         },
@@ -81,13 +83,13 @@ const SelectCoordinates = ({ dispatch, selectedVertices, shapes, ...props }) => 
   } else {
     values = [
       {
-        type: 'number',
+        type: 'text',
         label: 'x',
         value: '--',
         disabled: true,
       },
       {
-        type: 'number',
+        type: 'text',
         label: 'y',
         value: '--',
         disabled: true,
