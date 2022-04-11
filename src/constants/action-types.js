@@ -75,7 +75,7 @@ export const SCALE_UI = 'SCALE_UI';
 
 
 
-export const ADD_TEXTURE_SOURCE = 'ADD_TEXTURE_SOURCE';
+export const ADD_TEXTURE = 'ADD_TEXTURE';
 export const REMOVE_TEXTURE_SOURCE = 'REMOVE_TEXTURE_SOURCE';
 
 export const ADD_SPRITE = 'ADD_SPRITE';

@@ -1,6 +1,4 @@
 // src/reducers/root-reducer.js
-import { v4 as uuid } from 'uuid';
-
 import combineShapes from 'reducers/helpers/combine-shapes';
 import removeVertexFromShapes from 'reducers/helpers/remove-vertex-from-shapes';
 import removeEdgeFromShapes from 'reducers/helpers/remove-edge-from-shapes';
@@ -43,7 +41,7 @@ import {
   SET_SELECT_OVERLAY_POSITION,
   SET_SELECT_OVERLAY_DIMENSIONS,
   SET_PIXI_APP,
-  ADD_TEXTURE_SOURCE,
+  ADD_TEXTURE,
   REMOVE_TEXTURE_SOURCE,
   ADD_SPRITE,
   SET_CONTEXT_MENU,
@@ -460,7 +458,7 @@ export const reducer = (state, action) => {
         ...state,
         shiftPressed: data.pressed,
       };
-    case ADD_TEXTURE_SOURCE:
+    case ADD_TEXTURE:
       return {
         ...state,
         textureSources: [ ...state.textureSources, { ...data } ],

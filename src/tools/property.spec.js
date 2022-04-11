@@ -29,7 +29,7 @@ describe('property.js --', () => {
       nonStandardMaps.forEach(map => expect(propertyMap(map, { asString })).toEqual(String(map)));
     });
 
-    it('it returns the result of `map.implode(delimiter)` when `map` is an array and `options.asString` is true', () => {
+    it('returns the result of `map.implode(delimiter)` when `map` is an array and `options.asString` is true', () => {
      const asString = true;
      const map = ['a', 'b', 'c', 'd'];
      expect(propertyMap(map, { asString })).toEqual('a.b.c.d');
