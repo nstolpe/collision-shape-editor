@@ -42,7 +42,7 @@ import {
   SET_CONTEXT_MENU_OPEN,
   SET_CONTEXT_MENU_POSITION,
   CLOSE_CONTEXT_MENU,
-  ADD_TEXTURE,
+  ADD_TEXTURE_SOURCE,
   REMOVE_TEXTURE_SOURCE,
   ADD_SPRITE,
 } from 'constants/action-types';
@@ -282,9 +282,9 @@ export const closeContextMenu = () => ({
   type: CLOSE_CONTEXT_MENU,
 });
 
-export const addTexture = (id, data) => ({
-  type: ADD_TEXTURE,
-  data: { id, data },
+export const addTextureSource = (id, textureData) => ({
+  type: ADD_TEXTURE_SOURCE,
+  data: { id, textureData },
 });
 
 export const removeTextureSource = source => ({

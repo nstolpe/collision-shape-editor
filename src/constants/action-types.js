@@ -73,9 +73,7 @@ export const SET_TOOL = 'SET_TOOL';
 export const RESIZE = 'RESIZE';
 export const SCALE_UI = 'SCALE_UI';
 
-
-
-export const ADD_TEXTURE = 'ADD_TEXTURE';
+export const ADD_TEXTURE_SOURCE = 'ADD_TEXTURE_SOURCE';
 export const REMOVE_TEXTURE_SOURCE = 'REMOVE_TEXTURE_SOURCE';
 
 export const ADD_SPRITE = 'ADD_SPRITE';

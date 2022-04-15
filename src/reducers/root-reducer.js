@@ -41,7 +41,7 @@ import {
   SET_SELECT_OVERLAY_POSITION,
   SET_SELECT_OVERLAY_DIMENSIONS,
   SET_PIXI_APP,
-  ADD_TEXTURE,
+  ADD_TEXTURE_SOURCE,
   REMOVE_TEXTURE_SOURCE,
   ADD_SPRITE,
   SET_CONTEXT_MENU,
@@ -458,10 +458,10 @@ export const reducer = (state, action) => {
         ...state,
         shiftPressed: data.pressed,
       };
-    case ADD_TEXTURE:
+    case ADD_TEXTURE_SOURCE:
       return {
         ...state,
-        textureSources: [ ...state.textureSources, { ...data } ],
+        textureSources: { ...state.textureSources, [data.id]: data.textureData },
       };
     case REMOVE_TEXTURE_SOURCE:
       return {
