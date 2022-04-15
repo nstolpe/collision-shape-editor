@@ -244,9 +244,9 @@ export const scaleUI = ({ x, y }) => ({
   data: { x, y },
 });
 
-export const setScreenDimensions = ({ x, y }) => ({
+export const setScreenDimensions = ({ height, width }) => ({
   type: SET_SCREEN_DIMENSIONS,
-  data: { x, y },
+  data: { height, width },
 });
 
 export const setBackgroundColor = backgroundColor => ({

@@ -1,5 +1,6 @@
 // src/js/components/html/FlexResizer.jsx
 import React, { useCallback, useState } from 'react';
+import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 
 import throttle from 'tools/throttle';
@@ -11,18 +12,18 @@ const FlexWrapper = styled.div`
 
 // resizes on window.resize, stores width and height, sends them as props to children.
 const FlexResizer = ({ callback, children }) => {
-  const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
+  const [width, setWidth] = useState(0);
 
   const resizeRef = useCallback(el => {
     const interval = 50;
     const resize = throttle(() => {
-      const width = el?.offsetWidth ?? 0;
       const height = el?.offsetHeight ?? 0;
+      const width = el?.offsetWidth ?? 0;
 
-      setWidth(width);
       setHeight(height);
-      callback?.(width, height);
+      setWidth(width);
+      callback?.({ height, width });
     }, interval);
 
     window.addEventListener('resize', resize);
@@ -34,9 +35,14 @@ const FlexResizer = ({ callback, children }) => {
 
   return (
     <FlexWrapper ref={resizeRef}>
-      {children(width, height)}
+      {children?.({ height, width })}
     </FlexWrapper>
   );
+};
+
+FlexResizer.propTypes = {
+  callback: PropTypes.func,
+  children: PropTypes.func,
 };
 
 export default FlexResizer;

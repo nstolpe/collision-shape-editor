@@ -443,7 +443,7 @@ export const reducer = (state, action) => {
     case SET_SCREEN_DIMENSIONS:
       return {
         ...state,
-        screenDimensions: { x: data.x, y: data.y },
+        screenDimensions: { height: data.height, width: data.width },
       };
     case SET_BACKGROUND_COLOR:
       return {
