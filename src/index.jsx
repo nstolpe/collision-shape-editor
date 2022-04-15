@@ -36,9 +36,9 @@ render(
       }}
     />
     <AppWrapper>
-      <FlexResizer>
-        <Screen />
-      </FlexResizer>
+      <FlexResizer>{
+        (width, height) => <Screen width={width} height={height}/>
+      }</FlexResizer>
       <Controls />
       <ShapeContextMenu />
     </AppWrapper>

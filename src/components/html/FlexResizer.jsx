@@ -1,10 +1,8 @@
-// src/js/components/html/FlexResizer.js
-import React, {
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+// src/js/components/html/FlexResizer.jsx
+import React, { useCallback, useState } from 'react';
 import styled from '@emotion/styled';
+
+import throttle from 'tools/throttle';
 
 const FlexWrapper = styled.div`
   flex: 1;
@@ -12,36 +10,32 @@ const FlexWrapper = styled.div`
 `;
 
 // resizes on window.resize, stores width and height, sends them as props to children.
-const FlexResizer = ({ children }) => {
+const FlexResizer = ({ callback, children }) => {
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
-  const flexResizer = useRef(null);
 
-
-  useEffect(() => {
+  const resizeRef = useCallback(el => {
     const interval = 50;
-    let timeout;
+    const resize = throttle(() => {
+      const width = el?.offsetWidth ?? 0;
+      const height = el?.offsetHeight ?? 0;
 
-    // throttled resize listener
-    const resize = () => {
-      window.clearTimeout(timeout);
-      timeout = window.setTimeout(() => {
-        setWidth(flexResizer.current ? flexResizer.current.offsetWidth : 0);
-        setHeight(flexResizer.current ? flexResizer.current.offsetHeight : 0);
-      }, interval);
-    };
+      setWidth(width);
+      setHeight(height);
+      callback?.(width, height);
+    }, interval);
 
     window.addEventListener('resize', resize);
 
     resize();
 
     return () => window.removeEventListener('resize', resize);
-  }, []);
+  }, [callback]);
 
   return (
-    <FlexWrapper ref={flexResizer}>{
-      React.Children.map(children, child => React.cloneElement(child, { width, height }))
-    }</FlexWrapper>
+    <FlexWrapper ref={resizeRef}>
+      {children(width, height)}
+    </FlexWrapper>
   );
 };
 
