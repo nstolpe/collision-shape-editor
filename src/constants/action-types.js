@@ -72,6 +72,8 @@ export const SET_TOOL = 'SET_TOOL';
 
 export const RESIZE = 'RESIZE';
 export const SCALE_UI = 'SCALE_UI';
+export const SET_SCREEN_DIMENSIONS = 'SET_SCREEN_DIMENSIONS';
+
 
 export const ADD_TEXTURE_SOURCE = 'ADD_TEXTURE_SOURCE';
 export const REMOVE_TEXTURE_SOURCE = 'REMOVE_TEXTURE_SOURCE';

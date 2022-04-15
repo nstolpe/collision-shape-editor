@@ -32,6 +32,7 @@ import {
   SET_TOOL,
   RESIZE,
   SCALE_UI,
+  SET_SCREEN_DIMENSIONS,
   SET_BACKGROUND_COLOR,
   SET_ALT_PRESSED,
   SET_CTRL_PRESSED,
@@ -145,6 +146,7 @@ export const initialState = {
     }
   ]),
   movingVerticeIds: [],
+  screenDimensions: { x: 0, y: 0 },
   scale: { x: 1, y: 1 },
   altPressed: false,
   ctrlPressed: false,
@@ -437,6 +439,11 @@ export const reducer = (state, action) => {
       return {
         ...state,
         scale: { x: data.x, y: data.y },
+      };
+    case SET_SCREEN_DIMENSIONS:
+      return {
+        ...state,
+        screenDimensions: { x: data.x, y: data.y },
       };
     case SET_BACKGROUND_COLOR:
       return {
