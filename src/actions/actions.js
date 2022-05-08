@@ -28,7 +28,6 @@ import {
   SET_TOOL,
   RESIZE,
   SCALE_UI,
-  SET_SCREEN_DIMENSIONS,
   SET_BACKGROUND_COLOR,
   SET_ALT_PRESSED,
   SET_CTRL_PRESSED,
@@ -242,11 +241,6 @@ export const resize = ({ width, height }) => ({
 export const scaleUI = ({ x, y }) => ({
   type: SCALE_UI,
   data: { x, y },
-});
-
-export const setScreenDimensions = ({ height, width }) => ({
-  type: SET_SCREEN_DIMENSIONS,
-  data: { height, width },
 });
 
 export const setBackgroundColor = backgroundColor => ({

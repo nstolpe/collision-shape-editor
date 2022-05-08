@@ -11,7 +11,7 @@ const FlexWrapper = styled.div`
 `;
 
 // resizes on window.resize, stores width and height, sends them as props to children.
-const FlexResizer = ({ callback, children }) => {
+const FlexResizer = ({ children }) => {
   const [height, setHeight] = useState(0);
   const [width, setWidth] = useState(0);
 
@@ -23,7 +23,6 @@ const FlexResizer = ({ callback, children }) => {
 
       setHeight(height);
       setWidth(width);
-      callback?.({ height, width });
     }, interval);
 
     window.addEventListener('resize', resize);
@@ -31,7 +30,7 @@ const FlexResizer = ({ callback, children }) => {
     resize();
 
     return () => window.removeEventListener('resize', resize);
-  }, [callback]);
+  }, []);
 
   return (
     <FlexWrapper ref={resizeRef}>
@@ -41,7 +40,6 @@ const FlexResizer = ({ callback, children }) => {
 };
 
 FlexResizer.propTypes = {
-  callback: PropTypes.func,
   children: PropTypes.func,
 };
 

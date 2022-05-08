@@ -2,8 +2,9 @@
 
 import * as PIXI from 'pixi.js';
 import React, {
-    useEffect,
-    useRef,
+  useEffect,
+  useState,
+  useRef,
 } from 'react';
 import { Sprite } from 'react-pixi-fiber';
 
@@ -11,14 +12,21 @@ import { Sprite } from 'react-pixi-fiber';
  * A sprite component that has its scale mode set to NEAREST.
  */
 const ScaleNearestSprite = props => {
-    const sprite = useRef(null);
-    props.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  const sprite = useRef(null);
+  const [pivot, setPivot] = useState(0, 0);
 
-    useEffect(() => {
-        sprite.current.pivot.set(sprite.width * 0.5, sprite.height * 0.5);
-    });
+  props.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
-    return (<Sprite ref={sprite} {...props} />);
+  useEffect(() => {
+    if (sprite.current) {
+      setPivot([
+        sprite.current.width * 0.5,
+        sprite.current.height * 0.5,
+      ]);
+    }
+  }, []);
+
+  return (<Sprite ref={sprite} pivot={pivot} {...props} />);
 };
 
 export default ScaleNearestSprite;
