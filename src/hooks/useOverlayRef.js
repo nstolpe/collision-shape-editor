@@ -34,8 +34,10 @@ const comparator =({
   return true;
 };
 
-const useOverlayRef = target => {
+const useOverlayRef = () => {
   const ref = useRef();
+  // @TODO make this a hoc that provides a ref, remove context
+  // stuff and have that come down through a container.
   const ctx = selector(useContext(ScreenContext));
   const {
     enabled,
@@ -51,10 +53,6 @@ const useOverlayRef = target => {
   // ticker.add(() => setTime(ticker.lastTime));
 
   useEffect(() => {
-    if (target && ref.current !== target) {
-      ref.current = target;
-    }
-
     if (ref.current) {
       if (enabled) {
         const fragment = `
@@ -172,7 +170,6 @@ const useOverlayRef = target => {
     width,
     x, y,
     // time,
-    target,
     enabled,
     scale.x,
     scale.y
