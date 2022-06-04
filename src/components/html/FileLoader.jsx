@@ -62,7 +62,7 @@ const loadWrapper = (
 
     reader.onabort = onAbort;
     reader.onerror = onError;
-    reader.onload = event => onLoad(file.name, event.target.result);
+    reader.onload = event => onLoad(file.name, event);
     reader.onloadend = onLoadend;
     reader.onloadstart = onLoadstart;
     reader.onprogress = onProgress;
@@ -73,6 +73,7 @@ const loadWrapper = (
 
 const FileLoader = ({
   text,
+  onChange,
   onAbort,
   onError,
   onLoad,
@@ -88,19 +89,7 @@ const FileLoader = ({
     <Label htmlFor="file-uploader" active={active}>
       <Span>{text}</Span>
       <Input
-        onChange={event => loadWrapper(
-          event,
-          onAbort,
-          onError,
-          onLoad,
-          onLoadend,
-          onLoadstart,
-          onProgress,
-        )}
-        onInput={eventLog}
-        onCancel={eventLog}
-        onBlur={eventLog}
-        onFocus={eventLog}
+        onChange={onChange}
         onPointerDown={e => {
           setPressed(true);
         }}

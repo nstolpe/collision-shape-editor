@@ -1,6 +1,6 @@
 // src/js/components/pixi/InteractiveViewport.js
 import * as PIXI from 'pixi.js';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { usePixiApp } from 'react-pixi-fiber';
 
 import {
@@ -95,7 +95,6 @@ const InteractiveViewport = ({
   const pixiApp = usePixiApp();
   const {
     loader,
-    renderer,
     renderer: {
       plugins: { interaction },
     },
@@ -112,40 +111,49 @@ const InteractiveViewport = ({
       scale: { x, y },
     },
   }) => dispatch(scaleUI({ x, y }));
+  const [viewport, setViewport] = useState({});
+  const viewportCallbackRef = node => {
+    // if (viewport && viewport !== node) {
+      console.log('setting viewport');
+      setViewport(node);
+    // }
+  };
 
+  useEffect(() => {
+    console.log(viewport.center);
+  }, [viewport.center]);
   const viewportRef = useOverlayRef();
-
-  useEffect(
-    () => {
-      textureSources.forEach(textureSource => {
-        if (!loader.resources[textureSource.id]) {
-          loader.add(textureSource.id, textureSource.data);
-          removeTextureSource(textureSource);
-        } else {
-          // notify that load didn't happen
-        }
-      });
-      loader.load((loader, resources) => {
-        textureSources.forEach(textureSource => {
-          addSprite({
-            name: textureSource.id,
-            texture: resources[textureSource.id].texture,
-            x: screenWidth * 0.5,
-            y: screenHeight * 0.5,
-            rotation: 0,
-            scale: [1, 1],
-            scaleMode: PIXI.SCALE_MODES.NEAREST,
-          });
-        });
-      });
-    },
-    [
-      textureSources,
-      loader,
-      screenHeight,
-      screenWidth
-    ]
-  );
+  // useEffect(
+  //   () => {
+  //     textureSources.forEach(textureSource => {
+  //       if (!loader.resources[textureSource.id]) {
+  //         loader.add(textureSource.id, textureSource.data);
+  //         removeTextureSource(textureSource);
+  //       } else {
+  //         // notify that load didn't happen
+  //       }
+  //     });
+  //     loader.load((loader, resources) => {
+  //       textureSources.forEach(textureSource => {
+  //         addSprite({
+  //           name: textureSource.id,
+  //           texture: resources[textureSource.id].texture,
+  //           x: screenWidth * 0.5,
+  //           y: screenHeight * 0.5,
+  //           rotation: 0,
+  //           scale: [1, 1],
+  //           scaleMode: PIXI.SCALE_MODES.NEAREST,
+  //         });
+  //       });
+  //     });
+  //   },
+  //   [
+  //     textureSources,
+  //     loader,
+  //     screenHeight,
+  //     screenWidth
+  //   ]
+  // );
 
   const {
     onFrameEnd,
@@ -183,7 +191,12 @@ const InteractiveViewport = ({
   return (
     <Viewport
       name="VIEWPORT"
-      ref={viewportRef}
+      ref={node => {
+        viewportCallbackRef(node);
+        if (viewportRef.current !== node) {
+          viewportRef.current = node;
+        }
+      }}
       drag={{ keyToPress: [panModifierCode] }}
       pinch={{ percent: 1 }}
       wheel={{ percent: 0.05 }}
@@ -207,8 +220,7 @@ const InteractiveViewport = ({
         name="BACKGROUND"
       />
       <Sprites />
-      <Shapes selectedVertices={selectedVertices} />
-
+      <Shapes />
     </Viewport>
   );
 };

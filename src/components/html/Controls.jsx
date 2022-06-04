@@ -8,12 +8,9 @@ import { setMode, setTool } from 'actions/actions';
 import * as Modes from 'constants/modes';
 import * as Tools from 'constants/tools';
 import ModeTools from 'constants/mode-tools';
-import {
-  addTextureSource,
-  setBackgroundColor,
-} from 'actions/actions';
+import { setBackgroundColor } from 'actions/actions';
 import withSelector from 'components/hoc/withSelector';
-import FileLoader from 'components/html/FileLoader';
+import FileLoader from 'components/html/containers/FileLoader';
 import EdgeIcon from 'components/html/EdgeIcon';
 import PlusIcon from 'components/html/PlusIcon';
 import MinusIcon from 'components/html/MinusIcon';
@@ -109,11 +106,6 @@ const Controls = ({
     dispatch(setBackgroundColor(parseInt(color.hex().replace('#', ''), 16)));
   };
 
-  const onLoad = (name, data) => {
-    console.log('load image');
-    dispatch(addTextureSource(name, data));
-  };
-
   const {
     edgeIconProps,
     minusIconProps,
@@ -126,7 +118,6 @@ const Controls = ({
   return(
     <ControlWrapper>
       <FileLoader
-        onLoad={onLoad}
         accept="image/*"
         multiple
         title="load sprites"
