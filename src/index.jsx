@@ -7,7 +7,7 @@ import FiraMonoRegular from 'fonts/FiraMono/FiraMono-Regular.ttf';
 import AppWrapper from 'components/html/AppWrapper';
 import ShapeContextMenu from 'components/html/containers/ShapeContextMenu';
 import Controls from 'components/html/Controls';
-import FlexResizer from 'components/html/containers/FlexResizer';
+import FlexResizer from 'components/html/FlexResizer';
 import Screen from 'components/pixi/Screen';
 import RootStore from 'store/RootStore';
 
