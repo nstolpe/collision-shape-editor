@@ -5,10 +5,25 @@ import Shape from 'components/pixi/Shape';
 import ScreenContext from 'contexts/ScreenContext';
 import { SHAPE } from 'constants/prefixes';
 import { addPrefix } from 'tools/prefix';
+import selectedVerticesComparator from 'comparators/selected-vertices';
 
-const selector = ({ shapes }) => ({ shapes });
-const comparator = ({ shapes }, { shapes: oldShapes }) => {
-  return oldShapes === shapes;
+const selector = ({ selectedVertices, shapes }) => ({ selectedVertices, shapes });
+const comparator = ({
+  selectedVertices,
+  shapes,
+}, {
+  shapes: oldShapes,
+  selectedVertices: oldSelectedVertices,
+}) => {
+//   if (!selectedVerticesComparator(selectedVertices, oldSelectedVertices)) {
+//     return false;
+//   }
+//
+//   return oldShapes === shapes;
+   return (
+     selectedVerticesComparator(selectedVertices, oldSelectedVertices) &&
+     oldShapes === shapes
+   );
 };
 
 const Shapes = ({ shapes, selectedVertices }) =>
