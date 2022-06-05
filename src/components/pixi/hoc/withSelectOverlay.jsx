@@ -1,7 +1,6 @@
-// src/js/hooks/useOverlayRef.js
 import * as PIXI from 'pixi.js';
-import { useContext, useEffect, useRef, useState } from 'react';
-import { usePixiApp } from 'react-pixi-fiber';
+import { useContext, useEffect, useRef } from 'react';
+// import { usePixiApp } from 'react-pixi-fiber';
 import ScreenContext from 'contexts/ScreenContext';
 import useCustomCompareMemo from 'hooks/useCustomCompareMemo';
 import selectOverlayComparator from 'comparators/select-overlay';
@@ -34,10 +33,9 @@ const comparator =({
   return true;
 };
 
-const useOverlayRef = () => {
-  const ref = useRef();
-  // @TODO make this a hoc that provides a ref, remove context
-  // stuff and have that come down through a container.
+const withSelectOverlay = WrappedComponent => props => {
+  // @TODO get rid of selector, comparator and contex.
+  // make all values from useCustomCompareMemo come as props
   const ctx = selector(useContext(ScreenContext));
   const {
     enabled,
@@ -51,9 +49,10 @@ const useOverlayRef = () => {
   // const [time, setTime] = useState(ticker.lastTime);
   // @TODO add option to enable/disable, and throttle
   // ticker.add(() => setTime(ticker.lastTime));
-
+  const overlayRef = useRef();
   useEffect(() => {
-    if (ref.current) {
+    console.log('barfoo',x,y, width, height);
+    if (overlayRef.current) {
       if (enabled) {
         const fragment = `
           precision highp float;
@@ -152,17 +151,17 @@ const useOverlayRef = () => {
           fragment,
           {
             // @TODO there
-            x1: (x * scale.x) + ref.current.getGlobalPosition().x,
-            x2: ((x + width) * scale.x) + ref.current.getGlobalPosition().x,
-            y1: (y * scale.y) + ref.current.getGlobalPosition().y,
-            y2: ((y + height) * scale.y) + ref.current.getGlobalPosition().y,
+            x1: (x * scale.x) + overlayRef.current.getGlobalPosition().x,
+            x2: ((x + width) * scale.x) + overlayRef.current.getGlobalPosition().x,
+            y1: (y * scale.y) + overlayRef.current.getGlobalPosition().y,
+            y2: ((y + height) * scale.y) + overlayRef.current.getGlobalPosition().y,
             // time,
           }
         );
 
-        ref.current.filters = [filter];
+        overlayRef.current.filters = [filter];
       } else {
-        ref.current.filters = [];
+        overlayRef.current.filters = [];
       }
     }
   }, [
@@ -175,7 +174,7 @@ const useOverlayRef = () => {
     scale.y
   ]);
 
-  return ref;
+  return <WrappedComponent {...{ ...props, overlayRef }} />;
 };
 
-export default useOverlayRef;
+export default withSelectOverlay;

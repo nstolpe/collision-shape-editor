@@ -11,6 +11,7 @@ import {
   setCtrlPressed,
   setShiftPressed,
 } from 'actions/actions';
+import { setViewport } from 'reducers/viewport-reducer';
 import {
   clearKeys,
   pressKey,
@@ -27,10 +28,9 @@ import { COPY, CROSSHAIR, GRAB, NO_DROP, POINTER } from 'constants/cursors';
 import { ADD, DELETE, SELECT } from 'constants/tools';
 import * as Modes from 'constants/modes';
 import ScreenContext from 'contexts/ScreenContext';
-import useOverlayRef from 'hooks/useOverlayRef';
+import withSelectOverlay from 'components/pixi/hoc/withSelectOverlay';
 import usePointerInteractions from 'hooks/usePointerInteractions';
 import useViewportHandlers from 'hooks/useViewportHandlers';
-
 /**
  * Adds global keyboard shortcuts to `document`.
  *
@@ -90,39 +90,27 @@ const InteractiveViewport = ({
   screenHeight,
   screenWidth,
   panModifierCode,
+  overlayRef,
   ...restProps
 }) => {
   const pixiApp = usePixiApp();
   const {
-    loader,
     renderer: {
       plugins: { interaction },
     },
   } = pixiApp;
-  const [cursor, setCursor] = useState(GRAB);
+  // const [cursor, setCursor] = useState(GRAB);
   const {
     handlePointerDown,
     handlePointerMove,
     handlePointerUp,
-    selectedVertices,
   } = usePointerInteractions();
   const onZoomed = ({
     viewport: {
       scale: { x, y },
     },
   }) => dispatch(scaleUI({ x, y }));
-  const [viewport, setViewport] = useState({});
-  const viewportCallbackRef = node => {
-    // if (viewport && viewport !== node) {
-      console.log('setting viewport');
-      setViewport(node);
-    // }
-  };
 
-  useEffect(() => {
-    console.log(viewport.center);
-  }, [viewport.center]);
-  const viewportRef = useOverlayRef();
   // useEffect(
   //   () => {
   //     textureSources.forEach(textureSource => {
@@ -160,21 +148,21 @@ const InteractiveViewport = ({
     onMoved,
     onMovedEnd,
     viewportBackgroundProps,
-  } = useViewportHandlers(viewportRef, screenHeight, screenWidth);
+  } = useViewportHandlers({ dispatch, ref: overlayRef, screenHeight, screenWidth });
 
   useKeyboardShortcuts(dispatch);
 
   useEffect(() => {
     const onBlur = () => {
-      if (viewportRef.current) {
-        viewportRef.current.drag({ keyToPress: [panModifierCode] });
+      if (overlayRef.current) {
+        overlayRef.current.drag({ keyToPress: [panModifierCode] });
       }
       dispatch(clearKeys());
     };
 
     const onFocus = () => {
-      if (viewportRef.current) {
-        viewportRef.current.drag({ keyToPress: [panModifierCode] });
+      if (overlayRef.current) {
+        overlayRef.current.drag({ keyToPress: [panModifierCode] });
       }
       dispatch(clearKeys());
     };
@@ -186,17 +174,18 @@ const InteractiveViewport = ({
       window.removeEventListener('blur', onBlur);
       window.removeEventListener('focus', onFocus);
     };
-  }, [dispatch, viewportRef, panModifierCode]);
+  }, [dispatch, overlayRef, panModifierCode]);
+
+  const refRef = useCallback(viewport => {
+    console.log('dispatch(setViewport(viewport))');
+    overlayRef.current = viewport;
+    dispatch(setViewport(viewport));
+  },[dispatch, overlayRef]);
 
   return (
     <Viewport
       name="VIEWPORT"
-      ref={node => {
-        viewportCallbackRef(node);
-        if (viewportRef.current !== node) {
-          viewportRef.current = node;
-        }
-      }}
+      ref={overlayRef}
       drag={{ keyToPress: [panModifierCode] }}
       pinch={{ percent: 1 }}
       wheel={{ percent: 0.05 }}
@@ -225,4 +214,4 @@ const InteractiveViewport = ({
   );
 };
 
-export default withSelector(ScreenContext, selector)(InteractiveViewport);
+export default withSelector(ScreenContext, selector)(withSelectOverlay(InteractiveViewport));

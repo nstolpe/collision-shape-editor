@@ -1,4 +1,4 @@
-// src/components/hoc/withContextMenu.jsx
+// src/components/html/hoc/withContextMenu.jsx
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import styled from '@emotion/styled/macro';

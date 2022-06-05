@@ -2,7 +2,7 @@
 import styled from '@emotion/styled/macro';
 
 import { Button, Ul } from 'components/html/resets';
-import withContextMenu from 'components/hoc/withContextMenu';
+import withContextMenu from 'components/html/hoc/withContextMenu';
 
 const Header = styled.h3`
   color: hsl(0,0%,75%);
