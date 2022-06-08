@@ -10,7 +10,7 @@ import * as Tools from 'constants/tools';
 import ModeTools from 'constants/mode-tools';
 import { setBackgroundColor } from 'actions/actions';
 import withSelector from 'components/hoc/withSelector';
-import FileLoader from 'components/html/containers/FileLoader';
+import SpriteLoader from 'components/html/containers/SpriteLoader';
 import EdgeIcon from 'components/html/EdgeIcon';
 import PlusIcon from 'components/html/PlusIcon';
 import MinusIcon from 'components/html/MinusIcon';
@@ -117,7 +117,7 @@ const Controls = ({
 
   return(
     <ControlWrapper>
-      <FileLoader
+      <SpriteLoader
         accept="image/*"
         multiple
         title="load sprites"
