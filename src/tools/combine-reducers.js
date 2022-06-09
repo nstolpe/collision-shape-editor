@@ -8,7 +8,7 @@
  *
  */
 const combineReducers = (...reducers) => (inState, action) => reducers.reduce(
-  (outState, reducer) => ({ ...reducer(outState, action) }),
+  (outState, reducer) => (reducer(outState, action)),
   inState
 );
 

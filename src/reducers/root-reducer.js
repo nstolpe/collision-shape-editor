@@ -154,8 +154,8 @@ export const initialState = {
     enabled: false,
     height: 0,
     width: 0,
-    x: 0,
-    y: 0,
+    x: null,
+    y: null,
   },
   uiOptions: {
     vertexRadius: 6.5,

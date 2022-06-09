@@ -47,12 +47,16 @@ const combineShapes = ({
     ),
   };
 
-  return shapes.splice({
-    start: shapes.indexOf(shape2),
-    deleteCount: 1,
-  }).map(
-    (shape) => shape === shape1 ? newShape : shape
-  );
+  return shapes.reduce((newShapes, shape, idx, key) => {
+      switch (true) {
+        case shape === shape2:
+          return newShapes;
+        case shape === shape1:
+          return newShapes.append([key], newShape);
+        default:
+          return newShapes.append([key], shape);
+      }
+    }, List());
 };
 
 combineShapes.JoinTypes = JoinTypes;

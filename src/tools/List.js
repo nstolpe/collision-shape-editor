@@ -279,7 +279,6 @@ const ListPrototype = Object.create({}, {
       const deleteCount = options?.deleteCount ?? 0;
       const newKeys = options?.newKeys ? Array.from(options.newKeys) : [];
       const { keys, values } = this;
-      const uniqueKeys = [...keys, ...newKeys];
 
       for (let i = 0, l = newValues.length; i < l; i++) {
         newKeys[i] = newKeys[i] ?? uniqueKey([...keys, ...newKeys]);
