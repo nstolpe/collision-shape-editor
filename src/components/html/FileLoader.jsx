@@ -44,33 +44,6 @@ const Label = styled.label`
 const Span = styled.span`
 `;
 
-const eventLog = event => console.log(event.type);
-
-const loadWrapper = (
-  syntheticEvent,
-  onAbort,
-  onError,
-  onLoad,
-  onLoadend,
-  onLoadstart,
-  onProgress,
-) => {
-  const file = syntheticEvent.nativeEvent.target.files[0];
-
-  if (file) {
-    const reader = new FileReader();
-
-    reader.onabort = onAbort;
-    reader.onerror = onError;
-    reader.onload = event => onLoad(file.name, event);
-    reader.onloadend = onLoadend;
-    reader.onloadstart = onLoadstart;
-    reader.onprogress = onProgress;
-
-    reader.readAsDataURL(file);
-  }
-};
-
 const FileLoader = ({
   text,
   onChange,
