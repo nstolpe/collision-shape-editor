@@ -12,7 +12,7 @@ import {
   setCtrlPressed,
   setShiftPressed,
 } from 'actions/actions';
-import InteractiveViewport from 'components/pixi/InteractiveViewport';
+import InteractiveViewport from 'components/pixi/containers/InteractiveViewport';
 import Rectangle from 'components/pixi/base/Rectangle';
 
 const Screen = ({ children, width, height }) => {

@@ -78,7 +78,8 @@ const withSelectOverlay = WrappedComponent => props => {
   }, [
     height,
     width,
-    x, y,
+    x,
+    y,
     time,
     enabled,
     scale.x,
