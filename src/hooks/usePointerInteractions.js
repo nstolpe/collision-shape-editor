@@ -298,9 +298,9 @@ const usePointerInteraction = () => {
       }
     });
     Object.entries(selectedVertices).reduce((result, [key, vertex]) => {
-      const { x, y } = vertex ?? {};
       // const { x, y } = vertices.find(vtx => vtx.id === removePrefix(name, VERTEX));
-      if (x && y) {
+      if (vertex) {
+        const { x, y } = vertex;
         const distance = translation({ x, y }, coordinates);
         result[key] = distance;
       } else {
@@ -381,6 +381,10 @@ const usePointerInteraction = () => {
       const [, selectedVertexKey, , selectedVertexShapeKey] =
         Object.keys(selectedVertices)?.[0].split(DEFAULT_DELIMITER) || [];
 
+      if (selectedVertexKey === vertexKey) {
+        // the only selected vertex was clicked again, leave early and do nothing.
+        return;
+      }
       if (selectedVertexShapeKey === targetShapeKey) {
         // selected and clicked vertices are on the same shape.
         // const [, selectedVertexKey] = Object.keys(selectedVertices)[0].split(DEFAULT_DELIMITER);
@@ -830,10 +834,12 @@ const usePointerInteraction = () => {
     const { x, y } = pointerCoordinates;
     switch (tool) {
       case Tools.SELECT:
-        dispatch(setSelectOverlayDimensions({
-          width: x - selectOverlay.x,
-          height: y - selectOverlay.y,
-        }));
+        if (selectOverlay.x !== null && selectOverlay.y !== null) {
+          dispatch(setSelectOverlayDimensions({
+            width: x - selectOverlay.x,
+            height: y - selectOverlay.y,
+          }));
+        }
         break;
       default:
         break
@@ -944,8 +950,8 @@ const usePointerInteraction = () => {
 
       dispatch(setSelectOverlay({
         enabled: false,
-        x: 0,
-        y: 0,
+        x: null,
+        y: null,
         width: 0,
         height: 0,
       }));
