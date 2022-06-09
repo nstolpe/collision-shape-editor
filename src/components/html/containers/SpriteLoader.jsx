@@ -1,4 +1,4 @@
-// src/components/html/containers/FileLoader.jsx
+// src/components/html/containers/SpriteLoader.jsx
 import * as PIXI from 'pixi.js';
 
 import { addTextureSource, addSprite } from 'actions/actions';
@@ -18,12 +18,14 @@ const imageMimeTypes = [
 const selector = ({
   dispatch,
   pixiApp,
+  viewportCenter,
 }) => ({
   dispatch,
   pixiApp,
+  viewportCenter,
 });
 
-const Container = ({ dispatch, pixiApp, ...props }) => {
+const Container = ({ dispatch, pixiApp, viewportCenter, ...props }) => {
   const onChange = event => {
     const { nativeEvent : { target: { files } } } = event;
 
@@ -52,11 +54,12 @@ const Container = ({ dispatch, pixiApp, ...props }) => {
             if (loadedKeys.length >= files.length) {
               loader.load((currentLoader, resources) => {
                 loadedKeys.forEach(key => {
+
                   dispatch(addSprite({
                     name: key,
                     texture: resources[key].texture,
-                    x: 0,
-                    y: 0,
+                    x: viewportCenter.x,
+                    y: viewportCenter.y,
                     rotation: 0,
                     scale: [1, 2],
                     scaleMode: PIXI.SCALE_MODES.NEAREST,
@@ -94,3 +97,36 @@ const Container = ({ dispatch, pixiApp, ...props }) => {
 };
 
 export default withSelector(RootContext, selector)(Container);
+// @TODO consider setting texture sources from each of the files, then assign them
+// from the store to a sprite, so they can be reused easily.
+// useEffect(
+//   () => {
+//     textureSources.forEach(textureSource => {
+//       if (!loader.resources[textureSource.id]) {
+//         loader.add(textureSource.id, textureSource.data);
+//         removeTextureSource(textureSource);
+//       } else {
+//         // notify that load didn't happen
+//       }
+//     });
+//     loader.load((loader, resources) => {
+//       textureSources.forEach(textureSource => {
+//         addSprite({
+//           name: textureSource.id,
+//           texture: resources[textureSource.id].texture,
+//           x: screenWidth * 0.5,
+//           y: screenHeight * 0.5,
+//           rotation: 0,
+//           scale: [1, 1],
+//           scaleMode: PIXI.SCALE_MODES.NEAREST,
+//         });
+//       });
+//     });
+//   },
+//   [
+//     textureSources,
+//     loader,
+//     screenHeight,
+//     screenWidth
+//   ]
+// );
