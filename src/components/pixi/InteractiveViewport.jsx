@@ -1,6 +1,5 @@
 // src/js/components/pixi/InteractiveViewport.js
-import * as PIXI from 'pixi.js';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { usePixiApp } from 'react-pixi-fiber';
 
 import {
@@ -11,15 +10,11 @@ import {
   setCtrlPressed,
   setShiftPressed,
 } from 'actions/actions';
-import { setViewport } from 'reducers/viewport-reducer';
 import {
   clearKeys,
   pressKey,
   releaseKey,
 } from 'actions/modifier-keys-actions';
-import restComparator from 'comparators/rest';
-import scaleComparator from 'comparators/scale';
-import withSelector from 'components/hoc/withSelector';
 import Rectangle from 'components/pixi/base/Rectangle';
 import Shapes from 'components/pixi/Shapes';
 import Sprites from 'components/pixi/Sprites';
@@ -27,10 +22,9 @@ import Viewport from 'components/pixi/base/Viewport';
 import { COPY, CROSSHAIR, GRAB, NO_DROP, POINTER } from 'constants/cursors';
 import { ADD, DELETE, SELECT } from 'constants/tools';
 import * as Modes from 'constants/modes';
-import ScreenContext from 'contexts/ScreenContext';
 import withSelectOverlay from 'components/pixi/hoc/withSelectOverlay';
 import usePointerInteractions from 'hooks/usePointerInteractions';
-import useViewportHandlers from 'hooks/useViewportHandlers';
+
 /**
  * Adds global keyboard shortcuts to `document`.
  *
@@ -60,22 +54,6 @@ const getCursor = ({ mode, tool, altPressed, ctrlPressed, shiftPressed }) => {
   }
 };
 
-const selector = ({
-  dispatch,
-  backgroundColor,
-  mode,
-  tool,
-  textureSources,
-  panModifierCode,
-}) => ({
-  dispatch,
-  backgroundColor,
-  mode,
-  tool,
-  textureSources,
-  panModifierCode,
-});
-
 /**
  * `pixi-viewport` component.
  */
@@ -84,13 +62,13 @@ const InteractiveViewport = ({
   backgroundColor,
   mode,
   tool,
-  textureSources,
   scale,
   children,
   screenHeight,
   screenWidth,
   panModifierCode,
   overlayRef,
+  viewportBackgroundProps,
   ...restProps
 }) => {
   const pixiApp = usePixiApp();
@@ -105,50 +83,6 @@ const InteractiveViewport = ({
     handlePointerMove,
     handlePointerUp,
   } = usePointerInteractions();
-  const onZoomed = ({
-    viewport: {
-      scale: { x, y },
-    },
-  }) => dispatch(scaleUI({ x, y }));
-
-  // useEffect(
-  //   () => {
-  //     textureSources.forEach(textureSource => {
-  //       if (!loader.resources[textureSource.id]) {
-  //         loader.add(textureSource.id, textureSource.data);
-  //         removeTextureSource(textureSource);
-  //       } else {
-  //         // notify that load didn't happen
-  //       }
-  //     });
-  //     loader.load((loader, resources) => {
-  //       textureSources.forEach(textureSource => {
-  //         addSprite({
-  //           name: textureSource.id,
-  //           texture: resources[textureSource.id].texture,
-  //           x: screenWidth * 0.5,
-  //           y: screenHeight * 0.5,
-  //           rotation: 0,
-  //           scale: [1, 1],
-  //           scaleMode: PIXI.SCALE_MODES.NEAREST,
-  //         });
-  //       });
-  //     });
-  //   },
-  //   [
-  //     textureSources,
-  //     loader,
-  //     screenHeight,
-  //     screenWidth
-  //   ]
-  // );
-
-  const {
-    onFrameEnd,
-    onMoved,
-    onMovedEnd,
-    viewportBackgroundProps,
-  } = useViewportHandlers({ dispatch, ref: overlayRef, screenHeight, screenWidth });
 
   useKeyboardShortcuts(dispatch);
 
@@ -176,12 +110,6 @@ const InteractiveViewport = ({
     };
   }, [dispatch, overlayRef, panModifierCode]);
 
-  const refRef = useCallback(viewport => {
-    console.log('dispatch(setViewport(viewport))');
-    overlayRef.current = viewport;
-    dispatch(setViewport(viewport));
-  },[dispatch, overlayRef]);
-
   return (
     <Viewport
       name="VIEWPORT"
@@ -197,10 +125,6 @@ const InteractiveViewport = ({
       pointerdown={handlePointerDown}
       pointerup={handlePointerUp}
       pointermove={handlePointerMove}
-      onframeend={onFrameEnd}
-      onmoved={onMoved}
-      onmovedend={onMovedEnd}
-      onzoomed={onZoomed}
       {...restProps}
     >
       <Rectangle
@@ -214,4 +138,4 @@ const InteractiveViewport = ({
   );
 };
 
-export default withSelector(ScreenContext, selector)(withSelectOverlay(InteractiveViewport));
+export default InteractiveViewport;
