@@ -2,12 +2,15 @@
 import { useEffect, useState } from 'react';
 
 import { scaleUI } from 'actions/actions';
+import {
+  pressKey,
+  releaseKey,
+} from 'actions/modifier-keys-actions';
 import { setViewportCenter } from 'reducers/viewport-reducer';
 import withSelector from 'components/hoc/withSelector';
 import withSelectOverlay from 'components/pixi/hoc/withSelectOverlay';
 import InteractiveViewport from 'components/pixi/InteractiveViewport';
 import ScreenContext from 'contexts/ScreenContext';
-
 /**
  * Strictly compares all arguments
  * @TODO move to util
@@ -64,6 +67,21 @@ const Container = (props) => {
       );
     }
   }, [screenHeight, screenWidth, overlayRef]);
+
+  // attach key down and up handlers to document.
+  // @TODO check focus to see if it's inside this app.
+  useEffect(() => {
+    const onKeyDown = ({ code, key, keyCode }) => dispatch(pressKey(code));
+    const onKeyUp = ({ code, key, keyCode }) => dispatch(releaseKey(code));
+
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keyup', onKeyUp);
+
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('keyup', onKeyUp);
+    };
+  }, [dispatch]);
 
   /**
    * Sets the initial background dimensions and initial viewport center

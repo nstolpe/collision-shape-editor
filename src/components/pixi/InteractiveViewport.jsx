@@ -25,26 +25,6 @@ import * as Modes from 'constants/modes';
 import withSelectOverlay from 'components/pixi/hoc/withSelectOverlay';
 import usePointerInteractions from 'hooks/usePointerInteractions';
 
-/**
- * Adds global keyboard shortcuts to `document`.
- *
- * @param {function} dispatch  Dispatch function to call actions with.
- */
-const useKeyboardShortcuts = dispatch => {
-  useEffect(() => {
-    const onKeyDown = ({ code, key, keyCode }) => dispatch(pressKey(code));
-    const onKeyUp = ({ code, key, keyCode }) => dispatch(releaseKey(code));
-
-    document.addEventListener('keydown', onKeyDown);
-    document.addEventListener('keyup', onKeyUp);
-
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-      document.removeEventListener('keyup', onKeyUp);
-    };
-  }, [dispatch]);
-};
-
 const getCursor = ({ mode, tool, altPressed, ctrlPressed, shiftPressed }) => {
   switch (true) {
     case tool !== SELECT:
@@ -84,20 +64,20 @@ const InteractiveViewport = ({
     handlePointerUp,
   } = usePointerInteractions();
 
-  useKeyboardShortcuts(dispatch);
-
   useEffect(() => {
     const onBlur = () => {
-      if (overlayRef.current) {
-        overlayRef.current.drag({ keyToPress: [panModifierCode] });
-      }
+      // @TODO does this need to happen every time? or at all?
+      // if (overlayRef.current) {
+      //   overlayRef.current.drag({ keyToPress: [panModifierCode] });
+      // }
       dispatch(clearKeys());
     };
 
     const onFocus = () => {
-      if (overlayRef.current) {
-        overlayRef.current.drag({ keyToPress: [panModifierCode] });
-      }
+      // @TODO does this need to happen every time? or at all?
+      // if (overlayRef.current) {
+      //   overlayRef.current.drag({ keyToPress: [panModifierCode] });
+      // }
       dispatch(clearKeys());
     };
 
