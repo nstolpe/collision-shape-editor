@@ -48,7 +48,7 @@ const recenterSelectedVertices = (newCenter, selectedVertices, shapes) => {
 
     return shape;
   });
-  console.log(newCenter, currentCenter);
+
   return newShapes;
 };
 

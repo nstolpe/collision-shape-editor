@@ -328,7 +328,6 @@ export const reducer = (state, action) => {
         ),
       };
     case RECENTER_SELECTED_VERTICES:
-      console.log(data);
       return {
         ...state,
         shapes: recenterSelectedVertices(
