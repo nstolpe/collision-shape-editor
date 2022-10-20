@@ -64,32 +64,6 @@ const InteractiveViewport = ({
     handlePointerUp,
   } = usePointerInteractions();
 
-  useEffect(() => {
-    const onBlur = () => {
-      // @TODO does this need to happen every time? or at all?
-      // if (overlayRef.current) {
-      //   overlayRef.current.drag({ keyToPress: [panModifierCode] });
-      // }
-      dispatch(clearKeys());
-    };
-
-    const onFocus = () => {
-      // @TODO does this need to happen every time? or at all?
-      // if (overlayRef.current) {
-      //   overlayRef.current.drag({ keyToPress: [panModifierCode] });
-      // }
-      dispatch(clearKeys());
-    };
-
-    window.addEventListener('blur', onBlur);
-    window.addEventListener('focus', onFocus);
-
-    return () => {
-      window.removeEventListener('blur', onBlur);
-      window.removeEventListener('focus', onFocus);
-    };
-  }, [dispatch, overlayRef, panModifierCode]);
-
   return (
     <Viewport
       name="VIEWPORT"

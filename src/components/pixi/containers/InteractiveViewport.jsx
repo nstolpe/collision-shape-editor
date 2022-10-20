@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { scaleUI } from 'actions/actions';
 import {
+  clearKeys,
   pressKey,
   releaseKey,
 } from 'actions/modifier-keys-actions';
@@ -80,6 +81,24 @@ const Container = (props) => {
     return () => {
       document.removeEventListener('keydown', onKeyDown);
       document.removeEventListener('keyup', onKeyUp);
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
+    const onBlur = () => {
+      dispatch(clearKeys());
+    };
+
+    const onFocus = () => {
+      dispatch(clearKeys());
+    };
+
+    window.addEventListener('blur', onBlur);
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      window.removeEventListener('blur', onBlur);
+      window.removeEventListener('focus', onFocus);
     };
   }, [dispatch]);
 
