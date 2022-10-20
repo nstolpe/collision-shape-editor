@@ -30,6 +30,7 @@ import {
   translation,
   withinAABB,
 } from 'tools/math';
+import { findAncestorViewport } from 'tools/pixi';
 import {
   DEFAULT_DELIMITER,
   addPrefix,
@@ -134,35 +135,6 @@ const comparator = ({
   }
 
   return true;
-};
-
-/**
- * Finds and returns the parent of a Pixi component
- * that has the `name` equal to the `VIEWPORT` constant.
- * Or returns `null`.
- */
-const findViewportParent = child => {
-  let viewport = null;
-
-  while (!viewport && child != null) {
-    if (child && child.name == 'VIEWPORT') {
-      viewport = child;
-      child = null;
-    }
-
-    if (child && child.parent) {
-      if (child.parent.name === 'VIEWPORT') {
-        viewport = child.parent;
-        child = null;
-      } else {
-        child = child.parent;
-      }
-    } else {
-      child = null;
-    }
-  }
-
-  return viewport;
 };
 
 const usePointerInteraction = () => {
@@ -529,7 +501,7 @@ const usePointerInteraction = () => {
       },
       target,
     } = event;
-    const viewport = findViewportParent(event.target);
+    const viewport = findAncestorViewport(event.target);
 
     if (!viewport) {
       return;
@@ -626,7 +598,7 @@ const usePointerInteraction = () => {
       } = event;
       const pointerIndex = activePointers.findIndex(pointer => pointer.identifier === identifier);
       const pointer = activePointers[pointerIndex];
-      const viewport = findViewportParent(target);
+      const viewport = findAncestorViewport(target);
 
       // the move event isn't over the pixi canvas. clear out pointer coords and exit early.
       if (!viewport) {
