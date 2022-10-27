@@ -10,9 +10,9 @@ import {
 
 export const initialState = {
   pressedKeyCodes: {},
-  addModifierCode: 'ShiftLeft',
-  subtractModifierCode: 'ControlLeft',
-  panModifierCode: 'AltLeft',
+  addModifierCode: 'Shift',
+  subtractModifierCode: 'Control',
+  panModifierCode: 'Space',
 };
 
 export const reducer = (state, action) => {

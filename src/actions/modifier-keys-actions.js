@@ -12,27 +12,27 @@ export const clearKeys = () => ({
   type: CLEAR_PRESSED_KEYS,
 });
 
-export const pressKey = code => ({
+export const pressKey = (key) => ({
   type: PRESS_KEY,
-  data: code,
+  data: key,
 });
 
-export const releaseKey = code => ({
+export const releaseKey = (key) => ({
   type: RELEASE_KEY,
-  data: code,
+  data: key,
 });
 
-export const setAddKeyPressed = pressed => ({
+export const setAddKeyPressed = (pressed) => ({
   type: SET_ADD_KEY_PRESSED,
   data: pressed,
 });
 
-export const setSubtractKeyPressed = pressed => ({
+export const setSubtractKeyPressed = (pressed) => ({
   type: SET_SUBTRACT_KEY_PRESSED,
   data: pressed,
 });
 
-export const setPanKeyPressed = pressed => ({
+export const setPanKeyPressed = (pressed) => ({
   type: SET_PAN_KEY_PRESSED,
   data: pressed,
 });

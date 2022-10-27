@@ -72,8 +72,8 @@ const Container = (props) => {
   // attach key down and up handlers to document.
   // @TODO check focus to see if it's inside this app.
   useEffect(() => {
-    const onKeyDown = ({ code, key, keyCode }) => dispatch(pressKey(code));
-    const onKeyUp = ({ code, key, keyCode }) => dispatch(releaseKey(code));
+    const onKeyDown = ({ key }) => dispatch(pressKey(key));
+    const onKeyUp = ({ key }) => dispatch(releaseKey(key));
 
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('keyup', onKeyUp);
