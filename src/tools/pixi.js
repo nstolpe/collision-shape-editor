@@ -7,7 +7,7 @@ export const findAncestorByName = (name, child) => {
   let parent = null;
 
   while (!parent && child != null) {
-    if (child && child.name == name) {
+    if (child && child.name === name) {
       parent = child;
       child = null;
     }

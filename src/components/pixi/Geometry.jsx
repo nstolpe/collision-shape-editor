@@ -72,7 +72,7 @@ const Geometry = ({
     };
 
     // draw the final edge if the geometry is closed.
-    if (closed || vertex1Index != vertices.length - 1) {
+    if (closed || vertex1Index !== vertices.length - 1) {
       const vertex2Index = (vertex1Index + 1) % vertices.length;
       const vertex2 = vertices.index(vertex2Index);
       const vertex2Key = vertices.keys[vertex2Index];
@@ -114,6 +114,7 @@ const Geometry = ({
             fontFamily: 'Fira Mono',
             fontSize: '2rem',
             fill: inverseHex,
+            padding: 4,
           }}
           scale={inverseScale}
         />
