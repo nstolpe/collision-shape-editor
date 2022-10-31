@@ -19,6 +19,12 @@ module.exports = {
       webpackConfig.resolve.extensions.push('.glsl');
       addBeforeLoader(webpackConfig, loaderByName('file-loader'), glslLoader);
 
+      webpackConfig.module.rules.push({
+        test: /\.mjs$/,
+        include: /node_modules/,
+        type: 'javascript/auto',
+      });
+
       return webpackConfig;
     },
   },
