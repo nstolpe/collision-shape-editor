@@ -100,7 +100,7 @@ const Controls = ({
   tool,
 }) => {
   // @TODO make debug settable somewhere higher up in abb state.
-  const debug = false;
+  const debug = true;
   const onColorChange =({ r, g, b }) => {
     const color = chroma(r, g, b);
     dispatch(setBackgroundColor(parseInt(color.hex().replace('#', ''), 16)));
