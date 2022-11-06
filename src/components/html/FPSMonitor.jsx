@@ -1,9 +1,9 @@
 // src/components/html/FPSMonitor.jsx
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 
-import withSelector from 'components/hoc/withSelector';
-import RootContext from 'contexts/RootContext';
+import withSelector from 'Components/hoc/withSelector';
+import RootContext from 'Contexts/RootContext';
 
 const Wrapper = styled.div`
   display: inline-flex;
@@ -28,11 +28,11 @@ const selector = ({ pixiApp }) => ({ pixiApp });
 
 const FPSMonitor = ({ pixiApp }) => {
   const [fps, setFps] = useState(0);
-
+  window.pixiApp = pixiApp;
   useEffect(() => {
-    const listener = function() {
+    const listener = function () {
       setFps(pixiApp.ticker.FPS);
-    }
+    };
 
     if (pixiApp) {
       pixiApp.ticker.add(listener);

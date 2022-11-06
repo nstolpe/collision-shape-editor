@@ -1,7 +1,7 @@
 // src/components/html/hoc/withContextMenu.jsx
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import styled from '@emotion/styled/macro';
+import styled from '@emotion/styled';
 import isPropValid from '@emotion/is-prop-valid';
 
 const Screen = styled.div`

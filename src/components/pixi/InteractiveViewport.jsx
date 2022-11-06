@@ -1,6 +1,6 @@
 // src/js/components/pixi/InteractiveViewport.js
 import React, { useEffect } from 'react';
-import { usePixiApp } from 'react-pixi-fiber';
+import { Container, usePixiApp } from 'react-pixi-fiber/index.js';
 
 import {
   addSprite,
@@ -9,21 +9,18 @@ import {
   setAltPressed,
   setCtrlPressed,
   setShiftPressed,
-} from 'actions/actions';
-import {
-  clearKeys,
-  pressKey,
-  releaseKey,
-} from 'actions/modifier-keys-actions';
-import Rectangle from 'components/pixi/base/Rectangle';
-import Shapes from 'components/pixi/Shapes';
-import Sprites from 'components/pixi/Sprites';
-import Viewport from 'components/pixi/base/Viewport';
-import { COPY, CROSSHAIR, GRAB, NO_DROP, POINTER } from 'constants/cursors';
-import { ADD, DELETE, SELECT } from 'constants/tools';
-import * as Modes from 'constants/modes';
-import withSelectOverlay from 'components/pixi/hoc/withSelectOverlay';
-import usePointerInteractions from 'hooks/usePointerInteractions';
+} from 'Actions/actions';
+import { clearKeys, pressKey, releaseKey } from 'Actions/modifier-keys-actions';
+import Rectangle from 'Components/pixi/base/Rectangle';
+import Circle from 'Components/pixi/base/Circle';
+import Shapes from 'Components/pixi/Shapes';
+import Sprites from 'Components/pixi/Sprites';
+import Viewport from 'Components/pixi/base/Viewport';
+import { COPY, CROSSHAIR, GRAB, NO_DROP, POINTER } from 'Constants/cursors';
+import { ADD, DELETE, SELECT } from 'Constants/tools';
+import * as Modes from 'Constants/modes';
+import withSelectOverlay from 'Components/pixi/hoc/withSelectOverlay';
+import usePointerInteractions from 'Hooks/usePointerInteractions';
 
 const getCursor = ({ mode, tool, altPressed, ctrlPressed, shiftPressed }) => {
   switch (true) {
@@ -58,11 +55,8 @@ const InteractiveViewport = ({
     },
   } = pixiApp;
   // const [cursor, setCursor] = useState(GRAB);
-  const {
-    handlePointerDown,
-    handlePointerMove,
-    handlePointerUp,
-  } = usePointerInteractions();
+  const { handlePointerDown, handlePointerMove, handlePointerUp } =
+    usePointerInteractions();
 
   return (
     <Viewport

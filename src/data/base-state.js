@@ -1,8 +1,8 @@
 // src/data/base-state.js
-import * as Interactions from 'constants/interactions';
-import * as Modes from 'constants/modes';
-import * as Tools from 'constants/tools';
-import List from 'tools/List';
+import * as Interactions from 'Constants/interactions';
+import * as Modes from 'Constants/modes';
+import * as Tools from 'Constants/tools';
+import List from 'Utility/List';
 
 const buildShapes = shapes => {
   shapes.map(shape => List(shape))

@@ -1,4 +1,4 @@
-import { properties, property, propertyMap } from 'tools/property';
+import { properties, property, propertyMap } from 'Utility/property';
 
 describe('property.js --', () => {
   describe('`propertyMap()`', () => {

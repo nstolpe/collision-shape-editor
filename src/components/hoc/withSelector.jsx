@@ -4,8 +4,8 @@ import React, {
   useMemo,
 } from 'react';
 
-import restComparator from 'comparators/rest';
-import useCustomCompareMemo from 'hooks/useCustomCompareMemo';
+import restComparator from 'Comparators/rest';
+import useCustomCompareMemo from 'Hooks/useCustomCompareMemo';
 
 /**
  * HOC that returns a memoized version of the wrapped component that has

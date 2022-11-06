@@ -1,5 +1,5 @@
 // src/reducers/helpers/combine-shapes.js
-import List from 'tools/List';
+import List from 'Utility/List';
 
 export const JoinTypes = {
   FIRST_FIRST: 'FIRST_FIRST',

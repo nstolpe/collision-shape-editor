@@ -6,7 +6,7 @@ import React, {
   useState,
   useRef,
 } from 'react';
-import { Sprite } from 'react-pixi-fiber';
+import { Sprite } from 'react-pixi-fiber/index.js';
 
 /**
  * A sprite component that has its scale mode set to NEAREST.

@@ -1,6 +1,6 @@
 // src/reducers/helpers/remove-edge-from-shapes.js
 
-import List from 'tools/List';
+import List from 'Utility/List';
 
 /**
  * Removes an edge (two sequential vertices, or the first and last vertices)

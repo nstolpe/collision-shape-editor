@@ -1,5 +1,5 @@
 // src/js/actions/action.js
-import List from 'tools/List';
+import List from 'Utility/List';
 
 import {
   SET_ROOT_CONTAINER,
@@ -45,7 +45,7 @@ import {
   ADD_TEXTURE_SOURCE,
   REMOVE_TEXTURE_SOURCE,
   ADD_SPRITE,
-} from 'constants/action-types';
+} from 'Constants/action-types';
 
 export const setRootContainer = container => ({
   type: SET_ROOT_CONTAINER,

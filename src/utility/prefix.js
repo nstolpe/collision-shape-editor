@@ -1,5 +1,5 @@
 // src/tools/prefix.js
-import { escapeRegExp } from 'tools/reg-exp';
+import { escapeRegExp } from 'Utility/reg-exp';
 
 export const DEFAULT_DELIMITER = '::';
 

@@ -1,32 +1,24 @@
 // src/js/components/html/containers/SelectCoordinates.js
-import restComparator from 'comparators/rest';
-import selectedVerticesComparator from 'comparators/selected-vertices';
-import withSelector from 'components/hoc/withSelector';
-import ValueMonitor from 'components/html/ValueMonitor';
-import RootContext from 'contexts/RootContext';
-import { DEFAULT_DELIMITER } from 'tools/prefix';
-import { expandAABB } from 'tools/math';
-import { recenterSelectedVertices } from 'actions/actions';
+import React from 'react';
 
-const selector = ({
-  dispatch,
-  selectedVertices,
-  shapes,
-}) => ({
+import restComparator from 'Comparators/rest';
+import selectedVerticesComparator from 'Comparators/selected-vertices';
+import withSelector from 'Components/hoc/withSelector';
+import ValueMonitor from 'Components/html/ValueMonitor';
+import RootContext from 'Contexts/RootContext';
+import { DEFAULT_DELIMITER } from 'Utility/prefix';
+import { expandAABB } from 'Utility/math';
+import { recenterSelectedVertices } from 'Actions/actions';
+
+const selector = ({ dispatch, selectedVertices, shapes }) => ({
   dispatch,
   selectedVertices,
   shapes,
 });
 
 const comparator = (
-  {
-    selectedVertices,
-    ...props
-  },
-  {
-    selectedVertices: oldSelectedVertices,
-    ...oldProps
-  },
+  { selectedVertices, ...props },
+  { selectedVertices: oldSelectedVertices, ...oldProps }
 ) => {
   if (!selectedVerticesComparator(selectedVertices, oldSelectedVertices)) {
     return false;
@@ -40,22 +32,30 @@ const comparator = (
   return true;
 };
 
-const SelectCoordinates = ({ dispatch, selectedVertices, shapes, ...props }) => {
+const SelectCoordinates = ({
+  dispatch,
+  selectedVertices,
+  shapes,
+  ...props
+}) => {
   const selectedVertexKeys = Object.keys(selectedVertices);
   let values;
 
   if (selectedVertexKeys.length) {
-    const [minX, maxX, minY, maxY] = selectedVertexKeys.reduce((bounds, key) => {
-      const [, vertexKey,, shapeKey] = key.split(DEFAULT_DELIMITER);
-      const shape = shapes.key(shapeKey);
-      const vertex = shape.vertices.key(vertexKey);
-      const { x, y } = vertex;
+    const [minX, maxX, minY, maxY] = selectedVertexKeys.reduce(
+      (bounds, key) => {
+        const [, vertexKey, , shapeKey] = key.split(DEFAULT_DELIMITER);
+        const shape = shapes.key(shapeKey);
+        const vertex = shape.vertices.key(vertexKey);
+        const { x, y } = vertex;
 
-      return expandAABB(x, y, bounds[0], bounds[1], bounds[2], bounds[3]);
-    }, [Infinity, -Infinity, Infinity, -Infinity]);
+        return expandAABB(x, y, bounds[0], bounds[1], bounds[2], bounds[3]);
+      },
+      [Infinity, -Infinity, Infinity, -Infinity]
+    );
     const center = {
-      x: minX + ((maxX - minX) * 0.5),
-      y: minY + ((maxY - minY) * 0.5),
+      x: minX + (maxX - minX) * 0.5,
+      y: minY + (maxY - minY) * 0.5,
     };
 
     values = [
@@ -65,7 +65,7 @@ const SelectCoordinates = ({ dispatch, selectedVertices, shapes, ...props }) => 
         value: center.x,
         disabled: false,
         step: 1,
-        onChange: e => {
+        onChange: (e) => {
           dispatch(recenterSelectedVertices(+e.target.value, center.y));
         },
       },
@@ -75,7 +75,7 @@ const SelectCoordinates = ({ dispatch, selectedVertices, shapes, ...props }) => 
         value: center.y,
         disabled: false,
         step: 1,
-        onChange: e => {
+        onChange: (e) => {
           dispatch(recenterSelectedVertices(center.x, +e.target.value));
         },
       },
@@ -106,4 +106,8 @@ const SelectCoordinates = ({ dispatch, selectedVertices, shapes, ...props }) => 
   );
 };
 
-export default withSelector(RootContext, selector, comparator)(SelectCoordinates);
+export default withSelector(
+  RootContext,
+  selector,
+  comparator
+)(SelectCoordinates);

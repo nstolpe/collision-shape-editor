@@ -1,9 +1,9 @@
 // src/js/components/html/PlusIcon.js
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from '@emotion/styled/macro';
+import styled from '@emotion/styled';
 
-import Icon from 'components/html/Icon';
+import Icon from 'Components/html/Icon';
 
 export const Minus = styled.div`
   position: absolute;

@@ -19,31 +19,31 @@ import {
   setContextMenuPosition,
   setSelectedVertices,
   setPointerCoordinates,
-} from 'actions/actions';
-import * as Tools from 'constants/tools';
-import * as Modes from 'constants/modes';
-import ScreenContext from 'contexts/ScreenContext';
-import useThrottle from 'hooks/useThrottle';
-import List from 'tools/List';
+} from 'Actions/actions';
+import * as Tools from 'Constants/tools';
+import * as Modes from 'Constants/modes';
+import ScreenContext from 'Contexts/ScreenContext';
+import useThrottle from 'Hooks/useThrottle';
+import List from 'Utility/List';
 import {
   closestPointOnSegment,
   translation,
   withinAABB,
-} from 'tools/math';
-import { findAncestorViewport } from 'tools/pixi';
+} from 'Utility/math';
+import { findAncestorViewport } from 'Utility/pixi';
 import {
   DEFAULT_DELIMITER,
   addPrefix,
   hasPrefix,
   removePrefix,
-} from 'tools/prefix';
-import { EDGE, VERTEX, SHAPE } from 'constants/prefixes';
-import useSelector from 'hooks/useSelector';
-import restComparator from 'comparators/rest';
-import selectOverlayComparator from 'comparators/select-overlay';
-import selectedVerticesComparator from 'comparators/selected-vertices';
-import verticesComparator from 'comparators/vertices';
-import { keySelector } from 'selectors/keys';
+} from 'Utility/prefix';
+import { EDGE, VERTEX, SHAPE } from 'Constants/prefixes';
+import useSelector from 'Hooks/useSelector';
+import restComparator from 'Comparators/rest';
+import selectOverlayComparator from 'Comparators/select-overlay';
+import selectedVerticesComparator from 'Comparators/selected-vertices';
+import verticesComparator from 'Comparators/vertices';
+import { keySelector } from 'Selectors/keys';
 
 // @TODO break this file up. maybe convert it into multiple hooks.. useCallback(handler)
 // https://stackoverflow.com/a/55015145

@@ -1,5 +1,5 @@
 // src/js/components/html/Separator.js
-import styled from '@emotion/styled/macro';
+import styled from '@emotion/styled';
 
 const Separator = styled.div`
   background: hsla(0, 0%, 50%, 1);

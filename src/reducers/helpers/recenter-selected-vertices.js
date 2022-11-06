@@ -1,5 +1,5 @@
-import { expandAABB } from 'tools/math';
-import { DEFAULT_DELIMITER } from 'tools/prefix';
+import { expandAABB } from 'Utility/math';
+import { DEFAULT_DELIMITER } from 'Utility/prefix';
 
 const recenterSelectedVertices = (newCenter, selectedVertices, shapes) => {
   const shapeKeys = [];

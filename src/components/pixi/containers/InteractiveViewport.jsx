@@ -1,25 +1,23 @@
 // src/components/pixi/containers/InteractiveViewport.jsx
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { scaleUI } from 'actions/actions';
-import {
-  clearKeys,
-  pressKey,
-  releaseKey,
-} from 'actions/modifier-keys-actions';
-import { setViewportCenter } from 'reducers/viewport-reducer';
-import withSelector from 'components/hoc/withSelector';
-import withSelectOverlay from 'components/pixi/hoc/withSelectOverlay';
-import InteractiveViewport from 'components/pixi/InteractiveViewport';
-import ScreenContext from 'contexts/ScreenContext';
+import { scaleUI } from 'Actions/actions';
+import { clearKeys, pressKey, releaseKey } from 'Actions/modifier-keys-actions';
+import { setViewportCenter } from 'Reducers/viewport-reducer';
+import withSelector from 'Components/hoc/withSelector';
+import withSelectOverlay from 'Components/pixi/hoc/withSelectOverlay';
+import InteractiveViewport from 'Components/pixi/InteractiveViewport';
+import ScreenContext from 'Contexts/ScreenContext';
 /**
  * Strictly compares all arguments
  * @TODO move to util
  */
-const allEqual = (...elements) => elements.reduce(
-  (areEqual, element, index) => areEqual && element === elements[(index + 1) % elements.length],
-  true
-);
+const allEqual = (...elements) =>
+  elements.reduce(
+    (areEqual, element, index) =>
+      areEqual && element === elements[(index + 1) % elements.length],
+    true
+  );
 
 const selector = ({
   dispatch,
@@ -36,12 +34,7 @@ const selector = ({
 });
 
 const Container = (props) => {
-  const {
-    dispatch,
-    overlayRef,
-    screenHeight,
-    screenWidth,
-  } = props;
+  const { dispatch, overlayRef, screenHeight, screenWidth } = props;
   const [viewportBackgroundProps, setViewportBackgroundProps] = useState({
     x: 0,
     y: 0,
@@ -55,17 +48,15 @@ const Container = (props) => {
   useEffect(() => {
     if (overlayRef.current) {
       const { top, bottom, left, right } = overlayRef.current;
-      setViewportBackgroundProps(
-        currentViewportBackgroundProps => ({
-            ...currentViewportBackgroundProps,
-            ...{
-              x: left,
-              y: top,
-              width: right - left,
-              height: bottom - top,
-            },
-        })
-      );
+      setViewportBackgroundProps((currentViewportBackgroundProps) => ({
+        ...currentViewportBackgroundProps,
+        ...{
+          x: left,
+          y: top,
+          width: right - left,
+          height: bottom - top,
+        },
+      }));
     }
   }, [screenHeight, screenWidth, overlayRef]);
 
@@ -105,25 +96,27 @@ const Container = (props) => {
   /**
    * Sets the initial background dimensions and initial viewport center
    */
-  const onFrameEnd = viewport => {
+  const onFrameEnd = (viewport) => {
     const { top, bottom, left, right } = viewport;
     if (!viewportCenterSet && !allEqual(viewport.x, viewport.center.y, 0)) {
       dispatch(setViewportCenter(viewport.center));
       setViewportCenterSet(true);
     }
 
-    if (!backgroundPropsSet && !allEqual(top, bottom, 0) && !allEqual(left, right, 0)) {
-      setViewportBackgroundProps(
-        currentViewportBackgroundProps => ({
-            ...currentViewportBackgroundProps,
-            ...{
-              x: left,
-              y: top,
-              width: right - left,
-              height: bottom - top,
-            },
-        })
-      );
+    if (
+      !backgroundPropsSet &&
+      !allEqual(top, bottom, 0) &&
+      !allEqual(left, right, 0)
+    ) {
+      setViewportBackgroundProps((currentViewportBackgroundProps) => ({
+        ...currentViewportBackgroundProps,
+        ...{
+          x: left,
+          y: top,
+          width: right - left,
+          height: bottom - top,
+        },
+      }));
 
       setBackgroundPropsSet(true);
     }
@@ -135,38 +128,34 @@ const Container = (props) => {
   const onMoved = ({ viewport }) => {
     const { top, bottom, left, right } = viewport;
 
-    setViewportBackgroundProps(
-      currentViewportBackgroundProps => ({
-          ...currentViewportBackgroundProps,
-          ...{
-            x: left,
-            y: top,
-            width: right - left,
-            height: bottom - top,
-          },
-      })
-    );
+    setViewportBackgroundProps((currentViewportBackgroundProps) => ({
+      ...currentViewportBackgroundProps,
+      ...{
+        x: left,
+        y: top,
+        width: right - left,
+        height: bottom - top,
+      },
+    }));
   };
 
   /**
    * Set's the background dimensions on move
    */
-  const onMovedEnd = viewport => {
+  const onMovedEnd = (viewport) => {
     const { top, bottom, left, right } = viewport;
 
     dispatch(setViewportCenter(viewport.center));
 
-    setViewportBackgroundProps(
-      currentViewportBackgroundProps => ({
-          ...currentViewportBackgroundProps,
-          ...{
-            x: left,
-            y: top,
-            width: right - left,
-            height: bottom - top,
-          },
-      })
-    );
+    setViewportBackgroundProps((currentViewportBackgroundProps) => ({
+      ...currentViewportBackgroundProps,
+      ...{
+        x: left,
+        y: top,
+        width: right - left,
+        height: bottom - top,
+      },
+    }));
   };
 
   const onZoomed = ({
@@ -187,4 +176,7 @@ const Container = (props) => {
   );
 };
 
-export default withSelector(ScreenContext, selector)(withSelectOverlay(Container));
+export default withSelector(
+  ScreenContext,
+  selector
+)(withSelectOverlay(Container));

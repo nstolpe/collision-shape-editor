@@ -1,5 +1,5 @@
 // /src/js/tools/color.js
-import { property } from 'tools/property';
+import { property } from 'Utility/property';
 
 // https://jsfiddle.net/t5nq6jjc/1
 // https://stackoverflow.com/a/9493060 (link above from comments)

@@ -1,11 +1,11 @@
 // src/components/pixi/Edges.jsx
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Container } from 'react-pixi-fiber';
+import { Container } from 'react-pixi-fiber/index.js';
 
-import Edge from 'components/pixi/Edge';
-import ScreenContext from 'contexts/ScreenContext';
-import withSelector from 'components/hoc/withSelector';
+import Edge from 'Components/pixi/Edge';
+import ScreenContext from 'Contexts/ScreenContext';
+import withSelector from 'Components/hoc/withSelector';
 
 /**
  * Callback for Array.prototype.map that configures edges for each

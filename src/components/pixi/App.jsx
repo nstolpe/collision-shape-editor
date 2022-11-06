@@ -15,7 +15,7 @@ import {
   Container,
   Sprite,
   Stage,
-} from 'react-pixi-fiber';
+} from 'react-pixi-fiber/index.js';
 
 import Edges from 'App/components/Edges';
 import Vertices from 'App/components/Vertices';

@@ -1,9 +1,9 @@
 // src/reducers/root-reducer.js
-import combineShapes from 'reducers/helpers/combine-shapes';
-import removeVertexFromShapes from 'reducers/helpers/remove-vertex-from-shapes';
-import removeEdgeFromShapes from 'reducers/helpers/remove-edge-from-shapes';
-import getShapeVerticesRelativeToCoordinates from 'reducers/helpers/get-shape-vertices-relative-to-coordinates';
-import recenterSelectedVertices from 'reducers/helpers/recenter-selected-vertices';
+import combineShapes from 'Reducers/helpers/combine-shapes';
+import removeVertexFromShapes from 'Reducers/helpers/remove-vertex-from-shapes';
+import removeEdgeFromShapes from 'Reducers/helpers/remove-edge-from-shapes';
+import getShapeVerticesRelativeToCoordinates from 'Reducers/helpers/get-shape-vertices-relative-to-coordinates';
+import recenterSelectedVertices from 'Reducers/helpers/recenter-selected-vertices';
 
 import {
   SET_ROOT_CONTAINER,
@@ -49,10 +49,10 @@ import {
   SET_CONTEXT_MENU_POSITION,
   CLOSE_CONTEXT_MENU,
   SET_POINTER_COORDINATES,
-} from 'constants/action-types';
-import * as Modes from 'constants/modes';
-import * as Tools from 'constants/tools';
-import List from 'tools/List';
+} from 'Constants/action-types';
+import * as Modes from 'Constants/modes';
+import * as Tools from 'Constants/tools';
+import List from 'Utility/List';
 
 const vertices = [
   [

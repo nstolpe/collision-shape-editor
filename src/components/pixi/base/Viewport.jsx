@@ -1,6 +1,6 @@
 // src/js/components/pixi/base/Viewport.js
 import deepEqual from 'deep-equal';
-import { CustomPIXIComponent } from 'react-pixi-fiber';
+import { CustomPIXIComponent } from 'react-pixi-fiber/index.js';
 import { Viewport } from 'pixi-viewport'
 
 export const TYPE = "Viewport";

@@ -1,11 +1,12 @@
 // src/components/html/containers/SpriteLoader.jsx
+import React from 'react';
 import * as PIXI from 'pixi.js';
 
-import { addTextureSource, addSprite } from 'actions/actions';
+import { addTextureSource, addSprite } from 'Actions/actions';
 
-import RootContext from 'contexts/RootContext';
-import withSelector from 'components/hoc/withSelector';
-import FileLoader from 'components/html/FileLoader';
+import RootContext from 'Contexts/RootContext';
+import withSelector from 'Components/hoc/withSelector';
+import FileLoader from 'Components/html/FileLoader';
 
 const imageMimeTypes = [
   'image/png',
@@ -15,19 +16,19 @@ const imageMimeTypes = [
   'image/tiff',
 ];
 
-const selector = ({
-  dispatch,
-  pixiApp,
-  viewportCenter,
-}) => ({
+const selector = ({ dispatch, pixiApp, viewportCenter }) => ({
   dispatch,
   pixiApp,
   viewportCenter,
 });
 
 const Container = ({ dispatch, pixiApp, viewportCenter, ...props }) => {
-  const onChange = event => {
-    const { nativeEvent : { target: { files } } } = event;
+  const onChange = (event) => {
+    const {
+      nativeEvent: {
+        target: { files },
+      },
+    } = event;
 
     if (files.length) {
       const { loader } = pixiApp;
@@ -38,7 +39,9 @@ const Container = ({ dispatch, pixiApp, viewportCenter, ...props }) => {
         const { name, type } = file;
 
         if (!imageMimeTypes.includes(type)) {
-          console.log(`@TODO: implement error notification. ${name} had invalid mime type ${type}`);
+          console.log(
+            `@TODO: implement error notification. ${name} had invalid mime type ${type}`
+          );
           continue;
         }
 
@@ -46,24 +49,25 @@ const Container = ({ dispatch, pixiApp, viewportCenter, ...props }) => {
           const reader = new FileReader();
 
           // eslint-disable-next-line no-loop-func
-          reader.onload = event => {
+          reader.onload = (event) => {
             loader.add(name, event.target.result);
 
             loadedKeys.push(name);
 
             if (loadedKeys.length >= files.length) {
               loader.load((currentLoader, resources) => {
-                loadedKeys.forEach(key => {
-
-                  dispatch(addSprite({
-                    name: key,
-                    texture: resources[key].texture,
-                    x: viewportCenter.x,
-                    y: viewportCenter.y,
-                    rotation: 0,
-                    scale: [1, 2],
-                    scaleMode: PIXI.SCALE_MODES.NEAREST,
-                  }));
+                loadedKeys.forEach((key) => {
+                  dispatch(
+                    addSprite({
+                      name: key,
+                      texture: resources[key].texture,
+                      x: viewportCenter.x,
+                      y: viewportCenter.y,
+                      rotation: 0,
+                      scale: [1, 2],
+                      scaleMode: PIXI.SCALE_MODES.NEAREST,
+                    })
+                  );
                 });
               });
             }
@@ -71,7 +75,9 @@ const Container = ({ dispatch, pixiApp, viewportCenter, ...props }) => {
 
           reader.readAsDataURL(file);
         } else {
-          console.log('@TODO: decide what to do when a file name is already used');
+          console.log(
+            '@TODO: decide what to do when a file name is already used'
+          );
         }
       }
     }
@@ -87,13 +93,7 @@ const Container = ({ dispatch, pixiApp, viewportCenter, ...props }) => {
     dispatch(addTextureSource(name, data));
   };
 
-  return (
-    <FileLoader
-      onChange={onChange}
-      onLoad={onLoad}
-      {...props}
-    />
-  );
+  return <FileLoader onChange={onChange} onLoad={onLoad} {...props} />;
 };
 
 export default withSelector(RootContext, selector)(Container);

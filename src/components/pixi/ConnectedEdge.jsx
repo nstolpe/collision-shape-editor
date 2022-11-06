@@ -1,11 +1,11 @@
 // components/pixi/ConnectedEdge.jsx
 import PropTypes from 'prop-types';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-import withSelector from 'components/hoc/withSelector';
-import Edge from 'components/pixi/Edge';
-import ScreenContext from 'contexts/ScreenContext';
-import { withinAABB } from 'tools/math';
+import withSelector from 'Components/hoc/withSelector';
+import Edge from 'Components/pixi/Edge';
+import ScreenContext from 'Contexts/ScreenContext';
+import { withinAABB } from 'Utility/math';
 
 const selector = ({
   uiOptions: {

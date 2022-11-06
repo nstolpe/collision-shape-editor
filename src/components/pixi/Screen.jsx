@@ -2,18 +2,18 @@
 import * as PIXI from 'pixi.js';
 import PropTypes from 'prop-types';
 import React, { useCallback, useEffect } from 'react';
-import { Stage, AppContext } from 'react-pixi-fiber';
+import { Stage, AppContext } from 'react-pixi-fiber/index.js';
 
-import { useRootContext } from 'contexts/RootContext';
-import ScreenContext from 'contexts/ScreenContext';
+import { useRootContext } from 'Contexts/RootContext';
+import ScreenContext from 'Contexts/ScreenContext';
 import {
   setPixiApp,
   setAltPressed,
   setCtrlPressed,
   setShiftPressed,
-} from 'actions/actions';
-import InteractiveViewport from 'components/pixi/containers/InteractiveViewport';
-import Rectangle from 'components/pixi/base/Rectangle';
+} from 'Actions/actions';
+import InteractiveViewport from 'Components/pixi/containers/InteractiveViewport';
+import Rectangle from 'Components/pixi/base/Rectangle';
 
 const Screen = ({ children, width, height }) => {
   const state = useRootContext();

@@ -1,5 +1,5 @@
 // src/reducers/helpers/remove-vertex-from-shapes.js
-import List from 'tools/List';
+import List from 'Utility/List';
 
 /**
  * Removes a single vertex from a List of vertices that belong to a Shape in a List of Shapes.

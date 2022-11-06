@@ -3,7 +3,7 @@ import React, { useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 
-import throttle from 'tools/throttle';
+import throttle from 'Utility/throttle';
 
 const FlexWrapper = styled.div`
   flex: 1;

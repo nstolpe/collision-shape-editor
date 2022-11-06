@@ -2,9 +2,9 @@
 import React, { useCallback } from 'react';
 import styled from '@emotion/styled';
 
-import { setRootContainer } from 'actions/actions';
-import RootContext from 'contexts/RootContext';
-import withSelector from 'components/hoc/withSelector';
+import { setRootContainer } from 'Actions/actions';
+import RootContext from 'Contexts/RootContext';
+import withSelector from 'Components/hoc/withSelector';
 
 const Wrapper = styled.div`
   display: flex;

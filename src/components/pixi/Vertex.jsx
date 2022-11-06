@@ -3,13 +3,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import * as PIXI from 'pixi.js';
 
-import restComparator from 'comparators/rest';
-import scaleComparator from 'comparators/scale';
-import Circle from 'components/pixi/base/Circle';
-import * as Cursors from 'constants/cursors';
-import * as Tools from 'constants/tools';
+import restComparator from 'Comparators/rest';
+import scaleComparator from 'Comparators/scale';
+import Circle from 'Components/pixi/base/Circle';
+import * as Cursors from 'Constants/cursors';
+import * as Tools from 'Constants/tools';
 
-export const getCursor = tool => {
+export const getCursor = (tool) => {
   switch (tool) {
     case Tools.ADD:
       return Cursors.CELL;
@@ -22,42 +22,47 @@ export const getCursor = tool => {
   }
 };
 
-const Vertex = React.forwardRef(({
-  activeFill,
-  alpha,
-  fill,
-  hitArea,
-  id,
-  radius,
-  scale,
-  selected,
-  strokeAlignment,
-  strokeColor,
-  strokeWidth,
-  tool,
-  x,
-  y,
-}, ref) => (
-  <Circle
-    alpha={alpha}
-    buttonMode
-    cursor={getCursor(tool)}
-    fill={selected ? activeFill : fill}
-    hitArea={hitArea}
-    interactive={true}
-    name={id}
-    pivot={[0, 0]}
-    radius={radius}
-    ref={ref}
-    scale={scale}
-    x={x}
-    y={y}
-    strokeAlignment={strokeAlignment}
-    strokeColor={strokeColor}
-    strokeWidth={strokeWidth}
-    zIndex={selected ? 10 : 0}
-  />
-));
+const Vertex = React.forwardRef(
+  (
+    {
+      activeFill,
+      alpha,
+      fill,
+      hitArea,
+      id,
+      radius,
+      scale,
+      selected,
+      strokeAlignment,
+      strokeColor,
+      strokeWidth,
+      tool,
+      x,
+      y,
+    },
+    ref
+  ) => (
+    <Circle
+      alpha={alpha}
+      buttonMode
+      cursor={getCursor(tool)}
+      fill={selected ? activeFill : fill}
+      hitArea={hitArea}
+      interactive={true}
+      name={id}
+      pivot={{ x: 0, y: 0 }}
+      radius={radius}
+      ref={ref}
+      scale={scale}
+      x={x}
+      y={y}
+      strokeAlignment={strokeAlignment}
+      strokeColor={strokeColor}
+      strokeWidth={strokeWidth}
+      zIndex={selected ? 10 : 0}
+    />
+  )
+);
 
 Vertex.defaultProps = {
   activeFill: 0x17bafb,
@@ -66,7 +71,7 @@ Vertex.defaultProps = {
   hitArea: new PIXI.Circle(0, 0, 5.5),
   id: 'ID',
   radius: 6.5,
-  scale: [1,1],
+  scale: [1, 1],
   selected: false,
   // @TODO disable/remove this prop, so the radius is never changed by stroke.
   strokeAlignment: 0,
@@ -82,10 +87,7 @@ Vertex.propTypes = {
   alpha: PropTypes.number,
   fill: PropTypes.number,
   hitArea: PropTypes.object,
-  id: PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.string,
-  ]),
+  id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   radius: PropTypes.number,
   scale: PropTypes.shape({
     x: PropTypes.number,
@@ -100,14 +102,19 @@ Vertex.propTypes = {
   y: PropTypes.number,
 };
 
-const comparator = ({ scale, ...restProps}, { scale: oldScale, ...restOldProps }) => {
+const comparator = (
+  { scale, ...restProps },
+  { scale: oldScale, ...restOldProps }
+) => {
   // @TODO maybe scale can be required to conform to { x. y }, and drop array ans scalar.
   const scaleX = scale?.x ?? scale?.[0] ?? scale;
   const scaleY = scale?.y ?? scale?.[1] ?? scale;
   const oldScaleX = oldScale?.x ?? oldScale?.[0] ?? oldScale;
   const oldScaleY = oldScale?.y ?? oldScale?.[1] ?? oldScale;
 
-  if (!scaleComparator({ x: scaleX, y: scaleY }, { x: oldScaleX, y: oldScaleY })) {
+  if (
+    !scaleComparator({ x: scaleX, y: scaleY }, { x: oldScaleX, y: oldScaleY })
+  ) {
     return false;
   }
 

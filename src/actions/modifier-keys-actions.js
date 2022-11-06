@@ -6,7 +6,7 @@ import {
   SET_ADD_KEY_PRESSED,
   SET_SUBTRACT_KEY_PRESSED,
   SET_PAN_KEY_PRESSED,
-} from 'constants/action-types';
+} from 'Constants/action-types';
 
 export const clearKeys = () => ({
   type: CLEAR_PRESSED_KEYS,

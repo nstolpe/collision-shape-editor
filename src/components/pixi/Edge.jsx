@@ -3,11 +3,11 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as PIXI from 'pixi.js';
 
-import Rectangle from 'components/pixi/base/Rectangle';
-import * as Cursors from 'constants/cursors';
-import * as Tools from 'constants/tools';
+import Rectangle from 'Components/pixi/base/Rectangle';
+import * as Cursors from 'Constants/cursors';
+import * as Tools from 'Constants/tools';
 
-export const getCursor = tool => {
+export const getCursor = (tool) => {
   switch (tool) {
     case Tools.ADD:
       return Cursors.CELL;
@@ -20,45 +20,52 @@ export const getCursor = tool => {
   }
 };
 
-const Edge = React.forwardRef(({
-  activeFill,
-  fill,
-  id,
-  length,
-  rotation,
-  scale,
-  selected,
-  thickness,
-  tool,
-  x,
-  y,
-}, ref) => {
-  const [pivot, setPivot] = useState([0, thickness * 0.5]);
-  const [hitArea, setHitArea] = useState(new PIXI.Rectangle(0, -2, length, thickness + 4));
+const Edge = React.forwardRef(
+  (
+    {
+      activeFill,
+      fill,
+      id,
+      length,
+      rotation,
+      scale,
+      selected,
+      thickness,
+      tool,
+      x,
+      y,
+    },
+    ref
+  ) => {
+    const [pivot, setPivot] = useState({ x: 0, y: thickness * 0.5 });
+    const [hitArea, setHitArea] = useState(
+      new PIXI.Rectangle(0, -2, length, thickness + 4)
+    );
 
-  useEffect(() => {
-    setPivot([0, thickness * 0.5]);
-    setHitArea(new PIXI.Rectangle(0, -2, length, thickness + 4));
-  }, [length, thickness]);
+    useEffect(() => {
+      setPivot({ x: 0, y: thickness * 0.5 });
+      setHitArea(new PIXI.Rectangle(0, -2, length, thickness + 4));
+    }, [length, thickness]);
 
-  return (
-    <Rectangle
-      cursor={getCursor(tool)}
-      fill={selected ? activeFill : fill}
-      height={thickness}
-      hitArea={hitArea}
-      interactive
-      name={id}
-      pivot={pivot}
-      ref={ref}
-      rotation={rotation}
-      scale={scale}
-      width={length}
-      x={x}
-      y={y}
-    />
-  );
-});
+    return (
+      <Rectangle
+        cursor={getCursor(tool)}
+        fill={selected ? activeFill : fill}
+        height={thickness}
+        hitArea={hitArea}
+        interactive
+        name={id}
+        pivot={pivot}
+        ref={ref}
+        rotation={rotation}
+        scale={scale}
+        width={length}
+        x={x}
+        y={y}
+      />
+    );
+  }
+);
 
 Edge.propTypes = {
   activeFill: PropTypes.number,

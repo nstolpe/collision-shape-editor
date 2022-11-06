@@ -1,16 +1,14 @@
 // components/pixi/ConnectedVertex.jsx
 import PropTypes from 'prop-types';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-import withSelector from 'components/hoc/withSelector';
-import Vertex from 'components/pixi/Vertex';
-import ScreenContext from 'contexts/ScreenContext';
-import { withinAABB } from 'tools/math';
+import withSelector from 'Components/hoc/withSelector';
+import Vertex from 'Components/pixi/Vertex';
+import ScreenContext from 'Contexts/ScreenContext';
+import { withinAABB } from 'Utility/math';
 
 const selector = ({
-  uiOptions: {
-    vertexRadius: radius,
-  },
+  uiOptions: { vertexRadius: radius },
   selectOverlay: {
     enabled: selectOverlayEnabled,
     x: selectOverlayX,
@@ -46,19 +44,20 @@ const ConnectedVertex = ({
 
   useEffect(() => {
     if (selectOverlayEnabled && ref.current) {
-      setIsWithinOverlayBounds(withinAABB(
-        { x, y },
-        { x: selectOverlayX, y: selectOverlayY },
-        {
-          x: selectOverlayX + selectOverlayWidth,
-          y: selectOverlayY + selectOverlayHeight,
-        },
-        radius
-      ));
+      setIsWithinOverlayBounds(
+        withinAABB(
+          { x, y },
+          { x: selectOverlayX, y: selectOverlayY },
+          {
+            x: selectOverlayX + selectOverlayWidth,
+            y: selectOverlayY + selectOverlayHeight,
+          },
+          radius
+        )
+      );
     } else {
       setIsWithinOverlayBounds(false);
     }
-
   }, [
     x,
     y,
@@ -74,6 +73,7 @@ const ConnectedVertex = ({
     <Vertex
       ref={ref}
       id={id}
+      radius={radius}
       scale={scale}
       selected={selected || isWithinOverlayBounds}
       tool={tool}
@@ -84,10 +84,7 @@ const ConnectedVertex = ({
 };
 
 ConnectedVertex.propTypes = {
-  id: PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.string,
-  ]),
+  id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   scale: PropTypes.shape({
     x: PropTypes.number,
     y: PropTypes.number,

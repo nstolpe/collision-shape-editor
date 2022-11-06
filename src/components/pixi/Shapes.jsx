@@ -1,29 +1,30 @@
 // src/components/pixi/Shapes.jsx
+import React from 'react';
 
-import withSelector from 'components/hoc/withSelector';
-import Shape from 'components/pixi/Shape';
-import ScreenContext from 'contexts/ScreenContext';
-import { SHAPE } from 'constants/prefixes';
-import { addPrefix } from 'tools/prefix';
-import selectedVerticesComparator from 'comparators/selected-vertices';
+import withSelector from 'Components/hoc/withSelector';
+import Shape from 'Components/pixi/Shape';
+import ScreenContext from 'Contexts/ScreenContext';
+import { SHAPE } from 'Constants/prefixes';
+import { addPrefix } from 'Utility/prefix';
+import selectedVerticesComparator from 'Comparators/selected-vertices';
 
-const selector = ({ selectedVertices, shapes }) => ({ selectedVertices, shapes });
-const comparator = ({
+const selector = ({ selectedVertices, shapes }) => ({
   selectedVertices,
   shapes,
-}, {
-  shapes: oldShapes,
-  selectedVertices: oldSelectedVertices,
-}) => {
-//   if (!selectedVerticesComparator(selectedVertices, oldSelectedVertices)) {
-//     return false;
-//   }
-//
-//   return oldShapes === shapes;
-   return (
-     selectedVerticesComparator(selectedVertices, oldSelectedVertices) &&
-     oldShapes === shapes
-   );
+});
+const comparator = (
+  { selectedVertices, shapes },
+  { shapes: oldShapes, selectedVertices: oldSelectedVertices }
+) => {
+  //   if (!selectedVerticesComparator(selectedVertices, oldSelectedVertices)) {
+  //     return false;
+  //   }
+  //
+  //   return oldShapes === shapes;
+  return (
+    selectedVerticesComparator(selectedVertices, oldSelectedVertices) &&
+    oldShapes === shapes
+  );
 };
 
 const Shapes = ({ shapes, selectedVertices }) =>

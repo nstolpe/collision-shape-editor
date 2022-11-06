@@ -1,6 +1,6 @@
 // src/tools/state.js
-import List from 'tools/List';
-import { DEFAULT_DELIMITER } from 'tools/prefix';
+import List from 'Utility/List';
+import { DEFAULT_DELIMITER } from 'Utility/prefix';
 
 // Tools for updating state. Used by reducers, so maybe should be tools/reducer
 

@@ -1,8 +1,8 @@
 // src/js/components/pixi/base/Circle.js
 import React, { forwardRef } from 'react';
-import PropTypes from 'prop-types'
+import PropTypes from 'prop-types';
 
-import Drawing from 'components/pixi/base/Drawing';
+import Drawing from 'Components/pixi/base/Drawing';
 
 export const draw = (instance, oldProps, newProps) => {
   const {

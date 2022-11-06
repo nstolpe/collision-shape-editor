@@ -1,10 +1,11 @@
 // src/components/pixi/Shape.jsx
-import { useState } from 'react';
+import React, { useState } from 'react';
 
-import { SHAPE, VERTEX } from 'constants/prefixes';
-import { addPrefix } from 'tools/prefix';
-import Geometry from 'components/pixi/Geometry';
+import { SHAPE, VERTEX } from 'Constants/prefixes';
+import { addPrefix } from 'Utility/prefix';
+import Geometry from 'Components/pixi/Geometry';
 
+// @TODO add container to use selector and comparator
 const Shape = ({
   vertices,
   selectedVertices,

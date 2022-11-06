@@ -1,4 +1,6 @@
 // src/components/html/containers/ShapeContextMenu.jsx
+import React from 'react';
+
 import {
   closeContextMenu,
   reverseShapeWinding,
@@ -6,21 +8,16 @@ import {
   deleteShape,
   setSelectedVertices,
   addSelectedVertices,
-} from 'actions/actions';
+} from 'Actions/actions';
 
-import RootContext from 'contexts/RootContext';
-import withSelector from 'components/hoc/withSelector';
-import ShapeContextMenu from 'components/html/ShapeContextMenu';
+import RootContext from 'Contexts/RootContext';
+import withSelector from 'Components/hoc/withSelector';
+import ShapeContextMenu from 'Components/html/ShapeContextMenu';
 
 const selector = ({
   dispatch,
   rootContainer,
-  contextMenu: {
-    type,
-    x,
-    y,
-    options,
-  },
+  contextMenu: { type, x, y, options },
 }) => ({
   dispatch,
   portalTarget: rootContainer,
@@ -32,28 +29,25 @@ const selector = ({
   isOpen: type === 'SHAPE',
 });
 
-const Container = ({
-  dispatch,
-  ...props
-}) => {
-  const toggleWinding = shapeKey => {
+const Container = ({ dispatch, ...props }) => {
+  const toggleWinding = (shapeKey) => {
     dispatch(toggleShapeShowWinding(shapeKey));
     dispatch(closeContextMenu());
   };
 
-  const reverseWinding = shapeKey => {
+  const reverseWinding = (shapeKey) => {
     dispatch(reverseShapeWinding(shapeKey));
     dispatch(closeContextMenu());
   };
 
-  const selectShapeVertices = (shape, shapeKey, replace=false) => {
+  const selectShapeVertices = (shape, shapeKey, replace = false) => {
     if (replace) {
       const newSelectedVertices = shape.vertices.reduce(
         (result, { x, y }, _, vertexKey) => {
           result[`VERTEX::${vertexKey}::SHAPE::${shapeKey}`] = { x, y };
           return result;
         },
-        {},
+        {}
       );
 
       dispatch(setSelectedVertices(newSelectedVertices));
@@ -63,7 +57,7 @@ const Container = ({
           result[`VERTEX::${vertexKey}::SHAPE::${shapeKey}`] = { x, y };
           return result;
         },
-        {},
+        {}
       );
 
       dispatch(addSelectedVertices(newSelectedVertices));
@@ -72,14 +66,14 @@ const Container = ({
     dispatch(closeContextMenu());
   };
 
-  const removeShape = shapeKey => {
+  const removeShape = (shapeKey) => {
     dispatch(deleteShape(shapeKey));
     dispatch(closeContextMenu());
   };
 
   const close = () => {
     console.log('foo');
-    dispatch(closeContextMenu())
+    dispatch(closeContextMenu());
   };
 
   return (

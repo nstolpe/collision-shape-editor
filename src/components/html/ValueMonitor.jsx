@@ -1,11 +1,14 @@
 // src/components/html/ValueMonitor.js
+import React from 'react';
+
 import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 
-import { Ul, Input } from 'components/html/resets';
+import { Ul, Input } from 'Components/html/resets';
 
-const Wrapper = styled.div(`
+const Wrapper = styled.div(
+  `
   line-height: 1.5;
   display: flex;
   flex-direction: column;
@@ -13,30 +16,41 @@ const Wrapper = styled.div(`
   height: 64px;
   font-family: 'Fira Mono';
   justify-content: space-between;
-`, ({ styles }) => styles);
+`,
+  ({ styles }) => styles
+);
 
-const Header = styled.h6(`
+const Header = styled.h6(
+  `
   color: hsl(0,0%,75%);
   background-color: hsl(0,0%,25%);
   margin: 0;
   font-size: 1.2rem;
   text-align: center;
   border-radius: 4px;
-`, ({ styles }) => styles);
+`,
+  ({ styles }) => styles
+);
 
-const ValueWrapper = styled.label(`
+const ValueWrapper = styled.label(
+  `
   background-color: #ffffff;
   display: flex;
   font-size: 1.2rem;
   border-radius: 4px;
   padding: 0 0 0 0.4rem;
-`, ({ styles }) => styles);
+`,
+  ({ styles }) => styles
+);
 
 const ValueLabel = styled.span(({ styles }) => styles);
 
-const ValueInput = styled(Input)(`
+const ValueInput = styled(Input)(
+  `
   width: 100%;
-`, ({ styles }) => styles);
+`,
+  ({ styles }) => styles
+);
 
 const Value = ({
   type,
@@ -48,7 +62,7 @@ const Value = ({
   labelStyles,
   inputStyles,
   onChange,
-  step=1,
+  step = 1,
 }) => {
   const extraProps = type === 'number' && { step };
 
@@ -86,19 +100,15 @@ Value.defaultProps = {
   inputStyles: {},
 };
 
-const ValueMonitor = ({
-  name,
-  title,
-  styles,
-  values,
-  headerStyles,
-}) => {
+const ValueMonitor = ({ name, title, styles, values, headerStyles }) => {
   return (
     <Wrapper title={title} styles={styles}>
       <Header styles={headerStyles}>{name}</Header>
-      {values.map((props, i) => <Value {...props} key={`${i}-${name}`}/>)}
+      {values.map((props, i) => (
+        <Value {...props} key={`${i}-${name}`} />
+      ))}
     </Wrapper>
-  )
+  );
 };
 
 ValueMonitor.propTypes = {
@@ -118,6 +128,5 @@ ValueMonitor.defaultProps = {
   title: '',
   values: [],
 };
-
 
 export default ValueMonitor;

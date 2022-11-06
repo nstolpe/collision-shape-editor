@@ -1,15 +1,16 @@
 // src/components/html/ShapeContextMenu.jsx
-import styled from '@emotion/styled/macro';
+import React from 'react';
+import styled from '@emotion/styled';
 
-import { Button, Ul } from 'components/html/resets';
-import withContextMenu from 'components/html/hoc/withContextMenu';
+import { Button, Ul } from 'Components/html/resets';
+import withContextMenu from 'Components/html/hoc/withContextMenu';
 
 const Header = styled.h3`
-  color: hsl(0,0%,75%);
+  color: hsl(0, 0%, 75%);
   font-size: 1.25em;
   font-weight: bold;
   line-height: 1.2;
-  background-color: hsl(0,0%,25%);
+  background-color: hsl(0, 0%, 25%);
   margin: 0 0 0.4em;
   pointer-events: none;
   text-align: center;
@@ -40,23 +41,23 @@ const ShapeContextMenu = ({
   selectShapeVertices,
   removeShape,
 }) => {
-  const onToggleWinding = shapeKey => {
+  const onToggleWinding = (shapeKey) => {
     toggleWinding(shapeKey);
     document.removeEventListener('keydown', onKeyDown);
   };
-  const onReverseWinding = shapeKey => {
+  const onReverseWinding = (shapeKey) => {
     reverseWinding(shapeKey);
     document.removeEventListener('keydown', onKeyDown);
-  }
-  const onSelectShapeVertices = (shape, shapeKey, replace=false) => {
+  };
+  const onSelectShapeVertices = (shape, shapeKey, replace = false) => {
     selectShapeVertices(shape, shapeKey, replace);
     document.removeEventListener('keydown', onKeyDown);
   };
-  const onRemoveShape = shapeKey => {
+  const onRemoveShape = (shapeKey) => {
     removeShape(shapeKey);
     document.removeEventListener('keydown', onKeyDown);
   };
-  const onKeyDown = event => {
+  const onKeyDown = (event) => {
     const key = event.key.toLowerCase();
 
     switch (key) {
@@ -92,16 +93,26 @@ const ShapeContextMenu = ({
           </MenuButton>
         </li>
         <li>
-          <MenuButton onClick={() => onReverseWinding(shapeKey)}>[r]everse winding</MenuButton>
+          <MenuButton onClick={() => onReverseWinding(shapeKey)}>
+            [r]everse winding
+          </MenuButton>
         </li>
         <li>
-          <MenuButton onClick={() => onSelectShapeVertices(shape, shapeKey)}>select shape verts ([a]dd)</MenuButton>
+          <MenuButton onClick={() => onSelectShapeVertices(shape, shapeKey)}>
+            select shape verts ([a]dd)
+          </MenuButton>
         </li>
         <li>
-          <MenuButton onClick={() => onSelectShapeVertices(shape, shapeKey, true)}>select shape verts ([s]et)</MenuButton>
+          <MenuButton
+            onClick={() => onSelectShapeVertices(shape, shapeKey, true)}
+          >
+            select shape verts ([s]et)
+          </MenuButton>
         </li>
         <li>
-          <MenuButton onClick={() => removeShape(shapeKey)}>[d]elete shape</MenuButton>
+          <MenuButton onClick={() => removeShape(shapeKey)}>
+            [d]elete shape
+          </MenuButton>
         </li>
       </List>
     </>

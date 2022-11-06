@@ -1,7 +1,7 @@
 // src/components/html/resets.js
 // @TODO rename this to /components/html/styles.js or /components/html/base-styles.js
 // or /components/html/styles/base.js or something.
-import styled from '@emotion/styled/macro';
+import styled from '@emotion/styled';
 
 export const Button = styled.button`
   outline: none;

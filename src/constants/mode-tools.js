@@ -1,6 +1,6 @@
 // src/js/constants/modes-tools.js
-import { ALL, EDGE, SHAPE, SPRITE, VERTEX } from 'constants/modes';
-import { ADD, DELETE, SELECT, ROTATE } from 'constants/tools';
+import { ALL, EDGE, SHAPE, SPRITE, VERTEX } from 'Constants/modes';
+import { ADD, DELETE, SELECT, ROTATE } from 'Constants/tools';
 
 // tools available to each mode
 const modeTools = {
