@@ -1,9 +1,9 @@
 // src/js/components/pixi/base/Viewport.js
 import deepEqual from 'deep-equal';
 import { CustomPIXIComponent } from 'react-pixi-fiber/index.js';
-import { Viewport } from 'pixi-viewport'
+import { Viewport } from 'pixi-viewport';
 
-export const TYPE = "Viewport";
+export const TYPE = 'Viewport';
 
 // props:
 // screenWidth
@@ -53,16 +53,16 @@ export const PLUGIN_PROPS = [
 export const propGrouprules = [
   {
     group: 'eventProps',
-    test: propName => Object.keys(EVENT_BY_PROPNAME).includes(propName),
+    test: (propName) => Object.keys(EVENT_BY_PROPNAME).includes(propName),
   },
   {
     group: 'pluginProps',
-    test: propName => PLUGIN_PROPS.includes(propName),
+    test: (propName) => PLUGIN_PROPS.includes(propName),
   },
 ];
 
 export const behavior = {
-  customDisplayObject: props => {
+  customDisplayObject: (props) => {
     const {
       restProps: {
         screenWidth,
@@ -83,7 +83,7 @@ export const behavior = {
     });
     return instance;
   },
-  customApplyProps: function(instance, oldProps = {}, newProps) {
+  customApplyProps: function (instance, oldProps = {}, newProps) {
     const {
       eventProps,
       pluginProps,
@@ -103,15 +103,24 @@ export const behavior = {
         worldWidth: oldWorldWidth,
         worldHeight: oldWorldHeight,
         ...oldPropsRest
-      }
+      },
     } = groupProps(oldProps, propGrouprules);
 
-    if (screenWidth !== oldScreenWidth || screenHeight !== oldScreenHeight || worldWidth !== oldWorldWidth || worldHeight !== oldWorldHeight) {
+    if (
+      screenWidth !== oldScreenWidth ||
+      screenHeight !== oldScreenHeight ||
+      worldWidth !== oldWorldWidth ||
+      worldHeight !== oldWorldHeight
+    ) {
       instance.resize(screenWidth, screenHeight, worldWidth, worldHeight);
     }
 
-    Object.entries(eventProps).forEach(([propName, prop]) => updateEventProp(instance, propName, prop, oldProps[propName]));
-    Object.entries(pluginProps).forEach(([propName, prop]) => updatePluginProp(instance, propName, prop, oldProps[propName]));
+    Object.entries(eventProps).forEach(([propName, prop]) =>
+      updateEventProp(instance, propName, prop, oldProps[propName])
+    );
+    Object.entries(pluginProps).forEach(([propName, prop]) =>
+      updatePluginProp(instance, propName, prop, oldProps[propName])
+    );
 
     this.applyDisplayObjectProps(oldPropsRest, newPropsRest);
   },
@@ -128,38 +137,43 @@ export const behavior = {
 export const groupProps = (props, rules) => {
   // const groups = rules.reduce((groups, { group, test}) => { ...groups, [group]: {} }, {});
 
-  return Object.entries(props).reduce((mappedProps, [propName, prop]) => {
-    let grouped = false;
+  return Object.entries(props).reduce(
+    (mappedProps, [propName, prop]) => {
+      let grouped = false;
 
-    for (let i = 0, l = rules.length; i < l; i++) {
-      const { group, test } = rules[i];
+      for (let i = 0, l = rules.length; i < l; i++) {
+        const { group, test } = rules[i];
 
-      // add the group key to mappedProps if it's not there yet.
-      if (!mappedProps.hasOwnProperty(group)) {
-        mappedProps[group] = {};
+        // add the group key to mappedProps if it's not there yet.
+        if (!mappedProps.hasOwnProperty(group)) {
+          mappedProps[group] = {};
+        }
+
+        // if the propName passes its first test, add it to the group and exit.
+        if (test(propName)) {
+          mappedProps[group][propName] = prop;
+          grouped = true;
+          break;
+        }
       }
 
-      // if the propName passes its first test, add it to the group and exit.
-      if (test(propName)) {
-        mappedProps[group][propName] = prop;
-        grouped = true;
-        break;
+      // if the prop wasn't grouped in the loop above, add it to restProps
+      if (!grouped) {
+        mappedProps.restProps[propName] = prop;
       }
-    }
 
-    // if the prop wasn't grouped in the loop above, add it to restProps
-    if (!grouped) {
-      mappedProps.restProps[propName] = prop;
-    }
-
-    return mappedProps;
-  }, { restProps: {} });
+      return mappedProps;
+    },
+    { restProps: {} }
+  );
 };
 
 export const updatePluginProp = (instance, pluginName, options, oldOptions) => {
   // @TODO do something better for shallow comparison
   if (PLUGIN_PROPS.includes(pluginName) && !deepEqual(options, oldOptions)) {
-    Object.entries(options).length ? instance[pluginName](options) : instance[pluginName]();
+    Object.entries(options).length
+      ? instance[pluginName](options)
+      : instance[pluginName]();
   }
 };
 

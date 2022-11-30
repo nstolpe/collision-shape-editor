@@ -125,12 +125,12 @@ export const initialState = {
   sprites: [],
   vertices: List(vertices[0]),
   selectedVertices: {
-      // coordinates (really coordinate modifiers) keyed to a string with
-      // delimited vertex and shape identifiers
-      // ['VERTEX::<uid>::SHAPE::<uid>']: {
-      //   x: 0,
-      //   y: 0,
-      // },
+    // coordinates (really coordinate modifiers) keyed to a string with
+    // delimited vertex and shape identifiers
+    // ['VERTEX::<uid>::SHAPE::<uid>']: {
+    //   x: 0,
+    //   y: 0,
+    // },
   },
   shapes: List([
     {
@@ -142,7 +142,7 @@ export const initialState = {
       vertices: List(vertices[1]),
       closed: false,
       showWinding: false,
-    }
+    },
   ]),
   movingVerticeIds: [],
   scale: { x: 1, y: 1 },
@@ -182,7 +182,7 @@ export const reducer = (state, action) => {
     case SET_SELECT_OVERLAY_ENABLED:
       return {
         ...state,
-        selectOverlay: { ...state.selectOverlay, enabled: data }
+        selectOverlay: { ...state.selectOverlay, enabled: data },
       };
     case SET_SELECT_OVERLAY_POSITION:
       return {
@@ -229,7 +229,7 @@ export const reducer = (state, action) => {
           deleteCount: 0,
           newKeys: [undefined],
         },
-        { x, y },
+        { x, y }
       );
       const newShapes = shapes.splice(
         {
@@ -237,13 +237,15 @@ export const reducer = (state, action) => {
           deleteCount: 1,
           newKeys: [shapes.keys[shapeIndex]],
         },
-        { ...shape, vertices },
+        { ...shape, vertices }
       );
 
       const newState = { ...state, shapes: newShapes };
 
       if (makeSelected) {
-        const key = `VERTEX::${vertices.keys[vertexIndex - 1]}::SHAPE::${shapeKey}`;
+        const key = `VERTEX::${
+          vertices.keys[vertexIndex - 1]
+        }::SHAPE::${shapeKey}`;
         newState.selectedVertices = { [key]: { x: 0, y: 0 } };
       }
 
@@ -261,7 +263,7 @@ export const reducer = (state, action) => {
           deleteCount: 0,
           newKeys: [undefined],
         },
-        { x, y },
+        { x, y }
       );
       const newShapes = shapes.splice(
         {
@@ -269,7 +271,7 @@ export const reducer = (state, action) => {
           deleteCount: 1,
           newKeys: [shapes.keys[shapeIndex]],
         },
-        { ...shape, vertices },
+        { ...shape, vertices }
       );
 
       const newState = { ...state, shapes: newShapes };
@@ -302,7 +304,9 @@ export const reducer = (state, action) => {
     case MOVE_VERTEX:
       return {
         ...state,
-        vertices: state.vertices.map(vertex => vertex.id === data.id ? data : vertex),
+        vertices: state.vertices.map((vertex) =>
+          vertex.id === data.id ? data : vertex
+        ),
       };
     case START_MOVE_VERTEX:
       return {
@@ -312,7 +316,9 @@ export const reducer = (state, action) => {
     case STOP_MOVE_VERTEX:
       return {
         ...state,
-        movingVerticeIds: state.movingVerticeIds.filter(vid => vid !== data.id),
+        movingVerticeIds: state.movingVerticeIds.filter(
+          (vid) => vid !== data.id
+        ),
       };
     case MOVE_VERTICES:
       // @TODO this will probably be removed
@@ -333,7 +339,7 @@ export const reducer = (state, action) => {
         shapes: recenterSelectedVertices(
           data,
           state.selectedVertices,
-          state.shapes,
+          state.shapes
         ),
       };
     case ADD_SELECTED_VERTICES:
@@ -354,22 +360,26 @@ export const reducer = (state, action) => {
     case CLOSE_SHAPE:
       return {
         ...state,
-        shapes: state.shapes.map(
-          (shape, idx, key) => key === data.id ? { ...shape, closed: true } : shape,
+        shapes: state.shapes.map((shape, idx, key) =>
+          key === data.id ? { ...shape, closed: true } : shape
         ),
       };
     case REVERSE_SHAPE_WINDING:
       return {
         ...state,
-        shapes: state.shapes.map(
-          (shape, idx, key) => key === data.id ? { ...shape, vertices: shape.vertices.reverse() } : shape,
+        shapes: state.shapes.map((shape, idx, key) =>
+          key === data.id
+            ? { ...shape, vertices: shape.vertices.reverse() }
+            : shape
         ),
       };
     case TOGGLE_SHAPE_SHOW_WINDING:
       return {
         ...state,
-        shapes: state.shapes.map(
-          (shape, idx, key) => key === data.id ? { ...shape, showWinding: !shape.showWinding } : shape,
+        shapes: state.shapes.map((shape, idx, key) =>
+          key === data.id
+            ? { ...shape, showWinding: !shape.showWinding }
+            : shape
         ),
       };
     case JOIN_SHAPES:
@@ -380,12 +390,14 @@ export const reducer = (state, action) => {
           shape1: data.shape1,
           shape2: data.shape2,
           joinType: data.joinType,
-        })
-      }
+        }),
+      };
     case CREATE_SHAPE: {
       const { vertices, closed, showWinding } = data;
       const newShape = { vertices, closed, showWinding };
-      const { shapes: { keys, values } } = state;
+      const {
+        shapes: { keys, values },
+      } = state;
       const newShapes = List([...values, newShape], keys);
       const shapeKey = newShapes.keyOf(newShape);
       const newSelectedVertices = vertices.reduce(
@@ -394,7 +406,7 @@ export const reducer = (state, action) => {
           result[key] = { x, y };
           return result;
         },
-        {},
+        {}
       );
 
       return {
@@ -460,17 +472,22 @@ export const reducer = (state, action) => {
     case ADD_TEXTURE_SOURCE:
       return {
         ...state,
-        textureSources: { ...state.textureSources, [data.id]: data.textureData },
+        textureSources: {
+          ...state.textureSources,
+          [data.id]: data.textureData,
+        },
       };
     case REMOVE_TEXTURE_SOURCE:
       return {
         ...state,
-        textureSources: state.textureSources.filter(textureSource => textureSource.id !== data.source.id),
+        textureSources: state.textureSources.filter(
+          (textureSource) => textureSource.id !== data.source.id
+        ),
       };
     case ADD_SPRITE:
       return {
         ...state,
-        sprites: [ ...state.sprites, { ...data.sprite } ],
+        sprites: [...state.sprites, { ...data.sprite }],
       };
     case SET_CONTEXT_MENU:
       return {

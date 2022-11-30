@@ -1,8 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useMemo,
-} from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 
 import restComparator from 'Comparators/rest';
 import useCustomCompareMemo from 'Hooks/useCustomCompareMemo';
@@ -19,25 +15,27 @@ import useCustomCompareMemo from 'Hooks/useCustomCompareMemo';
  * @param comparator {Function}      A function that takes two arguments and compares them.
  * @param WrappedComponent {object}  A React Component
  */
-const withSelector = (
-  context = createContext(),
-  selector = values => values,
-  comparator = restComparator
-) => WrappedComponent => {
-  const WrapperComponent = props => {
-    const ctx = selector(useContext(context));
-    const fileredProps = useCustomCompareMemo(ctx, comparator);
-    // below was causing it to always rerender, since fileredProps was always a new object.
-    // this seems to be good. delete once it's no longer needed for reference
-    // const fileredProps = { ...useCustomCompareMemo(ctx, comparator), ...props };
+const withSelector =
+  (
+    context = createContext(),
+    selector = (values) => values,
+    comparator = restComparator
+  ) =>
+  (WrappedComponent) => {
+    const WrapperComponent = (props) => {
+      const ctx = selector(useContext(context));
+      const filteredProps = useCustomCompareMemo(ctx, comparator);
+      // below was causing it to always rerender, since filteredProps was always a new object.
+      // this seems to be good. delete once it's no longer needed for reference
+      // const filteredProps = { ...useCustomCompareMemo(ctx, comparator), ...props };
 
-    return useMemo(
-      () => <WrappedComponent {...{...fileredProps, ...props}} />,
-      [fileredProps, props]
-    );
+      return useMemo(
+        () => <WrappedComponent {...{ ...filteredProps, ...props }} />,
+        [filteredProps, props]
+      );
+    };
+
+    return WrapperComponent;
   };
-
-  return WrapperComponent;
-};
 
 export default withSelector;
