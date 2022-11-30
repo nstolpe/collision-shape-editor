@@ -121,6 +121,16 @@ const Controls = ({
   return (
     <ControlWrapper>
       <SpriteLoader accept="image/*" multiple title="load sprites" />
+      <ColorPicker
+        modalContainerElement={rootContainer}
+        title="background color"
+        initialColor={backgroundColor}
+        onColorChange={onColorChange}
+        titleFontFamily="Fira Mono"
+        valueFontFamily="Fira Mono"
+        triggerWidth={'64px'}
+        triggerHeight={'64px'}
+      />
       <Separator />
       <VertexIcon {...vertexIconProps} />
       <EdgeIcon {...edgeIconProps} />
