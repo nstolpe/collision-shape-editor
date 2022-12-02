@@ -1,5 +1,5 @@
 // components/pixi/Geometry.jsx
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Container, Text } from 'react-pixi-fiber/index.js';
 import * as PIXI from 'pixi.js';
@@ -8,8 +8,8 @@ import chroma from 'chroma-js';
 import restComparator from 'Comparators/rest';
 import scaleComparator from 'Comparators/scale';
 import withSelector from 'Components/hoc/withSelector';
-import ConnectedEdge from 'Components/pixi/ConnectedEdge';
-import ConnectedVertex from 'Components/pixi/ConnectedVertex';
+import Edge from 'Components/pixi/containers/Edge';
+import Vertex from 'Components/pixi/containers/Vertex';
 import { EDGE, SHAPE, VERTEX } from 'Constants/prefixes';
 import { SELECT } from 'Constants/tools';
 import ScreenContext from 'Contexts/ScreenContext';
@@ -55,14 +55,14 @@ const Geometry = ({
     [scale.x, scale.y]
   );
 
-  const ref = (container) => {
+  const containerRef = useCallback((container) => {
     if (container) {
       const { height, width, x, y } = container.getBounds();
 
       container.pivot.set(x + width / 2, y + height / 2);
       container.position.set(x + width / 2, y + height / 2);
     }
-  };
+  }, []);
 
   // const hitArea = useMemo(() => new PIXI.Polygon(vertices.values), [vertices]);
 
@@ -115,10 +115,10 @@ const Geometry = ({
           y2,
         };
 
-        result[0].push(<ConnectedEdge {...edgeProps} />);
+        result[0].push(<Edge {...edgeProps} />);
       }
 
-      result[1].push(<ConnectedVertex {...vertexProps} />);
+      result[1].push(<Vertex {...vertexProps} />);
 
       if (showWinding) {
         const [r, g, b] = chroma(
@@ -151,7 +151,7 @@ const Geometry = ({
   return (
     <Container
       name={name}
-      ref={ref}
+      ref={containerRef}
       interactive
       // hitArea={hitArea}
     >
