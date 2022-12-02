@@ -24,14 +24,14 @@ const withSelector =
   (WrappedComponent) => {
     const WrapperComponent = (props) => {
       const ctx = selector(useContext(context));
-      const filteredProps = useCustomCompareMemo(ctx, comparator);
-      // below was causing it to always rerender, since filteredProps was always a new object.
+      const contextProps = useCustomCompareMemo(ctx, comparator);
+      // below was causing it to always rerender, since contextProps was always a new object.
       // this seems to be good. delete once it's no longer needed for reference
-      // const filteredProps = { ...useCustomCompareMemo(ctx, comparator), ...props };
+      // const contextProps = { ...useCustomCompareMemo(ctx, comparator), ...props };
 
       return useMemo(
-        () => <WrappedComponent {...{ ...filteredProps, ...props }} />,
-        [filteredProps, props]
+        () => <WrappedComponent {...{ ...contextProps, ...props }} />,
+        [contextProps, props]
       );
     };
 
