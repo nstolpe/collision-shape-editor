@@ -9,6 +9,8 @@ import Circle from 'Components/pixi/base/Circle';
 import * as Cursors from 'Constants/cursors';
 import * as Tools from 'Constants/tools';
 
+import { draw as drawCircle } from 'Components/pixi/base/Circle';
+
 export const getCursor = (tool) => {
   switch (tool) {
     case Tools.ADD:
@@ -22,9 +24,38 @@ export const getCursor = (tool) => {
   }
 };
 
-const Vertex = React.forwardRef(
-  (
-    {
+class Vertex extends React.Component {
+  state = {
+    shouldReCache: true,
+  };
+
+  draw = (instance, oldProps, newProps) => {
+    const [oldPropsRest, newPropsRest] = drawCircle(
+      instance,
+      oldProps,
+      newProps
+    );
+    // console.log('barfoo');
+    const { shouldReCache } = this.state;
+
+    if (shouldReCache) {
+      this.setState({ shouldReCache: false });
+    }
+
+    return [oldPropsRest, newPropsRest];
+  };
+
+  componentDidUpdate(prevProps) {
+    const { selected: oldSelected } = prevProps;
+    const { selected } = this.props;
+
+    if (selected !== oldSelected) {
+      this.setState({ shouldReCache: true });
+    }
+  }
+
+  render() {
+    const {
       activeFill,
       alpha,
       fill,
@@ -39,30 +70,35 @@ const Vertex = React.forwardRef(
       tool,
       x,
       y,
-    },
-    ref
-  ) => (
-    <Circle
-      alpha={alpha}
-      buttonMode
-      cursor={getCursor(tool)}
-      fill={selected ? activeFill : fill}
-      hitArea={hitArea}
-      interactive={true}
-      name={id}
-      pivot={{ x: 0, y: 0 }}
-      radius={radius}
-      ref={ref}
-      scale={scale}
-      x={x}
-      y={y}
-      strokeAlignment={strokeAlignment}
-      strokeColor={strokeColor}
-      strokeWidth={strokeWidth}
-      zIndex={selected ? 10 : 0}
-    />
-  )
-);
+      innerRef,
+    } = this.props;
+    const { shouldReCache } = this.state;
+    return (
+      <Circle
+        alpha={alpha}
+        buttonMode
+        cursor={getCursor(tool)}
+        fill={selected ? activeFill : fill}
+        draw={this.draw}
+        hitArea={hitArea}
+        interactive={true}
+        name={id}
+        pivot={{ x: 0, y: 0 }}
+        radius={radius}
+        ref={innerRef}
+        scale={scale}
+        x={x}
+        y={y}
+        strokeAlignment={strokeAlignment}
+        strokeColor={strokeColor}
+        strokeWidth={strokeWidth}
+        zIndex={selected ? 10 : 0}
+        cacheAsBitmap={shouldReCache}
+        cacheAsBitmapResolution={2}
+      />
+    );
+  }
+}
 
 Vertex.defaultProps = {
   activeFill: 0x17bafb,
@@ -112,17 +148,21 @@ const comparator = (
   const oldScaleX = oldScale?.x ?? oldScale?.[0] ?? oldScale;
   const oldScaleY = oldScale?.y ?? oldScale?.[1] ?? oldScale;
 
-  if (
-    !scaleComparator({ x: scaleX, y: scaleY }, { x: oldScaleX, y: oldScaleY })
-  ) {
-    return false;
-  }
-
-  if (!restComparator(restProps, restOldProps)) {
-    return false;
-  }
-
-  return true;
+  //
+  return (
+    scaleComparator({ x: scaleX, y: scaleY }, { x: oldScaleX, y: oldScaleY }) &&
+    restComparator(restProps, restOldProps) &&
+    true
+  );
 };
 
-export default React.memo(Vertex, comparator);
+// export default React.memo(Vertex, comparator);
+
+export default React.memo(
+  React.forwardRef((props, ref) => <Vertex innerRef={ref} {...props} />),
+  comparator
+);
+
+// export default React.forwardRef((props, ref) => (
+//   <Vertex innerRef={ref} {...props} />
+// ));
