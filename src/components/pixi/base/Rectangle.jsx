@@ -1,4 +1,4 @@
-// src/js/base/components/pixi/Rectangle.js
+// src/js/components/pixi/base/Rectangle.js
 import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 

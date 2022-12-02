@@ -1,16 +1,16 @@
-// src/js/components/base/Drawing.js
-
 import { CustomPIXIComponent } from 'react-pixi-fiber/index.js';
 import * as PIXI from 'pixi.js';
 
+/**
+ * A basic component for drawing something using PIXI.Graphics.
+ * customApplyProps does the drawing. Don't add any logic here to
+ * change the graphics instance, use props instead. See Edge or Vertex
+ * for how to do cacheAsBitmap
+ */
 const TYPE = 'Drawing';
 
 export const behavior = {
   customDisplayObject: (props) => new PIXI.Graphics(),
-  customDidAttach: (graphicsInstance) => {
-    // set based on prop
-    // graphicsInstance.cacheAsBitmap = true;
-  },
   customApplyProps: function (graphicsInstance, oldProps, newProps) {
     let oldPropsFinal;
     let newPropsFinal;
@@ -26,8 +26,9 @@ export const behavior = {
 
     if (typeof draw === 'function') {
       // takes a draw prop that is a function with graphicsInstance, oldProps and newProps as arguments.
-      // return old and new props as the 0 and 1 elements of an array if you want to don't want to pass
-      // them all on to the PIXI.Graphic object.
+      // return old and new props as the 0 and 1 elements of an array if you don't want to pass them all
+      // on to the PIXI.Graphic object.
+      // @TODO: this returning filtered props things is weird. does it need to happen?
       [oldPropsFinal, newPropsFinal] = draw(
         graphicsInstance,
         oldPropsRest,
