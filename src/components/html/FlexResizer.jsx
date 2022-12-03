@@ -1,5 +1,5 @@
 // src/js/components/html/FlexResizer.jsx
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 
@@ -10,34 +10,41 @@ const FlexWrapper = styled.div`
   overflow: hidden;
 `;
 
-// resizes on window.resize, stores width and height, sends them as props to children.
-const FlexResizer = ({ children }) => {
-  const [height, setHeight] = useState(0);
-  const [width, setWidth] = useState(0);
+// Resizes on window.resize, stores its width and height, sends them as render props.
+class FlexResizer extends React.Component {
+  ref = React.createRef();
 
-  const resizeRef = useCallback(el => {
-    const interval = 50;
-    const resize = throttle(() => {
-      const height = el?.offsetHeight ?? 0;
-      const width = el?.offsetWidth ?? 0;
+  state = {
+    height: 0,
+    width: 0,
+  };
 
-      setHeight(height);
-      setWidth(width);
-    }, interval);
+  resize = () => {
+    const height = this.ref.current?.offsetHeight ?? 0;
+    const width = this.ref.current?.offsetWidth ?? 0;
+    this.setState({ height, width });
+  };
 
-    window.addEventListener('resize', resize);
+  throttledResize = throttle(this.resize, 50);
 
-    resize();
+  componentDidMount() {
+    window.addEventListener('resize', this.throttledResize);
+    this.resize(this.ref.current);
+  }
 
-    return () => window.removeEventListener('resize', resize);
-  }, []);
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.throttledResize);
+  }
 
-  return (
-    <FlexWrapper ref={resizeRef}>
-      {children?.({ height, width })}
-    </FlexWrapper>
-  );
-};
+  render() {
+    const { children } = this.props;
+    const { height, width } = this.state;
+
+    return (
+      <FlexWrapper ref={this.ref}>{children?.({ height, width })}</FlexWrapper>
+    );
+  }
+}
 
 FlexResizer.propTypes = {
   children: PropTypes.func,
