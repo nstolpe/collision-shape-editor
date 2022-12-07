@@ -46,7 +46,7 @@ class Edge extends React.Component {
       this.setState({ shouldReCache: false });
     }
 
-    this.setState({ shouldReCache: false });
+    // this.setState({ shouldReCache: false });
 
     return [oldPropsRest, newPropsRest];
   };
@@ -56,9 +56,9 @@ class Edge extends React.Component {
     const pivot = { x: 0, y: thickness * 0.5 };
     const hitArea = new PIXI.Rectangle(
       0,
-      -this.paddingWidth,
+      -Edge.paddingWidth,
       length,
-      thickness + this.paddingWidth * 2
+      thickness + Edge.paddingWidth * 2
     );
 
     this.setState({
@@ -79,9 +79,9 @@ class Edge extends React.Component {
       this.setState({
         hitArea: new PIXI.Rectangle(
           0,
-          -this.paddingWidth,
+          -Edge.paddingWidth,
           length,
-          thickness + this.paddingWidth * 2
+          thickness + Edge.paddingWidth * 2
         ),
         shouldReCache: true,
       });
