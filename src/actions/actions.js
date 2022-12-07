@@ -10,7 +10,9 @@ import {
   DELETE_EDGE,
   MOVE_VERTEX,
   MOVE_VERTICES,
-  SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
+  SET_SELECTED_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
+  // SELECTED_VERTICES are vertex-key -> {x,y} distance from the pointer coordinates
+  // should maybe have a better name, like
   SET_SELECTED_VERTICES,
   ADD_SELECTED_VERTICES,
   RECENTER_SELECTED_VERTICES,
@@ -47,33 +49,33 @@ import {
   ADD_SPRITE,
 } from 'Constants/action-types';
 
-export const setRootContainer = container => ({
+export const setRootContainer = (container) => ({
   type: SET_ROOT_CONTAINER,
   data: { container },
 });
 
-export const setSelectOverlayEnabled = enabled => {
+export const setSelectOverlayEnabled = (enabled) => {
   return {
     type: SET_SELECT_OVERLAY_ENABLED,
     data: enabled,
-  }
+  };
 };
 
 export const setSelectOverlayPosition = ({ x, y }) => {
   return {
     type: SET_SELECT_OVERLAY_POSITION,
     data: { x, y },
-  }
+  };
 };
 
 export const setSelectOverlayDimensions = ({ width, height }) => {
   return {
     type: SET_SELECT_OVERLAY_DIMENSIONS,
     data: { width, height },
-  }
+  };
 };
 
-export const setPixiApp = pixiApp => ({
+export const setPixiApp = (pixiApp) => ({
   type: SET_PIXI_APP,
   data: { pixiApp },
 });
@@ -92,11 +94,11 @@ export const setPointerCoordinates = (x, y) => ({
  *   height: {number}
  * }
  */
-export const setSelectOverlay = data => {
+export const setSelectOverlay = (data) => {
   return {
     type: SET_SELECT_OVERLAY,
     data,
-  }
+  };
 };
 
 export const addVertex = ({ x, y }) => ({
@@ -104,12 +106,24 @@ export const addVertex = ({ x, y }) => ({
   data: { x, y },
 });
 
-export const insertVertexBefore = ({ shapeKey, vertexKey, x, y, makeSelected=false }) => ({
+export const insertVertexBefore = ({
+  shapeKey,
+  vertexKey,
+  x,
+  y,
+  makeSelected = false,
+}) => ({
   type: INSERT_VERTEX_BEFORE,
   data: { shapeKey, vertexKey, x, y, makeSelected },
 });
 
-export const insertVertexAfter = ({ shapeKey, vertexKey, x, y, makeSelected=false }) => ({
+export const insertVertexAfter = ({
+  shapeKey,
+  vertexKey,
+  x,
+  y,
+  makeSelected = false,
+}) => ({
   type: INSERT_VERTEX_AFTER,
   data: { shapeKey, vertexKey, x, y, makeSelected },
 });
@@ -132,22 +146,24 @@ export const moveVertex = ({ id, x, y }) => ({
 /**
  * @param {array} vertices
  */
-export const moveVertices = vertices => ({
+export const moveVertices = (vertices) => ({
   type: MOVE_VERTICES,
   data: { vertices },
 });
 
-export const setVertexPositionsRelativeToCoordinates = (vertices, coordinates) => ({
-  type: SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
-  data: { vertices, coordinates },
+export const setSelectedVertexPositionsRelativeToCoordinates = (
+  coordinates
+) => ({
+  type: SET_SELECTED_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
+  data: coordinates,
 });
 
-export const setSelectedVertices = selectedVertices => ({
+export const setSelectedVertices = (selectedVertices) => ({
   type: SET_SELECTED_VERTICES,
   data: { selectedVertices },
 });
 
-export const addSelectedVertices = selectedVertices => ({
+export const addSelectedVertices = (selectedVertices) => ({
   type: ADD_SELECTED_VERTICES,
   data: { selectedVertices },
 });
@@ -157,22 +173,22 @@ export const recenterSelectedVertices = (x, y) => ({
   data: { x, y },
 });
 
-export const openShape = id => ({
+export const openShape = (id) => ({
   type: OPEN_SHAPE,
   data: { id },
 });
 
-export const closeShape = id => ({
+export const closeShape = (id) => ({
   type: CLOSE_SHAPE,
   data: { id },
 });
 
-export const reverseShapeWinding = id => ({
+export const reverseShapeWinding = (id) => ({
   type: REVERSE_SHAPE_WINDING,
   data: { id },
 });
 
-export const toggleShapeShowWinding = id => ({
+export const toggleShapeShowWinding = (id) => ({
   type: TOGGLE_SHAPE_SHOW_WINDING,
   data: { id },
 });
@@ -195,40 +211,40 @@ export const joinShapes = ({
 });
 
 export const createShape = ({
-  vertices=List(),
-  closed=false,
-  showWinding=false,
+  vertices = List(),
+  closed = false,
+  showWinding = false,
 }) => ({
   type: CREATE_SHAPE,
   data: { vertices, closed, showWinding },
 });
 
-export const deleteShape = id => ({
+export const deleteShape = (id) => ({
   type: DELETE_SHAPE,
   data: { id },
 });
 
-export const startMoveVertex = id => ({
+export const startMoveVertex = (id) => ({
   type: START_MOVE_VERTEX,
   data: { id },
 });
 
-export const stopMoveVertex = id => ({
+export const stopMoveVertex = (id) => ({
   type: STOP_MOVE_VERTEX,
   data: { id },
 });
 
-export const setInteraction = interaction => ({
+export const setInteraction = (interaction) => ({
   type: SET_INTERACTION,
   data: { interaction },
 });
 
-export const setMode = mode => ({
+export const setMode = (mode) => ({
   type: SET_MODE,
   data: { mode },
 });
 
-export const setTool = tool => ({
+export const setTool = (tool) => ({
   type: SET_TOOL,
   data: { tool },
 });
@@ -243,22 +259,22 @@ export const scaleUI = ({ x, y }) => ({
   data: { x, y },
 });
 
-export const setBackgroundColor = backgroundColor => ({
+export const setBackgroundColor = (backgroundColor) => ({
   type: SET_BACKGROUND_COLOR,
   data: { backgroundColor },
 });
 
-export const setAltPressed = pressed => ({
+export const setAltPressed = (pressed) => ({
   type: SET_ALT_PRESSED,
   data: { pressed },
 });
 
-export const setCtrlPressed = pressed => ({
+export const setCtrlPressed = (pressed) => ({
   type: SET_CTRL_PRESSED,
   data: { pressed },
 });
 
-export const setShiftPressed = pressed => ({
+export const setShiftPressed = (pressed) => ({
   type: SET_SHIFT_PRESSED,
   data: { pressed },
 });
@@ -268,12 +284,12 @@ export const setContextMenu = (type, x, y, options) => ({
   data: { type, x, y, options },
 });
 
-export const setContextMenuOpen = open => ({
+export const setContextMenuOpen = (open) => ({
   type: SET_CONTEXT_MENU_OPEN,
   data: { open },
 });
 
-export const setContextMenuPosition = (x ,y) => ({
+export const setContextMenuPosition = (x, y) => ({
   type: SET_CONTEXT_MENU_POSITION,
   data: { x, y },
 });
@@ -287,12 +303,12 @@ export const addTextureSource = (id, textureData) => ({
   data: { id, textureData },
 });
 
-export const removeTextureSource = source => ({
+export const removeTextureSource = (source) => ({
   type: REMOVE_TEXTURE_SOURCE,
   data: { source },
 });
 
-export const addSprite = sprite => ({
+export const addSprite = (sprite) => ({
   type: ADD_SPRITE,
   data: { sprite },
 });
