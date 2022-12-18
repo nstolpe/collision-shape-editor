@@ -2,14 +2,18 @@
   "name": "collision-shape-editor",
   "version": "0.0.1",
   "description": "A 2D collision shape editor.",
+  "main": "electron/app.js",
   "scripts": {
     "old:start": "craco start",
     "old:build": "craco build",
     "old:test": "craco test",
     "old:test:coverage": "craco test --coverage --watchAll",
     "lint": "eslint src/",
-    "start": "webpack serve --mode development --open --hot",
-    "build": "webpack --mode production"
+    "start": "webpack serve --env production --mode development --hot",
+    "start:browser": "npm run pre -- npm start",
+    "start:electron": "npm run pre -- concurrently \"npm start\" \"wait-on http://localhost:$PORT && electron .\"",
+    "build": "webpack --mode production",
+    "pre": "PORT=$(./bin/find-port.js)"
   },
   "keywords": [
     "physics",
@@ -62,6 +66,8 @@
     "babel-jest": "^29.3.1",
     "babel-loader": "^9.1.0",
     "babel-plugin-rewire": "^1.2.0",
+    "concurrently": "^7.6.0",
+    "electron": "^22.0.0",
     "eslint": "^8.27.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
@@ -70,6 +76,7 @@
     "html-webpack-plugin": "^5.5.0",
     "portfinder": "^1.0.32",
     "prettier": "^2.7.1",
+    "wait-on": "^6.0.1",
     "webpack": "^5.75.0",
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.11.1",
