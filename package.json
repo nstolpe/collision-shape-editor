@@ -4,16 +4,18 @@
   "description": "A 2D collision shape editor.",
   "main": "electron/app.js",
   "scripts": {
-    "old:start": "craco start",
-    "old:build": "craco build",
-    "old:test": "craco test",
-    "old:test:coverage": "craco test --coverage --watchAll",
+    "start": "npm run start:${MODE:-browser}",
+    "electron": "npm run start:electron",
+    "start:browser": "npm run set-port -- npm run serve",
+    "start:electron": "npm run set-port -- concurrently \"npm run serve\" \"wait-on http://localhost:$PORT && electron .\"",
+    "serve": "webpack serve --env production --mode development --hot",
     "lint": "eslint src/",
-    "start": "webpack serve --env production --mode development --hot",
-    "start:browser": "npm run pre -- npm start",
-    "start:electron": "npm run pre -- concurrently \"npm start\" \"wait-on http://localhost:$PORT && electron .\"",
     "build": "webpack --mode production",
-    "pre": "PORT=$(./bin/find-port.js)"
+    "set-port": "PORT=$(./bin/find-port.js)",
+    "deprecated:start": "craco start",
+    "deprecated:build": "craco build",
+    "deprecated:test": "craco test",
+    "deprecated:test:coverage": "craco test --coverage --watchAll"
   },
   "keywords": [
     "physics",
