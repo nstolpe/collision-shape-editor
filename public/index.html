@@ -21,19 +21,27 @@
     -->
     <title>collission shape editor</title>
     <style>
-        html, body { height: 100%; }
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-        .root {
-            height: 100%;
-        }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      .root {
+        height: 100%;
+      }
     </style>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript id="noscript">
+      You need to enable JavaScript to run this app.
+    </noscript>
+    <script type="text/javascript">
+      window.ENV = <%= htmlWebpackPlugin.options.ENV %>;
+    </script>
     <div id="root" class="root"></div>
     <!--
       This HTML file is a template.
