@@ -103,6 +103,8 @@ const Controls = ({
   tool,
 }) => {
   // @TODO make debug settable somewhere higher up in abb state.
+  const [lastClick, setLastClick] = React.useState(null);
+  const [longPressTimeoutId, setLongPressTimeoutId] = React.useState(null);
   const debug = true;
   const onColorChange = ({ r, g, b }) => {
     const color = chroma(r, g, b);
@@ -137,7 +139,23 @@ const Controls = ({
       <SpriteIcon {...spriteIconProps} />
       <Separator />
       <SelectIcon {...selectIconProps} />
-      <PlusIcon {...plusIconProps} />
+      <PlusIcon
+        onPointerDown={(e) => {
+          setLastClick(Date.now());
+          const timeoutId = setTimeout(() => {
+            console.log('long press', timeoutId);
+            setLongPressTimeoutId(null);
+          }, 500);
+          setLongPressTimeoutId(timeoutId);
+        }}
+        onPointerUp={(e) => {
+          if (longPressTimeoutId !== null) {
+            clearTimeout(longPressTimeoutId);
+            setLongPressTimeoutId(null);
+          }
+        }}
+        {...plusIconProps}
+      />
       <MinusIcon {...minusIconProps} />
       <SelectCoordinates styles={{ marginLeft: 'auto' }} />
       <PointerCoordinates />
