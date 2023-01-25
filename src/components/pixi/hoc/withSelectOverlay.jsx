@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { usePixiApp } from 'react-pixi-fiber/index.js';
+import { withApp } from 'react-pixi-fiber/index.js';
 
 import ScreenContext from 'Contexts/ScreenContext';
 import useCustomCompareMemo from 'Hooks/useCustomCompareMemo';
@@ -29,41 +29,56 @@ const comparator = (
   return true;
 };
 
-const withSelectOverlay = (WrappedComponent) => (props) => {
-  // @TODO get rid of selector, comparator and contex.
-  // make all values from useCustomCompareMemo come as props
-  const ctx = selector(useContext(ScreenContext));
-  const { enabled, x, y, width, height, scale } = useCustomCompareMemo(
-    ctx,
-    comparator
-  );
-  const { ticker } = usePixiApp();
-  const [time, setTime] = useState(ticker.lastTime);
-  const overlayRef = useRef();
+const withSelectOverlay = (WrappedComponent) => {
+  const WrapperComponent = ({ app, ...props }) => {
+    // @TODO get rid of selector, comparator and context.
+    // make all values from useCustomCompareMemo come as props
+    const ctx = selector(useContext(ScreenContext));
+    const { enabled, x, y, width, height, scale } = useCustomCompareMemo(
+      ctx,
+      comparator
+    );
+    const { ticker } = app;
+    const [time, setTime] = useState(0);
+    const overlayRef = useRef();
+    const [filters, setFilters] = useState([]);
+    // @TODO add option to enable/disable, and throttle.
+    // move into own hook. or make class component.
+    useEffect(() => {
+      const updateTime = (delta) =>
+        setTime((currentTime) => currentTime + delta * 8);
 
-  // @TODO add option to enable/disable, and throttle
-  ticker.add(() => setTime(ticker.lastTime));
+      ticker.add(updateTime);
 
-  useEffect(() => {
-    if (overlayRef.current) {
-      if (enabled) {
-        const filter = new PIXI.Filter(undefined, selectOverlayFragment, {
-          // @TODO there
-          x1: x * scale.x + overlayRef.current.getGlobalPosition().x,
-          x2: (x + width) * scale.x + overlayRef.current.getGlobalPosition().x,
-          y1: y * scale.y + overlayRef.current.getGlobalPosition().y,
-          y2: (y + height) * scale.y + overlayRef.current.getGlobalPosition().y,
-          time,
-        });
+      return () => ticker.remove(updateTime);
+    }, [ticker]);
 
-        overlayRef.current.filters = [filter];
-      } else {
-        overlayRef.current.filters = [];
+    useEffect(() => {
+      if (overlayRef.current) {
+        if (enabled) {
+          const filter = new PIXI.Filter(undefined, selectOverlayFragment, {
+            x1: x * scale.x + overlayRef.current.getGlobalPosition().x,
+            x2:
+              (x + width) * scale.x + overlayRef.current.getGlobalPosition().x,
+            y1: y * scale.y + overlayRef.current.getGlobalPosition().y,
+            y2:
+              (y + height) * scale.y + overlayRef.current.getGlobalPosition().y,
+            time,
+          });
+
+          setFilters([filter]);
+        } else if (overlayRef.current.filters.length > 0) {
+          setFilters([]);
+        }
       }
-    }
-  }, [height, width, x, y, time, enabled, scale.x, scale.y]);
+    }, [height, width, x, y, time, enabled, scale.x, scale.y]);
 
-  return <WrappedComponent {...{ ...props, overlayRef }} />;
+    return <WrappedComponent {...{ ...props, overlayRef, filters }} />;
+  };
+
+  WrapperComponent.displayName = `${WrappedComponent.name}WithSelectOverlay`;
+  return withApp(WrapperComponent);
 };
 
+withSelectOverlay.displayName = 'withSelectOverlay';
 export default withSelectOverlay;
