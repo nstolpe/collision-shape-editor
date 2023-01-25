@@ -35,7 +35,6 @@ class Vertex extends React.Component {
       oldProps,
       newProps
     );
-    // console.log('barfoo');
     const { shouldReCache } = this.state;
 
     if (shouldReCache) {

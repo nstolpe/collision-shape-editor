@@ -106,6 +106,7 @@ class Container extends React.Component {
 
   componentDidUpdate(prevProps) {
     const { selectOverlayEnabled } = this.props;
+    const { isWithinOverlayBounds } = this.state;
     if (selectOverlayEnabled) {
       if (
         !restComparator(
@@ -134,6 +135,8 @@ class Container extends React.Component {
 
         this.setState({ isWithinOverlayBounds });
       }
+    } else if (isWithinOverlayBounds === true) {
+      this.setState({ isWithinOverlayBounds: false });
     }
   }
 

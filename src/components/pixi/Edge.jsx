@@ -40,7 +40,6 @@ class Edge extends React.Component {
       newProps
     );
     const { shouldReCache } = this.state;
-    // console.log('foobar');
 
     if (shouldReCache) {
       this.setState({ shouldReCache: false });
