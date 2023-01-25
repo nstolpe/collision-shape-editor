@@ -20,7 +20,6 @@ import {
   CLOSE_SHAPE,
   REVERSE_SHAPE_WINDING,
   TOGGLE_SHAPE_SHOW_WINDING,
-  JOIN_SHAPES,
   CREATE_SHAPE,
   DELETE_SHAPE,
   START_MOVE_VERTEX,
@@ -191,23 +190,6 @@ export const reverseShapeWinding = (id) => ({
 export const toggleShapeShowWinding = (id) => ({
   type: TOGGLE_SHAPE_SHOW_WINDING,
   data: { id },
-});
-
-export const joinShapes = ({
-  shape1,
-  shapeKey1,
-  shape2,
-  shapeKey2,
-  joinType,
-}) => ({
-  type: JOIN_SHAPES,
-  data: {
-    shape1,
-    shapeKey1,
-    shape2,
-    shapeKey2,
-    joinType,
-  },
 });
 
 export const createShape = ({

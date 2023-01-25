@@ -9,9 +9,9 @@ import { DEFAULT_DELIMITER } from 'Utility/prefix';
  * on their distance from coordinates
  */
 const getShapeVerticesRelativeToCoordinates = (
-  selectedVertices,
   coordinates,
-  shapes
+  shapes,
+  selectedVertices
 ) => {
   let newShapes = new List(shapes, shapes.keys);
 

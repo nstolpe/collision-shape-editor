@@ -10,8 +10,8 @@ import {
 
 export const initialState = {
   pressedKeyCodes: {},
-  addModifierCode: 'Shift',
-  subtractModifierCode: 'Control',
+  addModifierCode: 'ShiftLeft',
+  subtractModifierCode: 'ControlLeft',
   panModifierCode: 'Space',
 };
 

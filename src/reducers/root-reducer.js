@@ -1,5 +1,4 @@
 // src/reducers/root-reducer.js
-import combineShapes from 'Reducers/helpers/combine-shapes';
 import removeVertexFromShapes from 'Reducers/helpers/remove-vertex-from-shapes';
 import removeEdgeFromShapes from 'Reducers/helpers/remove-edge-from-shapes';
 import getShapeVerticesRelativeToCoordinates from 'Reducers/helpers/get-shape-vertices-relative-to-coordinates';
@@ -16,7 +15,7 @@ import {
   MOVE_VERTICES,
   START_MOVE_VERTEX,
   STOP_MOVE_VERTEX,
-  SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
+  SET_SELECTED_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
   SET_SELECTED_VERTICES,
   ADD_SELECTED_VERTICES,
   RECENTER_SELECTED_VERTICES,
@@ -24,7 +23,6 @@ import {
   CLOSE_SHAPE,
   REVERSE_SHAPE_WINDING,
   TOGGLE_SHAPE_SHOW_WINDING,
-  JOIN_SHAPES,
   CREATE_SHAPE,
   DELETE_SHAPE,
   SET_INTERACTION,
@@ -52,7 +50,13 @@ import {
 } from 'Constants/action-types';
 import * as Modes from 'Constants/modes';
 import * as Tools from 'Constants/tools';
+
 import List from 'Utility/List';
+import { translation } from 'Utility/math';
+import { addPrefix, DEFAULT_DELIMITER } from 'Utility/prefix';
+import projectShapesToVertices from 'Utility/projectors/project-shapes-to-vertices';
+
+import { VERTEX } from 'Constants/prefixes';
 
 const vertices = [
   [
@@ -123,6 +127,7 @@ export const initialState = {
   },
   textureSources: [],
   sprites: [],
+  // WARN:  Do not use these vertices, they're old and won't be in sync w/ the shapes.
   vertices: List(vertices[0]),
   selectedVertices: {
     // coordinates (really coordinate modifiers) keyed to a string with
@@ -252,6 +257,7 @@ export const reducer = (state, action) => {
       return newState;
     }
     case INSERT_VERTEX_AFTER: {
+      // @TODO: where is makeSelected coming from?
       const { shapeKey, vertexKey, x, y, makeSelected } = data;
       const { shapes } = state;
       const shape = shapes.key(shapeKey);
@@ -289,13 +295,15 @@ export const reducer = (state, action) => {
 
       return {
         ...state,
-        shapes: removeVertexFromShapes(shapes, shapeKey, vertexKey),
+        shapes: removeVertexFromShapes(
+          { shapes },
+          { key: `VERTEX::${vertexKey}::SHAPE::${shapeKey}` }
+        ),
       };
     }
     case DELETE_EDGE: {
       const { shapes } = state;
       const { shapeKey, vertexKey1, vertexKey2 } = data;
-
       return {
         ...state,
         shapes: removeEdgeFromShapes(shapes, shapeKey, vertexKey1, vertexKey2),
@@ -324,13 +332,13 @@ export const reducer = (state, action) => {
       // @TODO this will probably be removed
       return state;
     // @TODO this constant and everything related to it should be named better.
-    case SET_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES:
+    case SET_SELECTED_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES:
       return {
         ...state,
         shapes: getShapeVerticesRelativeToCoordinates(
-          data.vertices,
-          data.coordinates,
-          state.shapes
+          data,
+          state.shapes,
+          state.selectedVertices
         ),
       };
     case RECENTER_SELECTED_VERTICES:
@@ -382,16 +390,6 @@ export const reducer = (state, action) => {
             : shape
         ),
       };
-    case JOIN_SHAPES:
-      return {
-        ...state,
-        shapes: combineShapes({
-          shapes: state.shapes,
-          shape1: data.shape1,
-          shape2: data.shape2,
-          joinType: data.joinType,
-        }),
-      };
     case CREATE_SHAPE: {
       const { vertices, closed, showWinding } = data;
       const newShape = { vertices, closed, showWinding };
@@ -413,6 +411,35 @@ export const reducer = (state, action) => {
         ...state,
         shapes: newShapes,
         selectedVertices: newSelectedVertices,
+      };
+    }
+    // makes the vertex selected if it's unselected and unselected if it's selected.
+    // so this is an ok name for now. from a pointerdown.
+    case 'TOGGLE_VERTEX_IN_SELECTION': {
+      const { name, distance } = data;
+      const isThisVertexSelected = Object.prototype.hasOwnProperty.call(
+        state.selectedVertices,
+        name
+      );
+
+      if (isThisVertexSelected) {
+        return {
+          ...state,
+          selectedVertices: Object.entries(state.selectedVertices).reduce(
+            (newSelectedVertices, [key, vertex]) => {
+              if (key !== name) {
+                newSelectedVertices[key] = vertex;
+              }
+              return newSelectedVertices;
+            },
+            {}
+          ),
+        };
+      }
+
+      return {
+        ...state,
+        selectedVertices: { ...state.selectedVertices, [name]: distance },
       };
     }
     case DELETE_SHAPE: {
