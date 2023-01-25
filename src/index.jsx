@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import * as PIXI from 'pixi.js';
 import { Global } from '@emotion/react';
 
@@ -12,6 +12,8 @@ import Screen from 'Components/pixi/Screen';
 import RootStore from 'Store/RootStore';
 
 const appContainer = document.getElementById('root');
+const root = createRoot(appContainer);
+
 window.PIXI = PIXI;
 // PIXI.WebGLRenderer = PIXI.Renderer;
 // workaround for pixi to work with dev tools
@@ -19,7 +21,7 @@ window.__PIXI_INSPECTOR_GLOBAL_HOOK__ &&
   window.__PIXI_INSPECTOR_GLOBAL_HOOK__.register({ PIXI: PIXI });
 // end workaround
 
-render(
+root.render(
   <RootStore>
     <Global
       styles={{
@@ -43,6 +45,5 @@ render(
       <Controls />
       <ShapeContextMenu />
     </AppWrapper>
-  </RootStore>,
-  appContainer
+  </RootStore>
 );
