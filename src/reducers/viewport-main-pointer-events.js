@@ -87,7 +87,7 @@ const extendShapeOrAddShape = (state, { coordinates }) => {
   const shapeKey = newShapes.keyOf(newShape);
   const key = `VERTEX::${vertexKey}::SHAPE::${shapeKey}`;
   const newSelectedVertices = { [key]: { x: 0, y: 0 } };
-  console.log('foobar');
+
   return {
     shapes: newShapes,
     selectedVertices: newSelectedVertices,
@@ -155,7 +155,6 @@ const reducer = (state, { data, type }) => {
       return state;
     }
     case POINTER_MOVE: {
-      console.log('hola');
       return {
         ...state,
         ...updateSelectOverlay(state, data),

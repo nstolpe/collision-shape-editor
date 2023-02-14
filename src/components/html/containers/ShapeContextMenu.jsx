@@ -72,7 +72,6 @@ const Container = ({ dispatch, ...props }) => {
   };
 
   const close = () => {
-    console.log('foo');
     dispatch(closeContextMenu());
   };
 

@@ -4,7 +4,6 @@ import viewportMainPointerEventsReducer from 'Reducers/viewport-main-pointer-eve
 import { updateStateFromPointerMove } from 'Utility/state';
 
 const reducer = (state, { data, type }) => {
-  console.log('movingmovin', data.key, type);
   switch (type) {
     case SHAPE:
       return state;

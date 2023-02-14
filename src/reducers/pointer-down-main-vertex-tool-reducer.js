@@ -15,7 +15,6 @@ export const getUpdatedSelectedVertexDistances = (
   data
 ) => {
   const { coordinates } = data;
-  console.log('data.key', data.key);
   // @TODO drill down shapes.key(shapeKey).vertices.key(vertexKey) instead to avoid this processing
   const projectedVertices = projectShapesToVertices(shapes);
   const newSelectedVertices = Object.keys(selectedVertices).reduce(

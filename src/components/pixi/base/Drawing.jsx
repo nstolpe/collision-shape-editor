@@ -50,7 +50,6 @@ export const behavior = {
   // Maybe there should be a check for `if (!_child_destroyed)` around the `child.destroy` call,
   // in case a custom component doesn't have a parent to destroy it of for some other reason wants to call destroy?
   // customWillDetach: (graphicsInstance) => {
-  //   console.log(graphicsInstance._destroyed);
   //   graphicsInstance.destroy();
   // },
 };

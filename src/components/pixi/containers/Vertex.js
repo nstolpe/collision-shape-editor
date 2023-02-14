@@ -22,7 +22,7 @@ const containerSelector = (ctx) => {
       height: selectOverlayHeight,
     },
   } = ctx;
-  // console.log('orgre', ctx);
+
   return {
     radius,
     selectOverlayEnabled,
@@ -48,7 +48,6 @@ const containerComparator = (
   if (
     !scaleComparator({ x: scaleX, y: scaleY }, { x: oldScaleX, y: oldScaleY })
   ) {
-    console.log('doop');
     return false;
   }
 
