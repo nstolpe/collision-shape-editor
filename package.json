@@ -29,7 +29,7 @@
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "chroma-js": "^2.4.2",
-    "color-picker": "file:../color-picker/color-picker-0.0.5.tgz",
+    "color-picker": "github:nstolpe/color-picker#0.0.7",
     "deep-equal": "^2.1.0",
     "pixi-viewport": "^4.37.0",
     "pixi.js": "^6.5.8",
