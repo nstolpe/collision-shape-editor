@@ -1,5 +1,5 @@
 // src/components/html/Controls.js
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from '@emotion/styled';
 import chroma from 'chroma-js';
 import ColorPicker from 'color-picker';
@@ -103,13 +103,14 @@ const Controls = ({
   tool,
 }) => {
   // @TODO make debug settable somewhere higher up in abb state.
-  const [lastClick, setLastClick] = React.useState(null);
-  const [longPressTimeoutId, setLongPressTimeoutId] = React.useState(null);
+  const [lastClick, setLastClick] = useState(null);
+  const [longPressTimeoutId, setLongPressTimeoutId] = useState(null);
   const debug = true;
-  const onColorChange = ({ r, g, b }) => {
-    const color = chroma(r, g, b);
+  // don't ever change this so the ColorPicker isn't constantly initializing
+  // might be better to create a container and do this there.
+  const initialColor = useMemo(() => backgroundColor, []);
+  const onColorChange = (color) =>
     dispatch(setBackgroundColor(parseInt(color.hex().replace('#', ''), 16)));
-  };
 
   const {
     edgeIconProps,
@@ -125,8 +126,9 @@ const Controls = ({
       <SpriteLoader accept="image/*" multiple title="load sprites" />
       <ColorPicker
         modalContainerElement={rootContainer}
+        portalTargetSelector="#AppWrapper"
         title="background color"
-        initialColor={backgroundColor}
+        initialColor={initialColor}
         onColorChange={onColorChange}
         titleFontFamily="Fira Mono"
         valueFontFamily="Fira Mono"

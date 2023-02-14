@@ -19,11 +19,15 @@ const selector = ({ dispatch }) => ({ dispatch });
 
 const AppWrapper = ({ children, dispatch }) => {
   const rootContainerRef = useCallback(
-    wrapper => dispatch(setRootContainer(wrapper)),
+    (wrapper) => dispatch(setRootContainer(wrapper)),
     [dispatch]
   );
 
-  return <Wrapper ref={rootContainerRef}>{children}</Wrapper>;
+  return (
+    <Wrapper id="AppWrapper" ref={rootContainerRef}>
+      {children}
+    </Wrapper>
+  );
 };
 
 export default withSelector(RootContext, selector)(AppWrapper);
