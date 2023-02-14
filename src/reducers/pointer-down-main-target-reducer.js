@@ -1,6 +1,5 @@
-import { EDGE, SHAPE, VERTEX, VIEWPORT } from 'Constants/prefixes';
+import { EDGE, VERTEX, VIEWPORT } from 'Constants/prefixes';
 import edgeMainPointerEventsReducer from 'Reducers/edge-main-pointer-events';
-import shapeMainPointerEventsReducer from 'Reducers/shape-main-pointer-events';
 import vertexMainPointerEventsReducer from 'Reducers/vertex-main-pointer-events';
 import viewportMainPointerEventsReducer from 'Reducers/viewport-main-pointer-events';
 import { POINTER_DOWN } from 'Constants/pointer-events';
@@ -13,8 +12,6 @@ const reducer = (state, { data, type }) => {
   switch (type) {
     case EDGE:
       return edgeMainPointerEventsReducer(state, { data, type: POINTER_DOWN });
-    case SHAPE:
-      return shapeMainPointerEventsReducer(state, { data, type: POINTER_DOWN });
     case VERTEX:
       return vertexMainPointerEventsReducer(state, {
         data,
