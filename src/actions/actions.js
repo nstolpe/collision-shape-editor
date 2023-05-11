@@ -7,7 +7,6 @@ import {
   INSERT_VERTEX_BEFORE,
   INSERT_VERTEX_AFTER,
   DELETE_VERTEX,
-  DELETE_EDGE,
   MOVE_VERTEX,
   MOVE_VERTICES,
   SET_SELECTED_VERTEX_POSITIONS_RELATIVE_TO_COORDINATES,
@@ -130,11 +129,6 @@ export const insertVertexAfter = ({
 export const deleteVertex = ({ shapeKey, vertexKey }) => ({
   type: DELETE_VERTEX,
   data: { shapeKey, vertexKey },
-});
-
-export const deleteEdge = ({ shapeKey, vertexKey1, vertexKey2 }) => ({
-  type: DELETE_EDGE,
-  data: { shapeKey, vertexKey1, vertexKey2 },
 });
 
 export const moveVertex = ({ id, x, y }) => ({

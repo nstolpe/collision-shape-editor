@@ -10,7 +10,6 @@ import {
   INSERT_VERTEX_BEFORE,
   INSERT_VERTEX_AFTER,
   DELETE_VERTEX,
-  DELETE_EDGE,
   MOVE_VERTEX,
   MOVE_VERTICES,
   START_MOVE_VERTEX,
@@ -299,14 +298,6 @@ export const reducer = (state, action) => {
           { shapes },
           { key: `VERTEX::${vertexKey}::SHAPE::${shapeKey}` }
         ),
-      };
-    }
-    case DELETE_EDGE: {
-      const { shapes } = state;
-      const { shapeKey, vertexKey1, vertexKey2 } = data;
-      return {
-        ...state,
-        shapes: removeEdgeFromShapes(shapes, shapeKey, vertexKey1, vertexKey2),
       };
     }
     case MOVE_VERTEX:
